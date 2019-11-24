@@ -1,0 +1,108 @@
+{
+  "Actor": {
+    "types": ["pc", "npc"],
+    "templates": {
+      "common": {
+        "attributes": {
+          "ch": {
+            "gp": 0,
+            "xp": 0
+          },
+          "ge": {
+            "gp": 0,
+            "xp": 0
+          },
+          "in": {
+            "gp": 0,
+            "xp": 0
+          },
+          "kl": {
+            "gp": 0,
+            "xp": 0
+          },
+          "ko": {
+            "gp": 0,
+            "xp": 0
+          },
+          "kk": {
+            "gp": 0,
+            "xp": 0
+          },
+          "sc": {
+            "gp": 0,
+            "xp": 0
+          },
+          "wk": {
+            "gp": 0,
+            "xp": 0
+          }
+        }
+      }
+    },
+    "pc": {
+      "templates": ["common"],
+      "xp": {
+        "gained": 0,
+        "gp": 0
+      },
+      "gp": {
+        "initial": 500
+      }
+    },
+    "npc": {
+      "templates": ["common"]
+    }
+  },
+  "Item": {
+    "types": ["species", "training", "congenital", "special-ability", "weapon", "armor", "consumable", "other"],
+    "templates": {
+      "described": {
+        "description": ""
+      },
+      "physical": {
+        "quantity": 1,
+        "weight": 0,
+        "price": 0
+      }
+    },
+    "species": {
+      "templates": ["described"],
+      "gp": 0,
+      "attributes": {},
+      "bonuses": {}
+    },
+    "training": {
+      "templates": ["described"],
+      "gp": 0,
+      "bonuses": {},
+      "items": []
+    },
+    "congenital": {
+      "templates": ["described"],
+      "gp": 0,
+      "requirements": "",
+      "bonuses": {}
+    },
+    "special-ability": {
+      "templates": ["described"],
+      "gp": 0,
+      "xp": 0,
+      "bonuses": {},
+      "requirements": {}
+    },
+    "weapon": {
+      "templates": ["described", "physical"],
+      "damage": ""
+    },
+    "armor": {
+      "templates": ["described", "physical"],
+      "armor": 0
+    },
+    "consumable": {
+      "templates": ["described", "physical"]
+    },
+    "other": {
+      "templates": ["described", "physical"]
+    }
+  }
+}

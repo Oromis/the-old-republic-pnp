@@ -1,0 +1,49 @@
+{
+  "name": "sw-tor",
+  "title": "Star Wars: The old Republic PnP",
+  "description": "A PnP game system set in the Star Wars Universe at around 4000 BBY",
+  "version": 0.1,
+  "minimumCoreVersion": "0.4.1",
+  "templateVersion": 2,
+  "author": "David Bauske",
+  "esmodules": ["module/StarWarsTheOldRepublicPnP.js"],
+  "styles": ["styles/sw-tor.css"],
+  "packs": [
+    {
+      "name": "species",
+      "label": "Spezies",
+      "system": "sw-tor",
+      "path": "./packs/species.db",
+      "entity": "Item"
+    },
+    {
+      "name": "trainings",
+      "label": "Ausbildungen",
+      "system": "sw-tor",
+      "path": "./packs/trainings.db",
+      "entity": "Item"
+    },
+    {
+      "name": "congenitals",
+      "label": "Vor- und Nachteile",
+      "system": "sw-tor",
+      "path": "./packs/congenitals.db",
+      "entity": "Item"
+    },
+    {
+      "name": "special-abilities",
+      "label": "Spezialfertigkeiten",
+      "system": "sw-tor",
+      "path": "./packs/special-abilities.db",
+      "entity": "Item"
+    }
+  ],
+  "initiative": "1d6",
+  "gridDistance": 1.5,
+  "gridUnits": "m",
+  "primaryTokenAttribute": "health",
+  "secondaryTokenAttribute": "stamina",
+  "url": "https://github.com/Oromis/the-old-republic-pnp",
+  "manifest": "TODO",
+  "download": "TODO"
+}
