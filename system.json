@@ -44,6 +44,6 @@
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "stamina",
   "url": "https://github.com/Oromis/the-old-republic-pnp",
-  "manifest": "TODO",
-  "download": "TODO"
+  "manifest": "https://raw.githubusercontent.com/Oromis/the-old-republic-pnp/master/system.json",
+  "download": "https://github.com/Oromis/the-old-republic-pnp/archive/master.zip"
 }
