@@ -1,0 +1,25 @@
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.sw-tor .multi-item { margin: -4px; }
+.sw-tor .multi-item > * { margin: 4px; }
+.sw-tor .multi-item > .multi-item { margin: 0; }
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-cross-start {
+  align-items: flex-start;
+}
+
+.full-width {
+  width: 100% !important;
+}

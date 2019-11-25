@@ -1,0 +1,12 @@
+.sw-tor.sheet input {
+  width: 56px;
+}
+
+.sw-tor.sheet input[type=number] {
+  padding: 1px 3px;
+}
+
+.sw-tor.sheet button.small {
+  width: auto;
+  line-height: 20px;
+}

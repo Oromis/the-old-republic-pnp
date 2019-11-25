@@ -2,31 +2,8 @@
  * General classes
  *************************************************************************************/
 
-.flex-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.sw-tor .multi-item { margin: -4px; }
-.sw-tor .multi-item > * { margin: 4px; }
-.sw-tor .multi-item > .multi-item { margin: 0; }
-
-.flex-grow {
-    flex-grow: 1;
-}
-
-.flex-wrap {
-    flex-wrap: wrap;
-}
-
-.flex-cross-start {
-    align-items: flex-start;
-}
-
-.full-width {
-    width: 100%;
-}
+@import "general.css";
+@import "inputs.css";
 
 /*************************************************************************************
  * Charsheet
@@ -35,15 +12,6 @@
 .sw-tor.sheet .window-content {
     padding: 5px;
     overflow-y: hidden;
-}
-
-.sw-tor.sheet input {
-    min-width: 50px;
-}
-
-.sw-tor.sheet input[type=number] {
-    width: 56px;
-    padding: 1px 3px;
 }
 
 /* Sheet Header */

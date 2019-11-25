@@ -4,7 +4,16 @@ import Config from './Config.js'
 
 function calcGp(char) {
   return (char.gp.initial || Config.character.initialGp)
+    - (char.xp.gp || 0)
     - Object.values(char.attributes).reduce((acc, cur) => acc + (cur.gp || 0), 0)
+}
+
+function calcFreeXp(char) {
+  return calcTotalXp(char)
+}
+
+function calcTotalXp(char) {
+  return char.xp.gp * Config.character.gpToXpRate + char.xp.gained
 }
 
 function calcAttributeValue(attribute) {
@@ -63,7 +72,7 @@ export default class SwTorActorSheet extends ActorSheet {
   	  classes: ["sw-tor", "sheet", "actor"],
   	  template: "systems/sw-tor/templates/actor-sheet.html",
       submitOnUnfocus: true,
-      width: 600,
+      width: 754,
       height: 600
     });
   }
@@ -76,12 +85,20 @@ export default class SwTorActorSheet extends ActorSheet {
    */
   getData() {
     const data = super.getData()
+    let gp = calcGp(data.data)
     data.computed = {
-      gp: calcGp(data.data),
+      gp,
+      freeXp: calcFreeXp(data.data),
+      totalXp: calcTotalXp(data.data),
+      xpFromGp: data.data.xp.gp * Config.character.gpToXpRate,
       attributes: Attributes.list.map(attr => {
         const attribute = data.data.attributes[attr.key]
         return { ...attribute, ...attr, value: calcAttributeValue(attribute) }
-      })
+      }),
+      flags: {
+        hasGp: gp > 0,
+        canRefundXpToGp: data.data.xp.gp > 0
+      }
     }
     return data
   }
@@ -103,8 +120,6 @@ export default class SwTorActorSheet extends ActorSheet {
       callback: clicked => this._sheetTab = clicked.data("tab")
     });
 
-    this._html = html
-
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return;
 
@@ -120,6 +135,9 @@ export default class SwTorActorSheet extends ActorSheet {
     if (this._focusedKey != null) {
       html.find(`[data-key=${this._focusedKey}]`).focus().select()
     }
+
+    html.find('.gp-to-xp').click(this._onGpToXp)
+    html.find('.xp-to-gp').click(this._onXpToGp)
 
     // Update Inventory Item
     html.find('.item-edit').click(ev => {
@@ -192,6 +210,20 @@ export default class SwTorActorSheet extends ActorSheet {
   // focus which isn't exactly handy for our use case here
   _onUnfocus = () => {}
 
+  _onGpToXp = () => {
+    const gp = calcGp(this.actor.data.data)
+    if (gp > 0) {
+      this.actor.update({ 'data.xp.gp': ObjectUtils.try(this.actor.data.data, 'xp', 'gp', { default: 0 }) + 1 })
+    }
+  }
+
+  _onXpToGp = () => {
+    const gp = ObjectUtils.try(this.actor.data.data, 'xp', 'gp', { default: 0 })
+    if (gp > 0) {
+      this.actor.update({ 'data.xp.gp': gp - 1 })
+    }
+  }
+
   /* -------------------------------------------- */
 
   /**
@@ -201,7 +233,7 @@ export default class SwTorActorSheet extends ActorSheet {
    */
   _updateObject(event, formData) {
     // Handle the free-form attributes list
-    const input = expandObject(formData)
+    const parsed = expandObject(formData)
     // const formAttrs = expandObject(formData).data.attributes || {};
     // const attributes = Object.values(formAttrs).reduce((obj, v) => {
     //   let k = v["key"].trim();
@@ -222,7 +254,6 @@ export default class SwTorActorSheet extends ActorSheet {
     //   return obj;
     // }, {_id: this.actor._id, "data.attributes": attributes});
 
-    console.log('Updating ...')
     // Take care of attributes.
     // Step 1: Collect the old values of all attributes
     const attributes = Attributes.list.reduce((acc, attr) => {
@@ -233,12 +264,12 @@ export default class SwTorActorSheet extends ActorSheet {
     // Step 2: Process changes
     for (const [key, result] of Object.entries(attributes)) {
       const oldVal = calcAttributeValue(result)
-      let targetVal = Math.round(processDeltaValue(input.input.attributes[key].value, oldVal))
+      let targetVal = Math.round(processDeltaValue(parsed.input.attributes[key].value, oldVal))
       if (oldVal !== targetVal) {
         // Attribute value changed => figure out in what way
         if (targetVal > oldVal) {
           // Pay with GP if possible
-          const charGp = calcGp({ ...this.actor.data.data, attributes })
+          const charGp = calcGp({ ...this.actorData, attributes })
           if (charGp > 0) {
             result.gp += Math.min(targetVal - oldVal, charGp)
           }
@@ -267,7 +298,17 @@ export default class SwTorActorSheet extends ActorSheet {
     formData = ObjectUtils.omitBy(formData, (val, key) => key.startsWith('data.attributes'))
     formData['data.attributes'] = attributes
 
+    if (parsed.input.totalXp != null) {
+      const newVal = Math.round(processDeltaValue(parsed.input.totalXp, calcTotalXp(this.actorData)))
+      formData['data.xp.gained'] = newVal -
+        (ObjectUtils.try(this.actorData, 'xp', 'gp', { default: 0 }) * Config.character.gpToXpRate)
+    }
+
     // Update the Actor
     return this.actor.update(formData);
+  }
+
+  get actorData() {
+    return this.actor.data.data
   }
 }

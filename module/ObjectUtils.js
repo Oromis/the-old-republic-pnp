@@ -27,5 +27,29 @@ export default Object.freeze({
     return Object.entries(obj)
       .filter(entry => !predicate(entry[1], entry[0]))
       .reduce(zipEntries, {})
+  },
+
+  try(obj, ...paths) {
+    let defaultValue = null
+    paths = paths.filter(path => {
+      const isString = typeof path === 'string'
+      if (!isString && path != null && path.default != null) {
+        defaultValue = path.default
+      }
+      return isString
+    })
+
+    if (obj == null) {
+      return defaultValue
+    }
+
+    let val = obj
+    for (const path of paths) {
+      val = val[path]
+      if (val == null) {
+        return defaultValue
+      }
+    }
+    return val
   }
 })

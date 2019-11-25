@@ -4,6 +4,7 @@ const system = {
 
 const character = {
   initialGp: 500,
+  gpToXpRate: 50,
 }
 
 export default Object.freeze({

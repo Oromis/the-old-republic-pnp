@@ -9,13 +9,28 @@
           <input name="name" class="full-width" type="text" value="{{actor.name}}" placeholder="Name" />
         </h1>
         <div class="multi-item">
+          <div class="flex-row multi-item">
+            <span title="Generierungspunkte">GP</span>
+            <span class="flex-grow">{{computed.gp}}</span>
+            {{#if computed.flags.hasGp}}
+              <button type="button" class="small gp-to-xp">GP → XP</button>
+            {{/if}}
+            {{#if computed.flags.canRefundXpToGp}}
+              <button type="button" class="small xp-to-gp">GP ← XP</button>
+            {{/if}}
+          </div>
           <label class="flex-row multi-item">
-            <span>GP</span>
-            <span>{{computed.gp}}</span>
-          </label>
-          <label class="flex-row multi-item">
-            <span>XP</span>
-            <input name="data.xp.value" type="number" value="{{data.xp.value}}" placeholder="XP" data-dtype="Number" />
+            <span title="Erfahrungspunkte">XP</span>
+            <span>{{computed.freeXp}}</span>
+            <span>/</span>
+            <input
+                name="input.totalXp"
+                type="text"
+                value="{{computed.totalXp}}"
+                placeholder="Total XP"
+                title="Ab Start: {{computed.xpFromGp}} | Hinzugewonnen: {{actor.data.xp.gained}}"
+                class="flex-grow"
+            />
           </label>
         </div>
       </div>
