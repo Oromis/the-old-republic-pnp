@@ -2,7 +2,9 @@
   "Actor": {
     "types": ["pc", "npc"],
     "templates": {
-      "common": {}
+      "common": {
+        "attributes": []
+      }
     },
     "pc": {
       "templates": ["common"],
