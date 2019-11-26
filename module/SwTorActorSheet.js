@@ -198,10 +198,6 @@ export default class SwTorActorSheet extends ActorSheet {
     }
   }
 
-  // Disable the default unfocus functionality - It only submits the form when no other input receives
-  // focus which isn't exactly handy for our use case here
-  _onUnfocus = () => {}
-
   _onGpToXp = () => {
     const gp = calcGp(this.actor.data.data)
     if (gp > 0) {
@@ -247,48 +243,14 @@ export default class SwTorActorSheet extends ActorSheet {
     // }, {_id: this.actor._id, "data.attributes": attributes});
 
     // Take care of attributes.
-    // Step 1: Collect the old values of all attributes
-    const attributes = Attributes.list.reduce((acc, attr) => {
-      const oldAttribute = this.actor.data.data.attributes[attr.key]
-      acc[attr.key] = ObjectUtils.pick({ xp: 0, gp: 0, ...(oldAttribute || {}) }, ['xp', 'gp'])
-      return acc
-    }, {})
-    // Step 2: Process changes
-    for (const [key, result] of Object.entries(attributes)) {
-      const oldVal = calcAttributeValue(result)
-      let targetVal = Math.round(processDeltaValue(parsed.input.attributes[key].value, oldVal))
-      if (oldVal !== targetVal) {
-        // Attribute value changed => figure out in what way
-        if (targetVal > oldVal) {
-          // Pay with GP if possible
-          const charGp = calcGp({ ...this.actorData, attributes })
-          if (charGp > 0) {
-            result.gp += Math.min(targetVal - oldVal, charGp)
-          }
-          let newVal = calcAttributeValue(result)
-          if (targetVal > newVal) {
-            // We didn't have enough GP => pay with XP
-            // TODO
-          }
-          newVal = calcAttributeValue(result)
-          if (targetVal > newVal) {
-            // Still not enough point to pay for the change => show a warning
-            ui.notifications.error(`Kann Attribut ${Attributes.map[key].label} auf maximal ${newVal} steigern: Fehlende GP / XP`)
-          }
-        } else {
-          // Points reduced
-          // TODO deduct XP
-          const newVal = calcAttributeValue(result)
-          if (targetVal < newVal) {
-            // Not enough XP => deduct GP
-            result.gp = Math.max(0, result.gp - (newVal - targetVal))
-          }
-        }
+    Attributes.list.forEach(attr => {
+      const path = `data.attributes.${attr.key}.gp`
+      const userInput = formData[path]
+      if (userInput != null) {
+        const oldVal = ObjectUtils.try(this.actor.data.data.attributes[attr.key], 'gp')
+        formData[path] = Math.round(processDeltaValue(userInput, oldVal))
       }
-    }
-
-    formData = ObjectUtils.omitBy(formData, (val, key) => key.startsWith('data.attributes'))
-    formData['data.attributes'] = attributes
+    })
 
     if (parsed.input.totalXp != null) {
       const newVal = Math.round(processDeltaValue(parsed.input.totalXp, calcTotalXp(this.actorData)))

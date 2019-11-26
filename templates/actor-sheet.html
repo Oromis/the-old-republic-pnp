@@ -41,14 +41,7 @@
     {{#each computed.attributes as |attr index|}}
       <div class="attribute flex-row multi-item">
         <span class="attribute-label" title="{{attr.label}} - {{attr.desc}}">{{formatAttrKey attr.key}}</span>
-        <input
-            type="text"
-            class="attribute-value"
-            title="{{attr.gp}} aus GP"
-            name="input.attributes.{{attr.key}}.value"
-            value="{{attr.value}}"
-            data-key="{{attr.key}}"
-        />
+        <span title="{{attr.gp}} aus GP">{{attr.value}}</span>
       </div>
     {{/each}}
   </div>
