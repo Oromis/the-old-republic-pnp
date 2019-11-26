@@ -65,8 +65,9 @@
             <th>Name</th>
             <th>StK</th>
             <th>GP</th>
-            <th>XP</th>
             <th>Boni</th>
+            <th>XP</th>
+            <th>Buff</th>
             <th>Wert</th>
           </tr>
         </thead>
@@ -83,8 +84,11 @@
                   {{attr.gp}}
                 {{/if}}
               </td>
-              <td>{{attr.xp}}</td>
               <td></td>
+              <td>{{attr.xp}}</td>
+              <td>
+                <input type="text" name="data.attributes.{{attr.key}}.buff" value="{{attr.buff}}" />
+              </td>
               <td>{{attr.value}}</td>
             </tr>
           {{/each}}

@@ -18,7 +18,8 @@ function calcTotalXp(char) {
 
 function calcAttributeValue(attribute) {
   const attr = attribute || {}
-  return attr.gp || 0
+  return (attr.gp || 0) +
+    (attr.buff || 0)
 }
 
 function processDeltaValue(text, oldValue) {
@@ -57,8 +58,7 @@ export default class SwTorActorSheet extends ActorSheet {
      * Keep track of the currently active sheet tab
      * @type {string}
      */
-    this._sheetTab = "attributes";
-    this._dirty = false
+    this._sheetTab = "attributes"
   }
 
   /* -------------------------------------------- */
@@ -212,6 +212,14 @@ export default class SwTorActorSheet extends ActorSheet {
     }
   }
 
+  _processDeltaProperty(formData, path) {
+    const input = formData[path]
+    if (input != null) {
+      const old = ObjectUtils.try(this.actor.data, ...path.split('.'))
+      formData[path] = Math.round(processDeltaValue(input, old))
+    }
+  }
+
   /* -------------------------------------------- */
 
   /**
@@ -244,12 +252,8 @@ export default class SwTorActorSheet extends ActorSheet {
 
     // Take care of attributes.
     Attributes.list.forEach(attr => {
-      const path = `data.attributes.${attr.key}.gp`
-      const userInput = formData[path]
-      if (userInput != null) {
-        const oldVal = ObjectUtils.try(this.actor.data.data.attributes[attr.key], 'gp')
-        formData[path] = Math.round(processDeltaValue(userInput, oldVal))
-      }
+      this._processDeltaProperty(formData, `data.attributes.${attr.key}.gp`)
+      this._processDeltaProperty(formData, `data.attributes.${attr.key}.buff`)
     })
 
     if (parsed.input.totalXp != null) {
