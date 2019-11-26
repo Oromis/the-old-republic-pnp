@@ -44,7 +44,7 @@
         <input
             type="text"
             class="attribute-value"
-            title="{{attr.gp}} from GP"
+            title="{{attr.gp}} aus GP"
             name="input.attributes.{{attr.key}}.value"
             value="{{attr.value}}"
             data-key="{{attr.key}}"
@@ -55,16 +55,52 @@
 
   {{!-- Sheet Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">
-    <a class="item" data-tab="description">Description</a>
-    <a class="item" data-tab="items">Items</a>
-    <a class="item" data-tab="attributes">Attributes</a>
+    <a class="item" data-tab="attributes">Attribute</a>
+    <a class="item" data-tab="description">Beschreibung</a>
+    <a class="item" data-tab="items">Inventar</a>
+    <a class="item" data-tab="settings">Einstellungen</a>
   </nav>
 
   {{!-- Sheet Body --}}
   <section class="sheet-body">
+    {{!-- Attributes Tab --}}
+    <div class="tab attributes" data-group="primary" data-tab="attributes">
+      <table class="attributes-table full-width">
+        <thead>
+          <tr>
+            <th class="attributes-table-key"></th>
+            <th>Name</th>
+            <th>StK</th>
+            <th>GP</th>
+            <th>XP</th>
+            <th>Boni</th>
+            <th>Wert</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each computed.attributes as |attr|}}
+            <tr>
+              <td>{{formatAttrKey attr.key}}</td>
+              <td title="{{attr.desc}}">{{attr.label}}</td>
+              <td>{{attr.xpCategory}}</td>
+              <td>
+                {{#if ../data.creationMode.enabled}}
+                  <input type="text" name="data.attributes.{{attr.key}}.gp" value="{{attr.gp}}" />
+                {{else}}
+                  {{attr.gp}}
+                {{/if}}
+              </td>
+              <td>{{attr.xp}}</td>
+              <td></td>
+              <td>{{attr.value}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
 
     {{!-- Biography Tab --}}
-    <div class="tab biography active" data-group="primary" data-tab="description">
+    <div class="tab biography" data-group="primary" data-tab="description">
       {{editor content=data.biography target="data.biography" button=true owner=owner editable=editable}}
     </div>
 
@@ -84,40 +120,17 @@
       </ol>
     </div>
 
-    {{!-- Attributes Tab --}}
-    <div class="tab attributes" data-group="primary" data-tab="attributes">
-      <header class="attributes-header flexrow">
-        <span class="attribute-key">Attribute Key</span>
-        <span class="attribute-value">Value</span>
-        <span class="attribute-label">Label</span>
-        <span class="attribute-dtype">Data Type</span>
-        <a class="attribute-control" data-action="create"><i class="fas fa-plus"></i></a>
-      </header>
-
-      <ol class="attributes-list">
-        {{#each data.attributes as |attr key|}}
-          <li class="attribute flexrow" data-attribute="{{key}}">
-            <input class="attribute-key" type="text" name="data.attributes.{{key}}.key" value="{{key}}" />
-            {{#if attr.isCheckbox}}
-              <label class="attribute-value checkbox"><input type="checkbox"
-                                                             name="data.attributes.{{key}}.value" {{checked
-                    attr.value}}/></label>
-            {{else}}
-              <input class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}"
-                     data-dtype="{{attr.dtype}}" />
-            {{/if}}
-            <input class="attribute-label" type="text" name="data.attributes.{{key}}.label" value="{{attr.label}}" />
-            <select class="attribute-dtype" name="data.attributes.{{key}}.dtype">
-              {{#select attr.dtype}}
-                {{#each ../dtypes as |t|}}
-                  <option value="{{t}}">{{t}}</option>
-                {{/each}}
-              {{/select}}
-            </select>
-            <a class="attribute-control" data-action="delete"><i class="fas fa-trash"></i></a>
-          </li>
-        {{/each}}
-      </ol>
+    {{!-- Settings Tab --}}
+    <div class="tab settings" data-group="primary" data-tab="settings">
+      <label
+          class="flex-row multi-item"
+          title="Nur während der Charaktererstellungsmodus aktiv ist, ist es möglich, GP zu verteilen"
+      >
+        <span>
+          <input type="checkbox" name="data.creationMode.enabled" {{checked data.creationMode.enabled}} />
+        </span>
+        <span>Charaktererstellungsmodus</span>
+      </label>
     </div>
   </section>
 </form>

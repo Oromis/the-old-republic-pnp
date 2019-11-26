@@ -1,3 +1,5 @@
+import Config from './Config.js'
+
 const list = [
   {
     key: 'ch',
@@ -40,6 +42,10 @@ const list = [
     desc: 'Maß für die geistige Stärke und Wiederstandsfähigkeit. Beeinflusst Konzentration und ist daher für Machtbenutzer wichtig',
   }
 ]
+
+list.forEach(attr => {
+  attr.xpCategory = Config.character.attributes.xpCategory
+})
 
 const map = list.reduce((acc, cur) => {
   acc[cur.key] = cur

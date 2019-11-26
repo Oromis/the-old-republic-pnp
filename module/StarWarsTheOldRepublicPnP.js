@@ -7,6 +7,7 @@ Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
   Handlebars.registerHelper('formatAttrKey', key => key.toUpperCase())
+  Handlebars.registerHelper('formatBool', key => key ? 'Yo' : 'Nope')
 
 	/**
 	 * Set an initiative formula for the system

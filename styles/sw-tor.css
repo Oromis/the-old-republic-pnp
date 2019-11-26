@@ -5,6 +5,24 @@
 @import "general.css";
 @import "inputs.css";
 
+.sw-tor table {
+    background-color: transparent;
+    border: 0;
+}
+
+.sw-tor table th {
+    border-bottom: 1px solid black;
+}
+
+.sw-tor table th, .sw-tor table td {
+    text-align: left;
+    padding: 4px;
+}
+
+.sw-tor tr:nth-child(2n) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
 /*************************************************************************************
  * Charsheet
  *************************************************************************************/
@@ -88,43 +106,6 @@
 }
 
 /* Attributes */
-.sw-tor.sheet .attributes-header {
-    padding: 5px;
-    margin: 5px 0;
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid #AAA;
-    border-radius: 2px;
-    text-align: center;
-    font-weight: bold;
-}
-.sw-tor.sheet .attribute-label {
+.attributes-table-key {
     width: 22px;
-    text-align: right;
-}
-.sw-tor.sheet .attribute-control {
-    flex: 0 0 20px;
-}
-
-.sw-tor.sheet .attributes-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.sw-tor.sheet .attributes-list li > * {
-    margin: 0 3px;
-    height: 28px;
-    line-height: 24px;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    border-bottom: 1px solid #AAA;
-}
-
-.sw-tor.sheet .attribute-value {
-    width: 56px;
-}
-
-.sw-tor.sheet .attributes-list li a.attribute-control {
-    border: none;
 }

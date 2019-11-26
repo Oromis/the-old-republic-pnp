@@ -8,18 +8,12 @@
 .sw-tor .multi-item > * { margin: 4px; }
 .sw-tor .multi-item > .multi-item { margin: 0; }
 
-.flex-grow {
-  flex-grow: 1;
-}
+.flex-grow { flex-grow: 1; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-cross-start { align-items: flex-start; }
 
-.flex-wrap {
-  flex-wrap: wrap;
-}
+.full-width { width: 100% !important; }
 
-.flex-cross-start {
-  align-items: flex-start;
-}
-
-.full-width {
-  width: 100% !important;
-}
+.align-left { text-align: left; }
+.align-right { text-align: right; }
+.align-center { text-align: center; }

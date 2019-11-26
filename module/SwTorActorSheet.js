@@ -57,7 +57,7 @@ export default class SwTorActorSheet extends ActorSheet {
      * Keep track of the currently active sheet tab
      * @type {string}
      */
-    this._sheetTab = "description";
+    this._sheetTab = "attributes";
     this._dirty = false
   }
 
@@ -127,7 +127,6 @@ export default class SwTorActorSheet extends ActorSheet {
       // Enable auto-submit
       html.find('input')
         .on('change', this._onChangeInput)
-        .on('blur', this._onBlurInput)
         .on('focus', this._onFocusInput)
         .on('keypress', this._onEnter)
     }
@@ -184,20 +183,13 @@ export default class SwTorActorSheet extends ActorSheet {
     }
   }
 
-  _onChangeInput = () => {
-    this._dirty = true
+  _onChangeInput = async e => {
+    await this._onSubmit(e)
+    this._focusedKey = null
   }
 
   _onFocusInput = e => {
     this._focusedKey = $(e.target).attr('data-key')
-  }
-
-  _onBlurInput = async e => {
-    this._focusedKey = null
-    if (this._dirty) {
-      this._dirty = false
-      await this._onSubmit(e)
-    }
   }
 
   _onEnter = async e => {

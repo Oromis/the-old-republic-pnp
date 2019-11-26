@@ -47,6 +47,9 @@
       },
       "gp": {
         "initial": 500
+      },
+      "settings": {
+        "isGenerating": true
       }
     },
     "npc": {
