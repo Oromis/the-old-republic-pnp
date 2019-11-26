@@ -65,7 +65,7 @@
             <th>Name</th>
             <th>GP</th>
             <th>Boni</th>
-            <th>StK</th>
+            <th title="Steigerungsklasse">StK</th>
             <th class="attribute-table-xp">XP</th>
             <th>Gain</th>
             <th>Buff</th>
@@ -85,7 +85,15 @@
                 {{/if}}
               </td>
               <td></td>
-              <td>{{attr.xpCategory}}</td>
+              <td>
+                <select name="data.attributes.{{attr.key}}.xpCategory" data-dtype="String">
+                  {{#select attr.xpCategory}}
+                    {{#each ../computed.xpCategories as |category|}}
+                      <option value="{{category}}">{{category}}</option>
+                    {{/each}}
+                  {{/select}}
+                </select>
+              </td>
               <td>{{attr.xp}}</td>
               <td>
                 <div class="flex-row multi-item">
