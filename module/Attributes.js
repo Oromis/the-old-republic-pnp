@@ -47,7 +47,7 @@ list.forEach(attr => {
   attr.xpCategory = Config.character.attributes.xpCategory
   attr.xp = 0
   attr.gp = 0
-  attr.gained = 0
+  attr.gained = []
   attr.buff = 0
 })
 

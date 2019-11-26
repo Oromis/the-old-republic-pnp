@@ -2,10 +2,12 @@ import Attributes from './Attributes.js'
 import ObjectUtils from './ObjectUtils.js'
 import Config from './Config.js'
 import XpTable from './XpTable.js'
+import Species from './Species.js'
 
 function calcGp(char) {
   return (char.gp.initial || Config.character.initialGp)
     - (char.xp.gp || 0)
+    - ObjectUtils.try(Species.map[char.species], 'gp', { default: 0 })
     - Object.values(char.attributes).reduce((acc, cur) => acc + (cur.gp || 0), 0)
 }
 
@@ -20,20 +22,25 @@ function calcTotalXp(char) {
   return char.xp.gp * Config.character.gpToXpRate + char.xp.gained
 }
 
-function calcAttributeBaseValue(attribute) {
+function calcAttributeBaseValue(actor, attribute) {
   const attr = attribute || {}
-  return (attr.gp || 0)
+  return (attr.gp || 0) + calcAttributeMod(actor, attribute)
 }
 
-function calcAttributeValue(attribute) {
+function calcAttributeMod(actor, attribute) {
+  let speciesInfo = Species.map[(actor.species || Species.default)];
+  return speciesInfo.mods[attribute.key] || 0
+}
+
+function calcAttributeValue(actor, attribute) {
   const attr = attribute || {}
-  return calcAttributeBaseValue(attribute) +
+  return calcAttributeBaseValue(actor, attribute) +
     ObjectUtils.try(attr, 'gained', { default: [] }).length +
     (attr.buff || 0)
 }
 
-function calcAttributeUpgradeCost(attribute) {
-  const baseVal = calcAttributeBaseValue(attribute)
+function calcAttributeUpgradeCost(actor, attribute) {
+  const baseVal = calcAttributeBaseValue(actor, attribute)
   const gainLog = ObjectUtils.try(attribute, 'gained', { default: [] })
   return XpTable.getUpgradeCost({
     category: ObjectUtils.try(attribute, 'xpCategory', { default: Config.character.attributes.xpCategory }),
@@ -113,22 +120,26 @@ export default class SwTorActorSheet extends ActorSheet {
       totalXp: calcTotalXp(data.data),
       xpFromGp: data.data.xp.gp * Config.character.gpToXpRate,
       xpCategories: XpTable.getCategories(),
+      speciesList: Species.list,
+      speciesName: ObjectUtils.try(Species.map[data.data.species], 'name', { default: 'None' }),
       attributes: Attributes.list.map(generalAttr => {
         const charAttr = data.data.attributes[generalAttr.key]
-        let upgradeCost = calcAttributeUpgradeCost(charAttr)
+        const attr = { ...generalAttr, ...charAttr,  }
+
+        let upgradeCost = calcAttributeUpgradeCost(this.actorData, attr)
         if (upgradeCost > freeXp) {
           upgradeCost = null
         }
         const gainLog = ObjectUtils.try(charAttr, 'gained', { default: [] }).length
         return {
-          ...generalAttr,
-          ...charAttr,
+          ...attr,
           gained: {
             canDowngrade: gainLog > 0,
             value: gainLog,
             upgradeCost,
           },
-          value: calcAttributeValue(charAttr)
+          value: calcAttributeValue(this.actorData, attr),
+          mod: calcAttributeMod(this.actorData, attr),
         }
       }),
       flags: {
@@ -263,16 +274,19 @@ export default class SwTorActorSheet extends ActorSheet {
   _onChangeAttrGained = event => {
     const action = event.target.getAttribute('data-action')
     const key = event.target.getAttribute('data-attr')
-    const attribute = this.actorData.attributes[key]
+    const attribute = {
+      ...Attributes.map[key],
+      ...this.actorData.attributes[key],
+    }
     const prevXp = ObjectUtils.try(attribute, 'xp', { default: 0 })
     const gainLog = ObjectUtils.try(attribute, 'gained', { default: [] })
     let newGainLog, newXp
     if (action === '+') {
       const xpCategory = ObjectUtils.try(attribute, 'xpCategory', { default: Config.character.attributes.xpCategory })
       newGainLog = [...gainLog, { xpCategory }]
-      newXp = prevXp + calcAttributeUpgradeCost(attribute)
+      newXp = prevXp + calcAttributeUpgradeCost(this.actorData, attribute)
     } else {
-      const baseVal = calcAttributeBaseValue(attribute)
+      const baseVal = calcAttributeBaseValue(this.actorData, attribute)
       newGainLog = gainLog.slice(0, gainLog.length - 1)
       const removed = gainLog[gainLog.length - 1]
       newXp = prevXp - XpTable.getUpgradeCost({
@@ -330,6 +344,7 @@ export default class SwTorActorSheet extends ActorSheet {
     Attributes.list.forEach(attr => {
       this._processDeltaProperty(formData, `data.attributes.${attr.key}.gp`)
       this._processDeltaProperty(formData, `data.attributes.${attr.key}.buff`)
+      this._processDeltaProperty(formData, `data.attributes.${attr.key}.mod`)
     })
 
     if (parsed.input.totalXp != null) {
