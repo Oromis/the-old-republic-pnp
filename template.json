@@ -24,7 +24,7 @@
     }
   },
   "Item": {
-    "types": ["species", "training", "congenital", "special-ability", "weapon", "armor", "consumable", "other"],
+    "types": ["skill", "training", "congenital", "special-ability", "weapon", "armor", "consumable", "other"],
     "templates": {
       "described": {
         "description": ""
@@ -35,11 +35,8 @@
         "price": 0
       }
     },
-    "species": {
+    "skill": {
       "templates": ["described"],
-      "gp": 0,
-      "attributes": {},
-      "bonuses": {}
     },
     "training": {
       "templates": ["described"],

@@ -34,7 +34,7 @@
 
 /* Sheet Header */
 .sw-tor.sheet .profile-img {
-    flex: 0 0 100px;
+    width: 100px;
 }
 
 .sw-tor.sheet .header-fields {

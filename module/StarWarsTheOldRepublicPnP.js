@@ -6,6 +6,10 @@ import Config from './Config.js'
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
+  await loadTemplates([
+    'systems/sw-tor/templates/includes/skill-sheet.html'
+  ])
+
   Handlebars.registerHelper({
     concat: (...args) => args.filter(arg => typeof arg === 'string').join(''),
     formatAttrKey: key => key.toUpperCase(),
