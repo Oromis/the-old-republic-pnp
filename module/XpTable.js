@@ -69,5 +69,9 @@ export default {
       index = Math.max(costTable.length - 1, index + 1)
     }
     return points
+  },
+
+  getCategories() {
+    return categoryList.map(cat => cat.name)
   }
 }

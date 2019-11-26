@@ -12,7 +12,7 @@ function calcGp(char) {
 function calcFreeXp(char) {
   return calcTotalXp(char) -
     Attributes.list.reduce((acc, cur) => {
-      return acc + (char.attributes[cur.key].xp || 0)
+      return acc + ObjectUtils.try(char.attributes[cur.key], 'xp', { default: 0 })
     }, 0)
 }
 
@@ -112,6 +112,7 @@ export default class SwTorActorSheet extends ActorSheet {
       freeXp,
       totalXp: calcTotalXp(data.data),
       xpFromGp: data.data.xp.gp * Config.character.gpToXpRate,
+      xpCategories: XpTable.getCategories(),
       attributes: Attributes.list.map(generalAttr => {
         const charAttr = data.data.attributes[generalAttr.key]
         let upgradeCost = calcAttributeUpgradeCost(charAttr)

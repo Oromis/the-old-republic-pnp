@@ -15,8 +15,8 @@
       "gp": {
         "initial": 500
       },
-      "settings": {
-        "isGenerating": true
+      "creationMode": {
+        "enabled": true
       }
     },
     "npc": {
