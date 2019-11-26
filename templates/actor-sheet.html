@@ -12,11 +12,13 @@
           <div class="flex-row multi-item">
             <span title="Generierungspunkte">GP</span>
             <span class="flex-grow">{{computed.gp}}</span>
-            {{#if computed.flags.hasGp}}
-              <button type="button" class="small gp-to-xp">GP → XP</button>
-            {{/if}}
-            {{#if computed.flags.canRefundXpToGp}}
-              <button type="button" class="small xp-to-gp">GP ← XP</button>
+            {{#if data.creationMode.enabled}}
+              {{#if computed.flags.hasGp}}
+                <button type="button" class="small gp-to-xp">GP → XP</button>
+              {{/if}}
+              {{#if computed.flags.canRefundXpToGp}}
+                <button type="button" class="small xp-to-gp">GP ← XP</button>
+              {{/if}}
             {{/if}}
           </div>
           <label class="flex-row multi-item">
@@ -97,10 +99,12 @@
               <td>{{attr.xp}}</td>
               <td>
                 <div class="flex-row multi-item">
-                  {{#if attr.gained.canDowngrade}}
-                    <button type="button" class="small char change-attr-gained" data-attr="{{attr.key}}" data-action="-">-</button>
-                  {{else}}
-                    <span class="char-button-placeholder"></span>
+                  {{#if ../data.creationMode.enabled}}
+                    {{#if attr.gained.canDowngrade}}
+                      <button type="button" class="small char change-attr-gained" data-attr="{{attr.key}}" data-action="-">-</button>
+                    {{else}}
+                      <span class="char-button-placeholder"></span>
+                    {{/if}}
                   {{/if}}
                   <span class="attribute-gained">{{attr.gained.value}}</span>
                   {{#if attr.gained.upgradeCost}}
