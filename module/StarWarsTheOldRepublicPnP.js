@@ -6,8 +6,17 @@ import Config from './Config.js'
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
-  Handlebars.registerHelper('formatAttrKey', key => key.toUpperCase())
-  Handlebars.registerHelper('formatBool', key => key ? 'Yo' : 'Nope')
+  Handlebars.registerHelper({
+    concat: (...args) => args.filter(arg => typeof arg === 'string').join(''),
+    formatAttrKey: key => key.toUpperCase(),
+    stepButtons: ({ hash: { val, name, buttonClass = 'small char set-value', valueClass = '' } }) => {
+      return new Handlebars.SafeString(`
+        <button type="button" class="${buttonClass}" data-field="${name}" data-value="${val - 1}" data-action="-">-</button>
+        <span class="${valueClass}">${val}</span>
+        <button type="button" class="${buttonClass}" data-field="${name}" data-value="${val + 1}" data-action="+">+</button>
+      `)
+    }
+  })
 
 	/**
 	 * Set an initiative formula for the system

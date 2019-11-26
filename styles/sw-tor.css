@@ -109,3 +109,13 @@
 .attributes-table-key {
     width: 22px;
 }
+
+.attribute-gained {
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+}
+
+.attribute-table-xp {
+    min-width: 40px;
+}

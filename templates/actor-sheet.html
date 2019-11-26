@@ -63,10 +63,11 @@
           <tr>
             <th class="attributes-table-key"></th>
             <th>Name</th>
-            <th>StK</th>
             <th>GP</th>
             <th>Boni</th>
-            <th>XP</th>
+            <th>StK</th>
+            <th class="attribute-table-xp">XP</th>
+            <th>Gain</th>
             <th>Buff</th>
             <th>Wert</th>
           </tr>
@@ -76,7 +77,6 @@
             <tr>
               <td>{{formatAttrKey attr.key}}</td>
               <td title="{{attr.desc}}">{{attr.label}}</td>
-              <td>{{attr.xpCategory}}</td>
               <td>
                 {{#if ../data.creationMode.enabled}}
                   <input type="text" name="data.attributes.{{attr.key}}.gp" value="{{attr.gp}}" />
@@ -85,7 +85,23 @@
                 {{/if}}
               </td>
               <td></td>
+              <td>{{attr.xpCategory}}</td>
               <td>{{attr.xp}}</td>
+              <td>
+                <div class="flex-row multi-item">
+                  {{#if attr.gained.canDowngrade}}
+                    <button type="button" class="small char change-attr-gained" data-attr="{{attr.key}}" data-action="-">-</button>
+                  {{else}}
+                    <span class="char-button-placeholder"></span>
+                  {{/if}}
+                  <span class="attribute-gained">{{attr.gained.value}}</span>
+                  {{#if attr.gained.upgradeCost}}
+                    <button type="button" class="small char change-attr-gained" title="{{attr.gained.upgradeCost}} XP" data-attr="{{attr.key}}" data-action="+">+</button>
+                  {{else}}
+                    <span class="char-button-placeholder"></span>
+                  {{/if}}
+                </div>
+              </td>
               <td>
                 <input type="text" name="data.attributes.{{attr.key}}.buff" value="{{attr.buff}}" />
               </td>

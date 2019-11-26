@@ -7,6 +7,10 @@
 }
 
 .sw-tor.sheet button.small {
-  width: auto;
   line-height: 20px;
+}
+
+.sw-tor button.char,
+.sw-tor .char-button-placeholder {
+  width: 22px;
 }

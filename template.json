@@ -2,42 +2,7 @@
   "Actor": {
     "types": ["pc", "npc"],
     "templates": {
-      "common": {
-        "attributes": {
-          "ch": {
-            "gp": 0,
-            "xp": 0
-          },
-          "ge": {
-            "gp": 0,
-            "xp": 0
-          },
-          "in": {
-            "gp": 0,
-            "xp": 0
-          },
-          "kl": {
-            "gp": 0,
-            "xp": 0
-          },
-          "ko": {
-            "gp": 0,
-            "xp": 0
-          },
-          "kk": {
-            "gp": 0,
-            "xp": 0
-          },
-          "sc": {
-            "gp": 0,
-            "xp": 0
-          },
-          "wk": {
-            "gp": 0,
-            "xp": 0
-          }
-        }
-      }
+      "common": {}
     },
     "pc": {
       "templates": ["common"],
