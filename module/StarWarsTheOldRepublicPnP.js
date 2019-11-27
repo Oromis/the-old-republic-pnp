@@ -1,5 +1,5 @@
-import SwTorItemSheet from "./SwTorItemSheet.js";
-import SwTorActorSheet from "./SwTorActorSheet.js";
+import SwTorItemSheet from "./SwTorItemSheet.js"
+import SwTorActorSheet from "./SwTorActorSheet.js"
 
 import Config from './Config.js'
 
