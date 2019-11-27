@@ -1,9 +1,12 @@
-import AutoSubmitSheet from './AutoSubmitSheet.js'
-
 /**
  * Extend the basic ItemSheet with some very simple modifications
  */
-export default class SwTorItemSheet extends ItemSheet {
+import AutoSubmitSheet from './AutoSubmitSheet.js'
+import Attributes from './Attributes.js'
+import SkillCategories from './SkillCategories.js'
+import XpTable from './XpTable.js'
+
+export default class SkillSheet extends ItemSheet {
   constructor(...args) {
     super(...args);
 
@@ -23,7 +26,7 @@ export default class SwTorItemSheet extends ItemSheet {
 	static get defaultOptions() {
 	  return mergeObject(super.defaultOptions, {
 			classes: ["sw-tor", "sheet", "item"],
-			template: "systems/sw-tor/templates/item-sheet.html",
+			template: "systems/sw-tor/templates/skill-sheet.html",
 			width: 520,
 			height: 480,
 		})
@@ -36,7 +39,11 @@ export default class SwTorItemSheet extends ItemSheet {
    * The prepared data object contains both the actor data as well as additional sheet options
    */
   getData() {
-    return super.getData()
+    const data = super.getData()
+    data.attributes = Attributes.list
+    data.skillCategories = SkillCategories.list
+    data.xpCategories = XpTable.getCategories()
+    return data
   }
 
   /* -------------------------------------------- */
@@ -68,6 +75,11 @@ export default class SwTorItemSheet extends ItemSheet {
    * @private
    */
   _updateObject(event, formData) {
+    const key = formData['data.key']
+    if (key != null) {
+      formData['data.key'] = key.toLowerCase()
+    }
+
     return this.object.update(formData)
   }
 }

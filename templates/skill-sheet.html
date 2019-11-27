@@ -1,0 +1,82 @@
+<form class="{{cssClass}} multi-item" autocomplete="off">
+  <header class="sheet-header flex-row multi-item">
+    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
+    <div class="header-fields flex-grow multi-item">
+      <div class="flex-row multi-item flex-cross-start">
+        <h1 class="char-name flex-grow">
+          <input name="name" class="full-width" type="text" value="{{item.name}}" placeholder="Name"/>
+        </h1>
+      </div>
+      <div class="flex-row">
+        <textarea placeholder="Beschreibung" name="data.description" class="flex-grow">{{data.description}}</textarea>
+      </div>
+    </div>
+  </header>
+
+  {{!-- Sheet Body --}}
+  <section class="sheet-body">
+    <table>
+      <tbody>
+        <tr>
+          <td class="align-right">Kürzel</td>
+          <td><input type="text" class="uppercase" name="data.key" value="{{data.key}}" minlength="3" maxlength="3"/>
+          </td>
+        </tr>
+        <tr>
+          <td class="align-right">Kategorie</td>
+          <td>
+            <select name="data.category" title="Kategorie">
+              {{#select data.category}}
+                {{#each skillCategories as |category|}}
+                  <option value="{{category.key}}">{{category.label}}</option>
+                {{/each}}
+              {{/select}}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="align-right">Primärattribut</td>
+          <td>
+            <select name="data.attribute1" title="Primärattribut">
+              {{#select data.attribute1}}
+                {{#each attributes as |attr|}}
+                  <option value="{{attr.key}}">{{attr.label}}</option>
+                {{/each}}
+              {{/select}}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="align-right">Sekundärattribut</td>
+          <td>
+            <select name="data.attribute2" title="Sekundärattribut">
+              {{#select data.attribute2}}
+                {{#each attributes as |attr|}}
+                  <option value="{{attr.key}}">{{attr.label}}</option>
+                {{/each}}
+              {{/select}}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="align-right">Steigerungskategorie</td>
+          <td>
+            <select name="data.xpCategory" title="Steigerungskategorie">
+              {{#select data.xpCategory}}
+                {{#each xpCategories as |category|}}
+                  <option value="{{category}}">{{category}}</option>
+                {{/each}}
+              {{/select}}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="align-right">Grundfähigkeit</td>
+          <td>
+            <input type="checkbox" name="data.isBasicSkill" {{checked data.isBasicSkill}} />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</form>

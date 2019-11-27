@@ -2,6 +2,7 @@ import Attributes from './Attributes.js'
 import ObjectUtils from './ObjectUtils.js'
 import Config from './Config.js'
 import XpTable from './XpTable.js'
+import AutoSubmitSheet from './AutoSubmitSheet.js'
 
 function calcGp(char) {
   return (char.gp.initial || Config.character.initialGp)
@@ -79,6 +80,8 @@ export default class SwTorActorSheet extends ActorSheet {
      * @type {string}
      */
     this._sheetTab = "attributes"
+
+    new AutoSubmitSheet(this)
   }
 
   /* -------------------------------------------- */
@@ -159,18 +162,6 @@ export default class SwTorActorSheet extends ActorSheet {
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return;
 
-    if (this.options.submitOnUnfocus) {
-      // Enable auto-submit
-      html.find('input')
-        .on('change', this._onChangeInput)
-        .on('focus', this._onFocusInput)
-        .on('keypress', this._onEnter)
-    }
-
-    if (this._focusedKey != null) {
-      html.find(`[data-key=${this._focusedKey}]`).focus().select()
-    }
-
     html.find('.gp-to-xp').click(this._onGpToXp)
     html.find('.xp-to-gp').click(this._onXpToGp)
     html.find('button.set-value').click(this._onSetValueButton)
@@ -218,21 +209,6 @@ export default class SwTorActorSheet extends ActorSheet {
       const li = a.closest(".attribute");
       li.parentElement.removeChild(li);
       await this._onSubmit(event);
-    }
-  }
-
-  _onChangeInput = async e => {
-    await this._onSubmit(e)
-    this._focusedKey = null
-  }
-
-  _onFocusInput = e => {
-    this._focusedKey = $(e.target).attr('data-key')
-  }
-
-  _onEnter = async e => {
-    if (e.key === 'Enter') {
-      await this._onSubmit(e)
     }
   }
 
