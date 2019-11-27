@@ -36,7 +36,7 @@
       }
     },
     "skill": {
-      "templates": ["described"],
+      "templates": ["described"]
     },
     "training": {
       "templates": ["described"],
