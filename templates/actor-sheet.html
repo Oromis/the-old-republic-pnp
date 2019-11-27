@@ -5,9 +5,25 @@
     <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100" />
     <div class="header-fields flex-grow">
       <div class="flex-row multi-item flex-cross-start">
-        <h1 class="char-name flex-grow">
-          <input name="name" class="full-width" type="text" value="{{actor.name}}" placeholder="Name" />
-        </h1>
+        <div class="multi-item flex-grow">
+          <h1 class="char-name">
+            <input name="name" class="full-width" type="text" value="{{actor.name}}" placeholder="Name" />
+          </h1>
+          <div class="species-div flex-row multi-item">
+            <span title="Spezies">Spezies:</span>
+            {{#if data.creationMode.enabled}}
+            <select name="data.species" data-dtype="String">
+              {{#select actor.data.species}}
+              {{#each computed.speciesList as |sp|}}
+              <option value="{{sp.key}}">{{sp.name}}</option>
+              {{/each}}
+              {{/select}}
+            </select>
+            {{else}}
+            <span>{{computed.speciesName}}</span>
+            {{/if}}
+          </div>
+        </div>
         <div class="multi-item">
           <div class="flex-row multi-item">
             <span title="Generierungspunkte">GP</span>
@@ -66,7 +82,7 @@
             <th class="attributes-table-key"></th>
             <th>Name</th>
             <th>GP</th>
-            <th>Boni</th>
+            <th>Mod</th>
             <th title="Steigerungsklasse">StK</th>
             <th class="attribute-table-xp">XP</th>
             <th>Gain</th>
@@ -86,7 +102,7 @@
                   {{attr.gp}}
                 {{/if}}
               </td>
-              <td></td>
+              <td>{{attr.mod}}</td>
               <td>
                 <select name="data.attributes.{{attr.key}}.xpCategory" data-dtype="String">
                   {{#select attr.xpCategory}}

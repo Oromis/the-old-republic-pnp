@@ -51,6 +51,10 @@
     height: 40px;
 }
 
+.sw-tor.sheet .species-div {
+    height: 35px;
+}
+
 /* Navigation Tabs */
 .sw-tor.sheet .tabs {
     flex: 0 0 40px;
