@@ -1,5 +1,6 @@
 import SwTorItemSheet from "./SwTorItemSheet.js"
 import SwTorActorSheet from "./SwTorActorSheet.js"
+import SkillSheet from "./SkillSheet.js"
 
 import Config from './Config.js'
 
@@ -26,11 +27,12 @@ Hooks.once("init", async function() {
 	 * Set an initiative formula for the system
 	 * @type {String}
 	 */
-	CONFIG.initiative.formula = "1d6";
+	CONFIG.initiative.formula = "1d6"
 
   // Register sheet application classes
-  Actors.unregisterSheet("core", ActorSheet);
-  Actors.registerSheet("sw-tor", SwTorActorSheet, { makeDefault: true });
-  Items.unregisterSheet("core", ItemSheet);
-  Items.registerSheet("sw-tor", SwTorItemSheet, {makeDefault: true});
-});
+  Actors.unregisterSheet("core", ActorSheet)
+  Actors.registerSheet("sw-tor", SwTorActorSheet, { makeDefault: true })
+  Items.unregisterSheet("core", ItemSheet)
+  Items.registerSheet("sw-tor", SwTorItemSheet, {makeDefault: true})
+  Items.registerSheet("sw-tor", SkillSheet)
+})
