@@ -4,6 +4,8 @@ import Config from './Config.js'
 import XpTable from './XpTable.js'
 import Species from './Species.js'
 import AutoSubmitSheet from './AutoSubmitSheet.js'
+import ItemTypes from './ItemTypes.js'
+import SkillCategories from './SkillCategories.js'
 
 function calcGp(char) {
   return (char.gp.initial || Config.character.initialGp)
@@ -23,21 +25,53 @@ function calcTotalXp(char) {
   return char.xp.gp * Config.character.gpToXpRate + char.xp.gained
 }
 
-function calcAttributeBaseValue(actor, attribute) {
-  const attr = attribute || {}
-  return (attr.gp || 0) + calcAttributeMod(actor, attribute)
+function explainMod(actor, property) {
+  const key = typeof property === 'string' ? property : property.key
+  const species = Species.map[(actor.species || Species.default)]
+  const components = [
+    { label: species.name, value: ObjectUtils.try(species, 'mods', key, { default: 0 }) }
+  ].filter(mod => mod.value !== 0)
+  return {
+    total: components.reduce((acc, cur) => acc + cur.value, 0),
+    components
+  }
 }
 
-function calcAttributeMod(actor, attribute) {
-  let speciesInfo = Species.map[(actor.species || Species.default)];
-  return speciesInfo.mods[attribute.key] || 0
+function calcMod(actor, property) {
+  return explainMod(actor, property).total
+}
+
+function explainAttributeBaseValue(actor, attribute) {
+  const gp = ObjectUtils.try(attribute, 'gp', { default: 0 })
+  const result = explainMod(actor, attribute)
+  if (gp !== 0) {
+    result.total += gp
+    result.components.unshift({ label: 'GP', value: gp })
+  }
+  return result
+}
+
+function calcAttributeBaseValue(actor, attribute) {
+  return explainAttributeBaseValue(actor, attribute).total
+}
+
+function explainAttributeValue(actor, attribute) {
+  const result = explainAttributeBaseValue(actor, attribute)
+  const gained = ObjectUtils.try(attribute, 'gained', { default: [] }).length
+  if (gained !== 0) {
+    result.total += gained
+    result.components.push({ label: 'XP', value: gained })
+  }
+  const buff = ObjectUtils.try(attribute, 'buff', { default: 0 })
+  if (buff !== 0) {
+    result.total += buff
+    result.components.push({ label: 'Buff', value: buff })
+  }
+  return result
 }
 
 function calcAttributeValue(actor, attribute) {
-  const attr = attribute || {}
-  return calcAttributeBaseValue(actor, attribute) +
-    ObjectUtils.try(attr, 'gained', { default: [] }).length +
-    (attr.buff || 0)
+  return explainAttributeValue(actor, attribute).total
 }
 
 function calcAttributeUpgradeCost(actor, attribute) {
@@ -87,6 +121,7 @@ export default class SwTorActorSheet extends ActorSheet {
      * @type {string}
      */
     this._sheetTab = "attributes"
+    this._itemFilter = ''
 
     new AutoSubmitSheet(this)
   }
@@ -117,13 +152,20 @@ export default class SwTorActorSheet extends ActorSheet {
     const data = super.getData()
     let gp = calcGp(data.data)
     const freeXp = calcFreeXp(data.data)
+    const inventory = [], skills = []
+    data.items.forEach(item => {
+      if (item.type === 'skill') {
+        skills.push(item)
+      } else {
+        inventory.push(item)
+      }
+    })
     data.computed = {
       gp,
       freeXp,
       totalXp: calcTotalXp(data.data),
       xpFromGp: data.data.xp.gp * Config.character.gpToXpRate,
       xpCategories: XpTable.getCategories(),
-      speciesList: Species.list,
       speciesName: ObjectUtils.try(Species.map[data.data.species], 'name', { default: 'None' }),
       attributes: Attributes.list.map(generalAttr => {
         const charAttr = data.data.attributes[generalAttr.key]
@@ -141,14 +183,24 @@ export default class SwTorActorSheet extends ActorSheet {
             value: gainLog,
             upgradeCost,
           },
-          value: calcAttributeValue(this.actorData, attr),
-          mod: calcAttributeMod(this.actorData, attr),
+          value: explainAttributeValue(this.actorData, attr),
+          mod: explainMod(this.actorData, attr),
         }
       }),
+      skillCategories: SkillCategories.list.map(cat => ({
+        label: cat.label,
+        skills: skills.filter(skill => skill.data.category === cat.key)
+      })),
+      inventory,
       flags: {
         hasGp: gp > 0,
         canRefundXpToGp: data.data.xp.gp > 0
-      }
+      },
+    }
+    data.speciesList = Species.list
+    data.itemTypes = ItemTypes.list
+    data.ui = {
+      itemFilter: this._itemFilter,
     }
     return data
   }
@@ -178,16 +230,16 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('button.set-value').click(this._onSetValueButton)
     html.find('button.change-attr-gained').click(this._onChangeAttrGained)
 
-    // Update Inventory Item
+    // Update Item (or skill)
     html.find('.item-edit').click(ev => {
-      const li = $(ev.currentTarget).parents(".item");
+      const li = $(ev.currentTarget).parents("[data-item-id]");
       const item = this.actor.getOwnedItem(li.data("itemId"));
       item.sheet.render(true);
     });
 
     // Delete Inventory Item
     html.find('.item-delete').click(ev => {
-      const li = $(ev.currentTarget).parents(".item");
+      const li = $(ev.currentTarget).parents("[data-item-id]");
       this.actor.deleteOwnedItem(li.data("itemId"));
       li.slideUp(200, () => this.render(false));
     });
@@ -327,6 +379,8 @@ export default class SwTorActorSheet extends ActorSheet {
       formData['data.xp.gained'] = newVal -
         (ObjectUtils.try(this.actorData, 'xp', 'gp', { default: 0 }) * Config.character.gpToXpRate)
     }
+
+    this._itemFilter = formData['ui.itemFilter']
 
     // Update the Actor
     return this.actor.update(formData);

@@ -24,7 +24,7 @@
     }
   },
   "Item": {
-    "types": ["skill", "training", "congenital", "special-ability", "weapon", "armor", "consumable", "other"],
+    "types": ["skill", "training", "congenital", "special-ability", "weapon", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"],
     "templates": {
       "described": {
         "description": ""
@@ -36,7 +36,13 @@
       }
     },
     "skill": {
-      "templates": ["described"]
+      "templates": ["described"],
+      "key": "",
+      "category": null,
+      "attribute1": null,
+      "attribute2": null,
+      "xpCategory": null,
+      "isBasicSkill": false
     },
     "training": {
       "templates": ["described"],
@@ -57,13 +63,14 @@
       "bonuses": {},
       "requirements": {}
     },
-    "weapon": {
-      "templates": ["described", "physical"],
-      "damage": ""
+    "melee-weapon": {
+      "templates": ["described", "physical"]
     },
-    "armor": {
-      "templates": ["described", "physical"],
-      "armor": 0
+    "ranged-weapon": {
+      "templates": ["described", "physical"]
+    },
+    "wearable": {
+      "templates": ["described", "physical"]
     },
     "consumable": {
       "templates": ["described", "physical"]

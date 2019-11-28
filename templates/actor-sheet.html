@@ -3,7 +3,7 @@
   {{!-- Sheet Header --}}
   <header class="sheet-header flex-row multi-item">
     <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100" />
-    <div class="header-fields flex-grow">
+    <div class="header-fields flex-grow flex-self-start">
       <div class="flex-row multi-item flex-cross-start">
         <div class="multi-item flex-grow">
           <h1 class="char-name">
@@ -12,15 +12,15 @@
           <div class="species-div flex-row multi-item">
             <span title="Spezies">Spezies:</span>
             {{#if data.creationMode.enabled}}
-            <select name="data.species" data-dtype="String">
-              {{#select actor.data.species}}
-              {{#each computed.speciesList as |sp|}}
-              <option value="{{sp.key}}">{{sp.name}}</option>
-              {{/each}}
-              {{/select}}
-            </select>
+              <select name="data.species" data-dtype="String">
+                {{#select actor.data.species}}
+                  {{#each speciesList as |sp|}}
+                    <option value="{{sp.key}}">{{sp.name}}</option>
+                  {{/each}}
+                {{/select}}
+              </select>
             {{else}}
-            <span>{{computed.speciesName}}</span>
+              <span>{{computed.speciesName}}</span>
             {{/if}}
           </div>
         </div>
@@ -59,7 +59,7 @@
     {{#each computed.attributes as |attr index|}}
       <div class="attribute flex-row multi-item">
         <span class="attribute-label" title="{{attr.label}} - {{attr.desc}}">{{formatAttrKey attr.key}}</span>
-        <span title="{{attr.gp}} aus GP">{{attr.value}}</span>
+        <span title="{{formatExplanation attr.value.components}}">{{attr.value.total}}</span>
       </div>
     {{/each}}
   </div>
@@ -67,6 +67,7 @@
   {{!-- Sheet Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">
     <a class="item" data-tab="attributes">Attribute</a>
+    <a class="item" data-tab="skills">Fähigkeiten</a>
     <a class="item" data-tab="description">Beschreibung</a>
     <a class="item" data-tab="items">Inventar</a>
     <a class="item" data-tab="settings">Einstellungen</a>
@@ -102,7 +103,7 @@
                   {{attr.gp}}
                 {{/if}}
               </td>
-              <td>{{attr.mod}}</td>
+              <td title="{{formatExplanation attr.mod.components}}">{{formatMod attr.mod.total}}</td>
               <td>
                 <select name="data.attributes.{{attr.key}}.xpCategory" data-dtype="String">
                   {{#select attr.xpCategory}}
@@ -133,7 +134,7 @@
               <td>
                 <input type="text" name="data.attributes.{{attr.key}}.buff" value="{{attr.buff}}" />
               </td>
-              <td>{{attr.value}}</td>
+              <td title="{{formatExplanation attr.value.components}}">{{attr.value.total}}</td>
             </tr>
           {{/each}}
         </tbody>
@@ -145,8 +146,60 @@
       {{editor content=data.biography target="data.biography" button=true owner=owner editable=editable}}
     </div>
 
+    {{!-- Skills Tab --}}
+    <div class="tab skills multi-item" data-group="primary" data-tab="skills">
+      {{#each computed.skillCategories as |category|}}
+        <table>
+          <thead>
+            <tr>
+              <th>{{category.label}}</th>
+              <th class="skill-key-col"></th>
+              <th class="attr-key-col" title="Primärattribut">A1</th>
+              <th class="attr-key-col" title="Sekundärattribut">A2</th>
+              <th class="skill-actions-col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each category.skills as |skill|}}
+              <tr {{class when=skill.data.isBasicSkill then='basic-skill'}} data-item-id="{{skill.id}}">
+                <td>
+                  <div class="flex-row multi-item">
+                    <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
+                    {{skill.name}}
+                  </div>
+                </td>
+                <td>{{formatAttrKey skill.data.key}}</td>
+                <td title="{{formatAttrLabel skill.data.attribute1}}">{{formatAttrKey skill.data.attribute1}}</td>
+                <td title="{{formatAttrLabel skill.data.attribute2}}">{{formatAttrKey skill.data.attribute2}}</td>
+                <td>
+                  <span class="flex-row multi-item">
+                    <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
+                    {{#if ../../data.creationMode.enabled}}
+                      {{#unless skill.data.isBasicSkill}}
+                        <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+                      {{/unless}}
+                    {{/if}}
+                  </span>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{/each}}
+    </div>
+
     {{!-- Owned Items Tab --}}
     <div class="tab items" data-group="primary" data-tab="items">
+      <div class="flex-row multi-item">
+        <select name="ui.itemFilter" data-dtype="String">
+          {{#select ui.itemFilter}}
+            <option value="">Alle</option>
+            {{#each itemTypes as |type|}}
+              <option value="{{type.key}}">{{type.label}}</option>
+            {{/each}}
+          {{/select}}
+        </select>
+      </div>
       <ol class="items-list">
         {{#each actor.items as |item id|}}
           <li class="item flexrow" data-item-id="{{item.id}}">
@@ -175,4 +228,5 @@
     </div>
   </section>
 </form>
+
 

@@ -11,6 +11,7 @@
 .flex-grow { flex-grow: 1; }
 .flex-wrap { flex-wrap: wrap; }
 .flex-cross-start { align-items: flex-start; }
+.flex-self-start { align-self: flex-start; }
 
 .full-width { width: 100% !important; }
 

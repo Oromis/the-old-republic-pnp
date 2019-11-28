@@ -28,7 +28,7 @@ export default class SkillSheet extends ItemSheet {
 			classes: ["sw-tor", "sheet", "item"],
 			template: "systems/sw-tor/templates/skill-sheet.html",
 			width: 520,
-			height: 480,
+			height: 360,
 		})
   }
 

@@ -10,10 +10,10 @@
   "styles": ["styles/sw-tor.css"],
   "packs": [
     {
-      "name": "species",
-      "label": "Spezies",
+      "name": "skills",
+      "label": "Fähigkeiten",
       "system": "sw-tor",
-      "path": "./packs/species.db",
+      "path": "./packs/skills.db",
       "entity": "Item"
     },
     {
