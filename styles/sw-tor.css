@@ -91,8 +91,28 @@
     width: 46px;
 }
 
-.sw-tor .skill-actions-col {
+.sw-tor .value-col {
+    width: 50px;
+}
+
+.sw-tor .gain-col {
+    width: 88px;
+}
+
+.sw-tor .icon-col {
+    width: 24px;
+}
+
+.sw-tor .xp-col {
     width: 48px;
+}
+
+.sw-tor .buff-col {
+    width: 64px;
+}
+
+.sw-tor .xp-category-col {
+    width: 54px;
 }
 
 /* Items */
@@ -127,8 +147,4 @@
     width: 20px;
     display: inline-block;
     text-align: center;
-}
-
-.attribute-table-xp {
-    min-width: 40px;
 }

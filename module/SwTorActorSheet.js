@@ -7,12 +7,14 @@ import AutoSubmitSheet from './AutoSubmitSheet.js'
 import ItemTypes from './ItemTypes.js'
 import SkillCategories from './SkillCategories.js'
 import {
-  calcAttributeBaseValue,
-  calcAttributeUpgradeCost, calcFreeXp,
+  calcPropertyBaseValue,
+  calcAttributeUpgradeCost,
+  calcSkillUpgradeCost,
+  calcFreeXp,
   calcGp,
   calcTotalXp,
-  explainAttributeValue,
-  explainMod
+  explainPropertyValue,
+  explainMod, calcSkillXp
 } from './CharacterFormulas.js'
 
 function processDeltaValue(text, oldValue) {
@@ -82,7 +84,7 @@ export default class SwTorActorSheet extends ActorSheet {
   getData() {
     const data = super.getData()
     let gp = calcGp(data.data)
-    const freeXp = calcFreeXp(data.data)
+    const freeXp = calcFreeXp(data)
     const inventory = [], skills = []
     data.items.forEach(item => {
       if (item.type === 'skill') {
@@ -94,7 +96,7 @@ export default class SwTorActorSheet extends ActorSheet {
     data.computed = {
       gp,
       freeXp,
-      totalXp: calcTotalXp(data.data),
+      totalXp: calcTotalXp(data),
       xpFromGp: data.data.xp.gp * Config.character.gpToXpRate,
       xpCategories: XpTable.getCategories(),
       speciesName: ObjectUtils.try(Species.map[data.data.species], 'name', { default: 'None' }),
@@ -114,13 +116,30 @@ export default class SwTorActorSheet extends ActorSheet {
             value: gainLog,
             upgradeCost,
           },
-          value: explainAttributeValue(this.actorData, attr),
+          value: explainPropertyValue(this.actorData, attr),
           mod: explainMod(this.actorData, attr),
         }
       }),
       skillCategories: SkillCategories.list.map(cat => ({
         label: cat.label,
-        skills: skills.filter(skill => skill.data.category === cat.key)
+        skills: skills.filter(skill => skill.data.category === cat.key).map(skill => {
+          const gainLog = ObjectUtils.try(skill, 'data', 'gained', { default: [] }).length
+          let upgradeCost = calcSkillUpgradeCost(this.actorData, skill.data)
+          if (upgradeCost > freeXp) {
+            upgradeCost = null
+          }
+          return {
+            ...skill,
+            xp: calcSkillXp(skill.data),
+            xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
+            gained: {
+              canDowngrade: gainLog > 0,
+              value: gainLog,
+              upgradeCost,
+            },
+            value: explainPropertyValue(this.actorData, skill.data),
+          }
+        })
       })),
       inventory,
       flags: {
@@ -160,6 +179,7 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('.xp-to-gp').click(this._onXpToGp)
     html.find('button.set-value').click(this._onSetValueButton)
     html.find('button.change-attr-gained').click(this._onChangeAttrGained)
+    html.find('button.change-skill-gained').click(this._onChangeSkillGained)
 
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
@@ -245,7 +265,7 @@ export default class SwTorActorSheet extends ActorSheet {
       newGainLog = [...gainLog, { xpCategory }]
       newXp = prevXp + calcAttributeUpgradeCost(this.actorData, attribute)
     } else {
-      const baseVal = calcAttributeBaseValue(this.actorData, attribute)
+      const baseVal = calcPropertyBaseValue(this.actorData, attribute)
       newGainLog = gainLog.slice(0, gainLog.length - 1)
       const removed = gainLog[gainLog.length - 1]
       newXp = prevXp - XpTable.getUpgradeCost({
@@ -259,6 +279,39 @@ export default class SwTorActorSheet extends ActorSheet {
       [`data.attributes.${key}.xp`]: newXp,
       [`data.attributes.${key}.xpCategory`]: Attributes.map[key].xpCategory,  // Reset XP category after every change
     })
+  }
+
+  _onChangeSkillGained = event => {
+    const action = event.target.getAttribute('data-action')
+    const key = event.target.getAttribute('data-skill')
+    const skill = this.getSkill(key)
+    const prevXp = ObjectUtils.try(skill, 'data', 'xp', { default: 0 })
+    const gainLog = ObjectUtils.try(skill, 'data', 'gained', { default: [] })
+    let newGainLog, newXp
+    if (action === '+') {
+      const xpCategory = ObjectUtils.try(skill, 'data', 'tmpXpCategory') || ObjectUtils.try(skill, 'data', 'xpCategory')
+      newGainLog = [...gainLog, { xpCategory }]
+      newXp = prevXp + calcSkillUpgradeCost(this.actorData, skill.data)
+    } else {
+      const baseVal = calcPropertyBaseValue(this.actorData, skill.data)
+      newGainLog = gainLog.slice(0, gainLog.length - 1)
+      const removed = gainLog[gainLog.length - 1]
+      newXp = prevXp - XpTable.getUpgradeCost({
+        category: removed.xpCategory,
+        from: baseVal + newGainLog.length,
+        to: baseVal + gainLog.length
+      })
+    }
+    const skillEntity = this.actor.getOwnedItem(skill.id)
+    if (skillEntity != null) {
+      skillEntity.update({
+        'data.gained': newGainLog,
+        'data.xp': newXp,
+        'data.tmpXpCategory': ObjectUtils.try(skill, 'data', 'xpCategory'), // Reset after every skill point
+      })
+    } else {
+      throw new Error(`Skill entity does not exist: ${key}, ${skill.id}`)
+    }
   }
 
   _processDeltaProperty(formData, path) {
@@ -305,8 +358,26 @@ export default class SwTorActorSheet extends ActorSheet {
       this._processDeltaProperty(formData, `data.attributes.${attr.key}.buff`)
     })
 
+    for (const key of Object.keys(formData)) {
+      const match = /skills\.([\w\-_]+)\.(.*)/.exec(key)
+      if (match) {
+        const skill = this.getSkill(match[1])
+        if (skill != null) {
+          const skillEntity = this.actor.getOwnedItem(skill.id)
+          if (skillEntity != null) {
+            let value = formData[key]
+            if (match[2] === 'data.buff') {
+              value = processDeltaValue(value, skill.data.buff || 0)
+            }
+            skillEntity.update({ [match[2]]: value })
+          }
+        }
+        delete formData[key]
+      }
+    }
+
     if (parsed.input.totalXp != null) {
-      const newVal = Math.round(processDeltaValue(parsed.input.totalXp, calcTotalXp(this.actorData)))
+      const newVal = Math.round(processDeltaValue(parsed.input.totalXp, calcTotalXp(this.actor.data)))
       formData['data.xp.gained'] = newVal -
         (ObjectUtils.try(this.actorData, 'xp', 'gp', { default: 0 }) * Config.character.gpToXpRate)
     }
@@ -319,5 +390,9 @@ export default class SwTorActorSheet extends ActorSheet {
 
   get actorData() {
     return this.actor.data.data
+  }
+
+  getSkill(key) {
+    return this.actor.data.items.find(item => item.data.key === key)
   }
 }

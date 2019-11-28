@@ -85,7 +85,7 @@
             <th>GP</th>
             <th>Mod</th>
             <th title="Steigerungsklasse">StK</th>
-            <th class="attribute-table-xp">XP</th>
+            <th class="xp-col">XP</th>
             <th>Gain</th>
             <th>Buff</th>
             <th>Wert</th>
@@ -156,7 +156,14 @@
               <th class="skill-key-col"></th>
               <th class="attr-key-col" title="Primärattribut">A1</th>
               <th class="attr-key-col" title="Sekundärattribut">A2</th>
-              <th class="skill-actions-col"></th>
+              <th class="xp-category-col" title="Steigerungsklasse">StK</th>
+              <th class="xp-col">XP</th>
+              <th class="gain-col">Gain</th>
+              <th class="buff-col">Buff</th>
+              <th class="value-col">Wert</th>
+              {{#if ../data.creationMode.enabled}}
+                <th class="icon-col"></th>
+              {{/if}}
             </tr>
           </thead>
           <tbody>
@@ -165,22 +172,51 @@
                 <td>
                   <div class="flex-row multi-item">
                     <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
-                    {{skill.name}}
+                    <span class="flex-grow">{{skill.name}}</span>
+                    <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
                   </div>
                 </td>
                 <td>{{formatAttrKey skill.data.key}}</td>
                 <td title="{{formatAttrLabel skill.data.attribute1}}">{{formatAttrKey skill.data.attribute1}}</td>
                 <td title="{{formatAttrLabel skill.data.attribute2}}">{{formatAttrKey skill.data.attribute2}}</td>
                 <td>
-                  <span class="flex-row multi-item">
-                    <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
-                    {{#if ../../data.creationMode.enabled}}
-                      {{#unless skill.data.isBasicSkill}}
-                        <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
-                      {{/unless}}
-                    {{/if}}
-                  </span>
+                  <select name="skills.{{skill.data.key}}.data.tmpXpCategory">
+                    {{#select skill.xpCategory}}
+                      {{#each ../../computed.xpCategories as |category|}}
+                        <option value="{{category}}">{{category}}</option>
+                      {{/each}}
+                    {{/select}}
+                  </select>
                 </td>
+                <td>{{skill.xp}}</td>
+                <td>
+                  <div class="flex-row multi-item">
+                    {{#if ../../data.creationMode.enabled}}
+                      {{#if skill.gained.canDowngrade}}
+                        <button type="button" class="small char change-skill-gained" data-skill="{{skill.data.key}}" data-action="-">-</button>
+                      {{else}}
+                        <span class="char-button-placeholder"></span>
+                      {{/if}}
+                    {{/if}}
+                    <span class="skill-gained">{{skill.gained.value}}</span>
+                    {{#if skill.gained.upgradeCost}}
+                      <button type="button" class="small char change-skill-gained" title="{{skill.gained.upgradeCost}} XP" data-skill="{{skill.data.key}}" data-action="+">+</button>
+                    {{else}}
+                      <span class="char-button-placeholder"></span>
+                    {{/if}}
+                  </div>
+                </td>
+                <td>
+                  <input type="text" name="skills.{{skill.data.key}}.data.buff" value="{{skill.data.buff}}" />
+                </td>
+                <td title="{{formatExplanation skill.value.components}}">{{skill.value.total}}</td>
+                {{#if ../../data.creationMode.enabled}}
+                  <td>
+                    {{#unless skill.data.isBasicSkill}}
+                      <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+                    {{/unless}}
+                  </td>
+                {{/if}}
               </tr>
             {{/each}}
           </tbody>

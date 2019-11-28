@@ -47,6 +47,16 @@ export default {
   },
 
   /**
+   * Returns the cost to activate a skill of a certain category
+   * @param category The category to look up
+   * @return The activation cost in XP
+   */
+  getActivationCost(category) {
+    const costTable = getCostTable(category)
+    return costTable[0]
+  },
+
+  /**
    * Calculates the number of points gained from investing a specified amount of XP into a metric
    * @param category The XP Table category ("A", "B", "C", ...)
    * @param xp The amount of XP to invest
