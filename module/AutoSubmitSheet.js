@@ -1,3 +1,5 @@
+import { timeout } from './Timing.js'
+
 export default class AutoSubmitSheet {
   constructor(parent) {
     this.parent = parent
@@ -7,6 +9,9 @@ export default class AutoSubmitSheet {
       this.activateListeners(...args)
       parentActivateListeners.call(this.parent, ...args)
     }
+
+    // Disable default submit logic (it doesn't update the entity immediately when jumping between inputs)
+    this.parent._onUnfocus = () => {}
   }
 
   activateListeners(html) {
@@ -14,22 +19,12 @@ export default class AutoSubmitSheet {
       // Enable auto-submit
       html.find('input')
         .on('change', this._onChangeInput)
-        .on('focus', this._onFocusInput)
         .on('keypress', this._onEnter)
-    }
-
-    if (this._focusedKey != null) {
-      html.find(`[name="${this._focusedKey}"]`).focus().select()
     }
   }
 
   _onChangeInput = async e => {
     await this._onSubmit(e)
-    this._focusedKey = null
-  }
-
-  _onFocusInput = e => {
-    this._focusedKey = $(e.target).attr('name')
   }
 
   _onEnter = async e => {
@@ -38,7 +33,20 @@ export default class AutoSubmitSheet {
     }
   }
 
-  _onSubmit(event) {
-    this.parent._onSubmit(event)
+  async _onSubmit(event) {
+    // Make sure the focus has moved to the next element (if any) - this way we're able to restore focus after updating
+    await timeout(0)
+
+    const activeElement = document.activeElement
+    let focusKey = null
+    if (activeElement != null) {
+      focusKey = activeElement.getAttribute('name')
+    }
+
+    await this.parent._onSubmit(event)
+
+    if (focusKey != null) {
+      $(`[name="${focusKey}"]`).focus().select()
+    }
   }
 }

@@ -1,4 +1,5 @@
 import Config from './Config.js'
+import ObjectUtils from './ObjectUtils.js'
 
 const list = [
   {
@@ -51,9 +52,6 @@ list.forEach(attr => {
   attr.buff = 0
 })
 
-const map = list.reduce((acc, cur) => {
-  acc[cur.key] = cur
-  return acc
-}, {})
+const map = ObjectUtils.asObject(list, 'key')
 
 export default Object.freeze({ list, map })

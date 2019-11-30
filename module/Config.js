@@ -12,13 +12,13 @@ const character = {
       max: 65,
     }
   },
-  healthPoints: {
+  LeP: {
     xpCategory: 'H',
   },
-  forcePoints: {
+  MaP: {
     xpCategory: 'G',
   },
-  staminaPoints: {
+  AuP: {
     xpCategory: 'E',
   },
 }
