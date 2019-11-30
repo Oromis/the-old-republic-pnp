@@ -3,6 +3,7 @@ import ObjectUtils from './ObjectUtils.js'
 import Species from './Species.js'
 import Attributes from './Attributes.js'
 import XpTable from './XpTable.js'
+import Metrics from './Metrics.js'
 
 function detectPropertyType(property) {
   const key = property.key
@@ -44,7 +45,10 @@ export function calcFreeXp(char) {
     Attributes.list.reduce((acc, cur) => {
       return acc + ObjectUtils.try(char.data.attributes[cur.key], 'xp', { default: 0 })
     }, 0) -
-    char.items.filter(item => item.type === 'skill').reduce((acc, skill) => acc + calcSkillXp(skill.data), 0)
+    char.items.filter(item => item.type === 'skill').reduce((acc, skill) => acc + calcSkillXp(skill.data), 0) -
+    Metrics.list.reduce((acc, cur) => {
+      return acc + ObjectUtils.try(char.data.metrics[cur.key], 'xp', { default: 0 })
+    }, 0)
 }
 
 export function calcTotalXp(char) {
