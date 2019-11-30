@@ -52,6 +52,13 @@
           </label>
         </div>
       </div>
+      <div class="flex-row multi-item">
+        {{#each computed.metrics as |metric|}}
+          {{#if metric.max.total}}
+            {{metricView metric=metric}}
+          {{/if}}
+        {{/each}}
+      </div>
     </div>
   </header>
 
@@ -266,11 +273,7 @@
               <td>{{metric.key}}</td>
               <td title="{{metric.desc}}">{{metric.label}}</td>
               <td>
-                <div class="flex-row multi-item">
-                  <input type="text" name="data.metrics.{{metric.key}}.value" value="{{metric.value}}" />
-                  <span>/</span>
-                  <span>{{metric.max.total}}</span>
-                </div>
+                {{metricView metric=metric linked=true}}
               </td>
               <td title="{{formatExplanation metric.mod.components}}">{{formatMod metric.mod.total}}</td>
               <td>

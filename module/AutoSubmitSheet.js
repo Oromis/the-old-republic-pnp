@@ -24,6 +24,13 @@ export default class AutoSubmitSheet {
   }
 
   _onChangeInput = async e => {
+    const link = e.target.getAttribute('data-link')
+    if (link) {
+      const related = document.querySelector(`[name="${link}"]`)
+      if (related) {
+        related.value = e.target.value
+      }
+    }
     await this._onSubmit(e)
   }
 
