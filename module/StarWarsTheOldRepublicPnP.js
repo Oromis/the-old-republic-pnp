@@ -28,7 +28,17 @@ Hooks.once("init", async function() {
         <span class="${valueClass}">${val}</span>
         <button type="button" class="${buttonClass}" data-field="${name}" data-value="${val + 1}" data-action="+">+</button>
       `)
-    }
+    },
+    metricView: ({ hash: { metric, linked } }) => new Handlebars.SafeString(`
+      <div class="metric" title="${metric.key} | ${metric.label}">
+        <div class="metric-bar" style="width: ${(metric.value / metric.max.total) * 100}%; background-color: ${metric.backgroundColor};"></div>
+        <label class="metric-value flex-row multi-item flex-center">
+          <input type="text" ${linked ? 'data-link' : 'name'}="data.metrics.${metric.key}.value" value="${metric.value}" class="align-right transparent flex-grow" />
+          <span>/</span>
+          <span class="input-width flex-grow">${metric.max.total}</span>
+        </label>
+      </div>
+    `)
   })
 
 	/**

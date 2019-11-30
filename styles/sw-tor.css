@@ -148,3 +148,24 @@
     display: inline-block;
     text-align: center;
 }
+
+/* Metrics */
+.sw-tor .metric {
+    flex-grow: 1;
+    position: relative;
+    border: 1px solid #aaa;
+}
+
+.sw-tor .metric-bar {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    height: 100%;
+}
+
+.sw-tor .metric-value {
+    position: relative;
+    z-index: 2;
+    /*height: 38px;*/
+}

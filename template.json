@@ -3,7 +3,21 @@
     "types": ["pc", "npc"],
     "templates": {
       "common": {
-        "attributes": []
+        "attributes": [],
+        "metrics": {
+          "LeP": {
+            "value": 0
+          },
+          "AuP": {
+            "value": 0
+          },
+          "MaP": {
+            "value": 0
+          },
+          "EnP": {
+            "value": 0
+          }
+        }
       }
     },
     "pc": {

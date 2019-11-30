@@ -1,9 +1,15 @@
-.sw-tor.sheet input:not([type=checkbox]) {
+.sw-tor.sheet input:not([type=checkbox]), .input-width {
   width: 56px;
 }
 
 .sw-tor.sheet input[type=number] {
   padding: 1px 3px;
+}
+
+.sw-tor .transparent {
+  background-color: transparent;
+  border-radius: 0;
+  border: 0;
 }
 
 .sw-tor.sheet button.small {

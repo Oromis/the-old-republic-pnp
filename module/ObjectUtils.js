@@ -29,6 +29,13 @@ export default Object.freeze({
       .reduce(zipEntries, {})
   },
 
+  asObject(array, key) {
+    return array.reduce((acc, cur) => {
+      acc[cur[key]] = cur
+      return acc
+    }, {})
+  },
+
   try(obj, ...paths) {
     let defaultValue = null
     paths = paths.filter(path => {
