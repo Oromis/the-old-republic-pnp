@@ -1,4 +1,4 @@
-.sw-tor.sheet input:not([type=checkbox]) {
+.sw-tor.sheet input:not([type=checkbox]):not(.text) {
   width: 56px;
 }
 

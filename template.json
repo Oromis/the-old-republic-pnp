@@ -46,8 +46,11 @@
     },
     "training": {
       "templates": ["described"],
+      "fraction": "",
+      "disposition": "",
       "gp": 0,
-      "bonuses": {},
+      "mods": {},
+      "additionalInformation": "",
       "items": []
     },
     "congenital": {

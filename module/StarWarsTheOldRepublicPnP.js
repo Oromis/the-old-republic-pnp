@@ -1,6 +1,7 @@
 import SwTorItemSheet from "./SwTorItemSheet.js"
 import SwTorActorSheet from "./SwTorActorSheet.js"
 import SkillSheet from "./SkillSheet.js"
+import TrainingSheet from "./TrainingSheet.js"
 
 import Config from './Config.js'
 import Attributes from './Attributes.js'
@@ -43,4 +44,5 @@ Hooks.once("init", async function() {
   Items.unregisterSheet("core", ItemSheet)
   Items.registerSheet("sw-tor", SwTorItemSheet, {makeDefault: true})
   Items.registerSheet("sw-tor", SkillSheet)
+  Items.registerSheet("sw-tor", TrainingSheet)
 })

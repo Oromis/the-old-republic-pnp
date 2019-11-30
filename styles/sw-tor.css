@@ -70,6 +70,10 @@
     text-shadow: none;
 }
 
+.sw-tor.sheet .training .label-col {
+    width: 120px;
+}
+
 /* Content Tabs */
 .sw-tor.sheet .sheet-body .tab {
     height: 100%;
