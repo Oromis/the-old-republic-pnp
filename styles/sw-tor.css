@@ -167,5 +167,8 @@
 .sw-tor .metric-value {
     position: relative;
     z-index: 2;
-    /*height: 38px;*/
+}
+
+.sw-tor .has-error {
+    background-color: #ff8b91;
 }

@@ -1,8 +1,8 @@
-.sw-tor.sheet input:not([type=checkbox]), .input-width {
+.sw-tor input:not([type=checkbox]), .input-width {
   width: 56px;
 }
 
-.sw-tor.sheet input[type=number] {
+.sw-tor input[type=number] {
   padding: 1px 3px;
 }
 
@@ -10,6 +10,10 @@
   background-color: transparent;
   border-radius: 0;
   border: 0;
+}
+
+.sw-tor.sheet input.formula {
+  width: 100px;
 }
 
 .sw-tor.sheet button.small {

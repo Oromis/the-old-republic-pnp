@@ -10,6 +10,8 @@ function formatMod(val) {
   return val > 0 ? `+${val}` : val
 }
 
+const ERROR_CLASS = 'has-error'
+
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
@@ -18,6 +20,15 @@ Hooks.once("init", async function() {
   Handlebars.registerHelper({
     concat: (...args) => args.filter(arg => typeof arg === 'string').join(''),
     class: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(`class="${when ? then : otherwise}"`),
+    errorClass: ({ hash: { when, unless } }) => {
+      if (when) {
+        return ERROR_CLASS
+      } else if (unless != null && !unless) {
+        return ERROR_CLASS
+      } else {
+        return ''
+      }
+    },
     formatAttrKey: key => key.toUpperCase(),
     formatAttrLabel: key => ObjectUtils.try(Attributes.map[key], 'label'),
     formatMod,

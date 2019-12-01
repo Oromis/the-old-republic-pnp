@@ -5,6 +5,10 @@ import AutoSubmitSheet from './AutoSubmitSheet.js'
 import Attributes from './Attributes.js'
 import SkillCategories from './SkillCategories.js'
 import XpTable from './XpTable.js'
+import RangeTypes from './RangeTypes.js'
+import DurationTypes from './DurationTypes.js'
+import { Parser } from './vendor/expr-eval/expr-eval.js'
+import ObjectUtils from './ObjectUtils.js'
 
 export default class SkillSheet extends ItemSheet {
   constructor(...args) {
@@ -40,9 +44,46 @@ export default class SkillSheet extends ItemSheet {
    */
   getData() {
     const data = super.getData()
+    const isForceSkill = this.skill.type === 'force-skill'
+
     data.attributes = Attributes.list
     data.skillCategories = SkillCategories.list
     data.xpCategories = XpTable.getCategories()
+    data.computed = {
+      isRegularSkill: this.skill.type === 'skill',
+      isForceSkill,
+    }
+
+    if (isForceSkill) {
+      data.rangeTypes = RangeTypes.list
+      data.durationTypes = DurationTypes.list
+      data.computed.hasRangeField = data.data.range.type === RangeTypes.map.m.key
+      data.computed.hasDurationField = data.data.duration.type === DurationTypes.map.rounds.key
+      if (data.computed.hasDurationField) {
+        try {
+          const expr = Parser.parse(ObjectUtils.try(data.data.duration, 'formula', { default: '' }))
+          data.computed.durationVariables = expr.variables()
+        } catch (e) {
+          data.computed.durationFormulaError = true
+        }
+      }
+      try {
+        const expr = Parser.parse(ObjectUtils.try(data.data.cost, 'oneTime', { default: '0' }))
+        data.computed.oneTimeCostVariables = expr.variables()
+      } catch (e) {
+        data.computed.oneTimeCostError = true
+      }
+      const durationType = ObjectUtils.try(data.data.duration, 'type')
+      data.computed.hasPerTurnCost = durationType === DurationTypes.map.channeling.key || durationType === DurationTypes.map.toggle.key
+      if (data.computed.hasPerTurnCost) {
+        try {
+          const expr = Parser.parse(ObjectUtils.try(data.data.cost, 'perTurn', { default: '0' }))
+          data.computed.perTurnCostVariables = expr.variables()
+        } catch (e) {
+          data.computed.perTurnCostError = true
+        }
+      }
+    }
     return data
   }
 
@@ -81,5 +122,9 @@ export default class SkillSheet extends ItemSheet {
     }
 
     return this.object.update(formData)
+  }
+
+  get skill() {
+    return this.item
   }
 }
