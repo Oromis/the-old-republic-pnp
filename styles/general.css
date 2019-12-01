@@ -21,3 +21,5 @@
 .align-center { text-align: center !important; }
 
 .uppercase { text-transform: uppercase; }
+
+.hidden { display: none; }

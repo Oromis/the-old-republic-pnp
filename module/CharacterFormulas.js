@@ -43,11 +43,11 @@ export function calcGp(char) {
 export function calcFreeXp(char) {
   return calcTotalXp(char) -
     Attributes.list.reduce((acc, cur) => {
-      return acc + ObjectUtils.try(char.data.attributes[cur.key], 'xp', { default: 0 })
+      return acc + ObjectUtils.try(char.data.attributes, cur.key, 'xp', { default: 0 })
     }, 0) -
     char.items.filter(item => item.type === 'skill').reduce((acc, skill) => acc + calcSkillXp(skill.data), 0) -
     Metrics.list.reduce((acc, cur) => {
-      return acc + ObjectUtils.try(char.data.metrics[cur.key], 'xp', { default: 0 })
+      return acc + ObjectUtils.try(char.data.metrics, cur.key, 'xp', { default: 0 })
     }, 0)
 }
 

@@ -75,6 +75,7 @@
   <nav class="sheet-tabs tabs" data-group="primary">
     <a class="item" data-tab="attributes">Attribute</a>
     <a class="item" data-tab="skills">Fähigkeiten</a>
+    <a class="item {{hiddenClass unless=computed.forceSkills}}" data-tab="force-skills">Machtfähigkeiten</a>
     <a class="item" data-tab="items">Inventar</a>
     <a class="item" data-tab="other">Sonstiges</a>
   </nav>
@@ -223,6 +224,30 @@
           </tbody>
         </table>
       {{/each}}
+    </div>
+
+    {{!-- Force Tab --}}
+    <div class="tab force-skills multi-item" data-group="primary" data-tab="force-skills">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each computed.forceSkills as |skill|}}
+            <tr data-item-id="{{skill.id}}">
+              <td>
+                <div class="flex-row multi-item">
+                  <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
+                  <span class="flex-grow">{{skill.name}}</span>
+                  <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
     </div>
 
     {{!-- Inventory Tab --}}

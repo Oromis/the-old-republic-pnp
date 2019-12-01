@@ -120,7 +120,7 @@ export default class SwTorActorSheet extends ActorSheet {
     let inventory = [], skills = []
 
     data.items.forEach(item => {
-      if (item.type === 'skill') {
+      if (item.type === 'skill' || item.type === 'force-skill') {
         skills.push(item)
       } else {
         inventory.push(item)
@@ -137,13 +137,16 @@ export default class SwTorActorSheet extends ActorSheet {
       }
     })
 
-    skills = skills.map(skill => ({
+    const prepareSkill = skill => ({
       ...skill,
       xp: calcSkillXp(skill.data),
       xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
       gained: calcGained(this.actorData, skill.data, { freeXp }),
       value: explainPropertyValue(this.actorData, skill.data),
-    }))
+    })
+    skills = skills.map(prepareSkill)
+
+    const forceSkills = skills.filter(skill => skill.type === 'force-skill')
 
     const computed = {
       attributes: ObjectUtils.asObject(attributes, 'key'),
@@ -158,10 +161,14 @@ export default class SwTorActorSheet extends ActorSheet {
       xpCategories: XpTable.getCategories(),
       speciesName: ObjectUtils.try(Species.map[data.data.species], 'name', { default: 'None' }),
       attributes: computed.attributes,
-      skillCategories: SkillCategories.list.map(cat => ({
-        label: cat.label,
-        skills: skills.filter(skill => skill.data.category === cat.key)
-      })),
+      skillCategories: [
+        ...SkillCategories.list.map(cat => ({
+          label: cat.label,
+          skills: skills.filter(skill => skill.data.category === cat.key)
+        })),
+        { label: 'Mächte', skills: forceSkills }
+      ],
+      forceSkills: forceSkills.length > 0 ? forceSkills : null,
       metrics: Metrics.list.map(generalMetric => {
         const metric = {
           ...generalMetric,

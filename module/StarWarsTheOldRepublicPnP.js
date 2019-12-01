@@ -11,6 +11,17 @@ function formatMod(val) {
 }
 
 const ERROR_CLASS = 'has-error'
+const HIDDEN_CLASS = 'hidden'
+
+function conditionalClass(className, { when, unless }) {
+  if (when) {
+    return className
+  } else if (typeof unless !== 'undefined' && !unless) {
+    return className
+  } else {
+    return ''
+  }
+}
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -20,15 +31,8 @@ Hooks.once("init", async function() {
   Handlebars.registerHelper({
     concat: (...args) => args.filter(arg => typeof arg === 'string').join(''),
     class: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(`class="${when ? then : otherwise}"`),
-    errorClass: ({ hash: { when, unless } }) => {
-      if (when) {
-        return ERROR_CLASS
-      } else if (unless != null && !unless) {
-        return ERROR_CLASS
-      } else {
-        return ''
-      }
-    },
+    errorClass: ({ hash }) => conditionalClass(ERROR_CLASS, hash),
+    hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
     formatAttrKey: key => key.toUpperCase(),
     formatAttrLabel: key => ObjectUtils.try(Attributes.map[key], 'label'),
     formatMod,
