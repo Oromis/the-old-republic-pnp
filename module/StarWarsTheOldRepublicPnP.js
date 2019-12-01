@@ -33,6 +33,7 @@ Hooks.once("init", async function() {
     formatAttrLabel: key => ObjectUtils.try(Attributes.map[key], 'label'),
     formatMod,
     formatExplanation: components => components.map(component => `${component.label}: ${formatMod(component.value)}`).join(' | '),
+    expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',
     stepButtons: ({ hash: { val, name, buttonClass = 'small char set-value', valueClass = '' } }) => {
       return new Handlebars.SafeString(`
         <button type="button" class="${buttonClass}" data-field="${name}" data-value="${val - 1}" data-action="-">-</button>

@@ -9,6 +9,18 @@ import RangeTypes from './RangeTypes.js'
 import DurationTypes from './DurationTypes.js'
 import { Parser } from './vendor/expr-eval/expr-eval.js'
 import ObjectUtils from './ObjectUtils.js'
+import EffectModifiers from './EffectModifiers.js'
+import ForceDispositions from './ForceDispositions.js'
+
+function analyzeExpression({ path, defaultExpr = '' }) {
+  try {
+    const text = ObjectUtils.try(...path) || defaultExpr
+    const expr = Parser.parse(text)
+    return { variables: expr.variables() }
+  } catch (e) {
+    return { error: true }
+  }
+}
 
 export default class SkillSheet extends ItemSheet {
   constructor(...args) {
@@ -57,32 +69,20 @@ export default class SkillSheet extends ItemSheet {
     if (isForceSkill) {
       data.rangeTypes = RangeTypes.list
       data.durationTypes = DurationTypes.list
+      data.effectModifiers = EffectModifiers.list
+      data.dispositions = ForceDispositions.list
       data.computed.hasRangeField = data.data.range.type === RangeTypes.map.m.key
       data.computed.hasDurationField = data.data.duration.type === DurationTypes.map.rounds.key
       if (data.computed.hasDurationField) {
-        try {
-          const expr = Parser.parse(ObjectUtils.try(data.data.duration, 'formula', { default: '' }))
-          data.computed.durationVariables = expr.variables()
-        } catch (e) {
-          data.computed.durationFormulaError = true
-        }
+        data.computed.duration = analyzeExpression({ path: [data.data.duration, 'formula'] })
       }
-      try {
-        const expr = Parser.parse(ObjectUtils.try(data.data.cost, 'oneTime', { default: '0' }))
-        data.computed.oneTimeCostVariables = expr.variables()
-      } catch (e) {
-        data.computed.oneTimeCostError = true
-      }
+      data.computed.oneTimeCost = analyzeExpression({ path: [data.data.cost, 'oneTime'], defaultExpr: '0' })
       const durationType = ObjectUtils.try(data.data.duration, 'type')
       data.computed.hasPerTurnCost = durationType === DurationTypes.map.channeling.key || durationType === DurationTypes.map.toggle.key
       if (data.computed.hasPerTurnCost) {
-        try {
-          const expr = Parser.parse(ObjectUtils.try(data.data.cost, 'perTurn', { default: '0' }))
-          data.computed.perTurnCostVariables = expr.variables()
-        } catch (e) {
-          data.computed.perTurnCostError = true
-        }
+        data.computed.perTurnCost = analyzeExpression({ path: [data.data.cost, 'perTurn'], defaultExpr: '0' })
       }
+      data.computed.effect = analyzeExpression({ path: [data.data.effect, 'value'], defaultExpr: '0' })
     }
     return data
   }

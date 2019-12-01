@@ -101,7 +101,7 @@
           <tr>
             <td class="align-right">Wirkungsdauer</td>
             <td>
-              <div class="flex-row multi-item {{errorClass when=computed.durationFormulaError}}">
+              <div class="flex-row multi-item {{errorClass when=computed.duration.error}}">
                 {{#if computed.hasDurationField}}
                   <input type="text" name="data.duration.formula" value="{{data.duration.formula}}" placeholder="[n]" class="formula" />
                 {{/if}}
@@ -112,22 +112,16 @@
                     {{/each}}
                   {{/select}}
                 </select>
-                {{#if computed.durationVariables}}
-                  Variablen: [{{computed.durationVariables}}]
-                {{/if}}
+                {{expressionVariables computed.duration.variables}}
               </div>
             </td>
           </tr>
           <tr>
             <td class="align-right">Aktivierungskosten</td>
             <td>
-              <div class="flex-row multi-item {{errorClass when=computed.oneTimeCostError}}">
+              <div class="flex-row multi-item {{errorClass when=computed.oneTimeCost.error}}">
                 <input type="text" name="data.cost.oneTime" value="{{data.cost.oneTime}}" class="formula" />
-                <div>
-                  {{#if computed.oneTimeCostVariables}}
-                    Variablen: [{{computed.oneTimeCostVariables}}]
-                  {{/if}}
-                </div>
+                {{expressionVariables computed.oneTimeCost.variables}}
               </div>
             </td>
           </tr>
@@ -135,17 +129,44 @@
             <tr>
               <td class="align-right">Kosten pro Runde</td>
               <td>
-                <div class="flex-row multi-item {{errorClass when=computed.perTurnCostError}}">
+                <div class="flex-row multi-item {{errorClass when=computed.perTurnCost.error}}">
                   <input type="text" name="data.cost.perTurn" value="{{data.cost.perTurn}}" class="formula" />
-                  <div>
-                    {{#if computed.perTurnCostVariables}}
-                      Variablen: [{{computed.perTurnCostVariables}}]
-                    {{/if}}
-                  </div>
+                  {{expressionVariables computed.perTurnCost.variables}}
                 </div>
               </td>
             </tr>
           {{/if}}
+          <tr>
+            <td class="align-right">Effekt</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.effect.error}}">
+                <input type="text" name="data.effect.value" value="{{data.effect.value}}" class="formula" placeholder="Formula" />
+                <input type="text" name="data.effect.d6" value="{{data.effect.d6}}" placeholder="d6" />
+                <select name="data.effect.modifier" title="Modifier">
+                  {{#select data.effect.modifier}}
+                    {{#each effectModifiers as |modifier|}}
+                      <option value="{{modifier.key}}">{{modifier.label}}</option>
+                    {{/each}}
+                  {{/select}}
+                </select>
+                {{expressionVariables computed.effect.variables}}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Ausrichtung</td>
+            <td>
+              <div class="flex-row multi-item">
+                <select name="data.disposition">
+                  {{#select data.disposition}}
+                    {{#each dispositions as |disposition|}}
+                      <option value="{{disposition.key}}">{{disposition.label}}</option>
+                    {{/each}}
+                  {{/select}}
+                </select>
+              </div>
+            </td>
+          </tr>
         {{/if}}
       </tbody>
     </table>
