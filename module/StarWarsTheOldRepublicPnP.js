@@ -26,9 +26,12 @@ function conditionalClass(className, { when, unless }) {
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
-  // await loadTemplates([])
+  await loadTemplates([
+    'systems/sw-tor/templates/check-roll.html'
+  ])
 
   Handlebars.registerHelper({
+    json: obj => JSON.stringify(obj),
     concat: (...args) => args.filter(arg => typeof arg === 'string').join(''),
     resolve: (object, ...path) => ObjectUtils.try(object, ...path),
     class: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(`class="${when ? then : otherwise}"`),
@@ -36,6 +39,11 @@ Hooks.once("init", async function() {
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
     formatAttrKey: key => key.toUpperCase(),
     formatAttrLabel: key => ObjectUtils.try(Attributes.map[key], 'label'),
+    formatCheckDiff: diff => new Handlebars.SafeString(`
+      <span class="check-diff ${diff >= 0 ? 'good' : 'bad'}">
+        ${diff > 0 ? '+' : ''}${diff}
+      </span>`
+    ),
     formatMod,
     formatExplanation: components => components.map(component => `${component.label}: ${formatMod(component.value)}`).join(' | '),
     expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',

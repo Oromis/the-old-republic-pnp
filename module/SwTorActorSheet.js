@@ -165,14 +165,33 @@ export default class SwTorActorSheet extends ActorSheet {
         mod: explainMod(this.actorData, attr),
       }
     })
+    const attributesMap = ObjectUtils.asObject(attributes, 'key')
 
-    skills = skills.map(skill => ({
-      ...skill,
-      xp: calcSkillXp(skill.data),
-      xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
-      gained: calcGained(this.actorData, skill.data, { freeXp }),
-      value: explainPropertyValue(this.actorData, skill.data),
-    }))
+    skills = skills.map(skill => {
+      const value = explainPropertyValue(this.actorData, skill.data)
+      return {
+        ...skill,
+        xp: calcSkillXp(skill.data),
+        xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
+        gained: calcGained(this.actorData, skill.data, { freeXp }),
+        value,
+        check: {
+          rolls: [
+            {
+              key: skill.data.attribute1,
+              label: attributesMap[skill.data.attribute1].label,
+              value: attributesMap[skill.data.attribute1].value.total
+            },
+            {
+              key: skill.data.attribute2,
+              label: attributesMap[skill.data.attribute2].label,
+              value: attributesMap[skill.data.attribute2].value.total
+            },
+            { key: skill.data.key, label: skill.name, value: value.total },
+          ],
+        },
+      }
+    })
 
     const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
       skill.range = RangeTypes.map[skill.data.range.type].format(skill.data.range)
@@ -283,6 +302,7 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('button.change-metric-gained').click(this._onChangeMetricGained)
     html.find('.use-force').click(this._onUseForce)
     html.find('.do-roll').click(this._onDoRoll)
+    html.find('.roll-check').click(this._onRollCheck)
 
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
@@ -428,6 +448,27 @@ export default class SwTorActorSheet extends ActorSheet {
     new Roll(formula).toMessage({
       flavor: event.currentTarget.getAttribute('data-label')
     })
+  }
+
+  _onRollCheck = async event => {
+    const check = JSON.parse(event.currentTarget.getAttribute('data-check'))
+    const die = new Die(20)
+    die.roll(check.rolls.length)
+
+    const chatData = {
+      user: game.user._id,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      rollMode: game.settings.get("core", "rollMode"),
+      sound: CONFIG.sounds.dice,
+      content: await renderTemplate('systems/sw-tor/templates/check-roll.html', {
+        rolls: check.rolls.map((roll, i) => {
+          const target = Math.floor(roll.value / 5)
+          return { ...roll, die: die.results[i], target, diff: target - die.results[i] }
+        })
+      })
+    }
+
+    ChatMessage.create(chatData)
   }
 
   _processDeltaProperty(formData, path) {

@@ -88,7 +88,7 @@
 }
 
 .sw-tor .skill-key-col {
-    width: 46px;
+    width: 34px;
 }
 
 .sw-tor .value-col {
@@ -171,4 +171,18 @@
 
 .sw-tor .has-error {
     background-color: #ff8b91;
+}
+
+/* Rolls */
+.sw-tor .check-roll {
+    flex: 1 0 0;
+    text-align: center;
+}
+
+.sw-tor .check-diff.good {
+    color: #00820b;
+}
+
+.sw-tor .check-diff.bad {
+    color: #ff4b48;
 }

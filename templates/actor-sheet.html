@@ -155,7 +155,6 @@
           <thead>
             <tr>
               <th>{{category.label}}</th>
-              <th class="skill-key-col"></th>
               <th class="attr-key-col" title="Primärattribut">A1</th>
               <th class="attr-key-col" title="Sekundärattribut">A2</th>
               <th class="xp-category-col" title="Steigerungsklasse">StK</th>
@@ -174,11 +173,12 @@
                 <td>
                   <div class="flex-row multi-item">
                     <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
+                    <span class="skill-key-col">{{formatAttrKey skill.data.key}}</span>
                     <span class="flex-grow">{{skill.name}}</span>
                     <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
+                    <a class="roll-check" title="Probe werfen" data-check='{{json skill.check}}'><i class="fas fa-dice-d20"></i></a>
                   </div>
                 </td>
-                <td>{{formatAttrKey skill.data.key}}</td>
                 <td title="{{formatAttrLabel skill.data.attribute1}}">{{formatAttrKey skill.data.attribute1}}</td>
                 <td title="{{formatAttrLabel skill.data.attribute2}}">{{formatAttrKey skill.data.attribute2}}</td>
                 <td>
