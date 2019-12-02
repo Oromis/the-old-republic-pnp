@@ -30,6 +30,7 @@ Hooks.once("init", async function() {
 
   Handlebars.registerHelper({
     concat: (...args) => args.filter(arg => typeof arg === 'string').join(''),
+    resolve: (object, ...path) => ObjectUtils.try(object, ...path),
     class: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(`class="${when ? then : otherwise}"`),
     errorClass: ({ hash }) => conditionalClass(ERROR_CLASS, hash),
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),

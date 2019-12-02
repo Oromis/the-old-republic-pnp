@@ -66,11 +66,11 @@
         "type": ""
       },
       "cost": {
-        "perTurn": "",
-        "oneTime": ""
+        "perTurn": { "formula": ""},
+        "oneTime": { "formula": ""}
       },
       "effect": {
-        "value": "",
+        "formula": "",
         "d6": 0,
         "modifier": null
       },

@@ -1,10 +1,10 @@
 import ObjectUtils from './ObjectUtils.js'
 
 const list = [
-  { key: 'instant', label: 'Sofort' },
-  { key: 'toggle', label: 'Aktivierbar' },
-  { key: 'channeling', label: 'Anhaltend' },
-  { key: 'rounds', label: 'Runden' },
+  { key: 'instant', label: 'Sofort', hasOneTimeCost: true },
+  { key: 'toggle', label: 'Aktivierbar', hasOneTimeCost: true, hasPerTurnCost: true },
+  { key: 'channeling', label: 'Anhaltend', hasPerTurnCost: true },
+  { key: 'rounds', label: 'Runden', hasFormula: true, hasOneTimeCost: true },
 ]
 
 export default Object.freeze({

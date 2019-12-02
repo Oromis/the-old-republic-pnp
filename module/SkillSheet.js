@@ -76,13 +76,16 @@ export default class SkillSheet extends ItemSheet {
       if (data.computed.hasDurationField) {
         data.computed.duration = analyzeExpression({ path: [data.data.duration, 'formula'] })
       }
-      data.computed.oneTimeCost = analyzeExpression({ path: [data.data.cost, 'oneTime'], defaultExpr: '0' })
-      const durationType = ObjectUtils.try(data.data.duration, 'type')
-      data.computed.hasPerTurnCost = durationType === DurationTypes.map.channeling.key || durationType === DurationTypes.map.toggle.key
+      const durationType = ObjectUtils.try(DurationTypes.map, ObjectUtils.try(data.data.duration, 'type'), { default: DurationTypes.map.instant })
+      data.computed.hasPerTurnCost = !!durationType.hasPerTurnCost
       if (data.computed.hasPerTurnCost) {
-        data.computed.perTurnCost = analyzeExpression({ path: [data.data.cost, 'perTurn'], defaultExpr: '0' })
+        data.computed.perTurnCost = analyzeExpression({ path: [data.data.cost, 'perTurn', 'formula'], defaultExpr: '0' })
       }
-      data.computed.effect = analyzeExpression({ path: [data.data.effect, 'value'], defaultExpr: '0' })
+      data.computed.hasOneTimeCost = !!durationType.hasOneTimeCost
+      if (data.computed.hasOneTimeCost) {
+        data.computed.oneTimeCost = analyzeExpression({ path: [data.data.cost, 'oneTime', 'formula'], defaultExpr: '0' })
+      }
+      data.computed.effect = analyzeExpression({ path: [data.data.effect, 'formula'], defaultExpr: '0' })
     }
     return data
   }

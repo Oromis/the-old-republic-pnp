@@ -75,7 +75,7 @@
   <nav class="sheet-tabs tabs" data-group="primary">
     <a class="item" data-tab="attributes">Attribute</a>
     <a class="item" data-tab="skills">Fähigkeiten</a>
-    <a class="item {{hiddenClass unless=computed.forceSkills}}" data-tab="force-skills">Machtfähigkeiten</a>
+    <a class="item {{hiddenClass unless=computed.forceSkills}}" data-tab="force-skills">Mächte</a>
     <a class="item" data-tab="items">Inventar</a>
     <a class="item" data-tab="other">Sonstiges</a>
   </nav>
@@ -232,6 +232,11 @@
         <thead>
           <tr>
             <th>Name</th>
+            <th>Reichweite</th>
+            <th>Wirkungsdauer</th>
+            <th>Kosten</th>
+            <th>Effekt</th>
+            <th>Ausrichtung</th>
           </tr>
         </thead>
         <tbody>
@@ -244,6 +249,47 @@
                   <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
                 </div>
               </td>
+              <td>{{skill.range}}</td>
+              <td>{{skill.duration.value}}</td>
+              <td>
+                <div class="multi-item">
+                  {{#each skill.cost as |entry|}}
+                    <div class="flex-row multi-item {{errorClass when=entry.error}}">
+                      <span class="flex-grow">{{entry.value}} {{entry.postfix}}</span>
+                      <a class="use-force" title="Abziehen" data-amount="{{entry.value}}"><i class="fas fa-play"></i></a>
+                    </div>
+                    {{#each entry.variables as |var|}}
+                      <div class="flex-row multi-item">
+                        <span>{{var}}:</span>
+                        <input
+                            type="text"
+                            name="skills.{{skill.data.key}}.data.cost.{{entry.key}}.vars.{{var}}"
+                            value="{{resolve skill.data.cost entry.key 'vars' var}}"
+                            class="flex-grow"
+                            placeholder="{{var}}"
+                        />
+                      </div>
+                    {{/each}}
+                  {{/each}}
+                </div>
+              </td>
+              <td>
+                <div class="flex-row multi-item">
+                  <span>
+                    {{skill.effect.prefix}}
+                    {{skill.effect.value}}
+                    {{#if skill.effect.d6}}
+                      + {{skill.effect.d6}}w6
+                    {{/if}}
+                  </span>
+                  {{#if skill.effect.d6}}
+                    <a class="do-roll" title="Würfeln" data-formula="{{skill.effect.value}} + {{skill.effect.d6}}d6" data-label="{{skill.name}}">
+                      <i class="fas fa-dice-d20"></i>
+                    </a>
+                  {{/if}}
+                </div>
+              </td>
+              <td>{{skill.disposition.label}}</td>
             </tr>
           {{/each}}
         </tbody>

@@ -72,7 +72,7 @@
             </select>
           </td>
         </tr>
-        {{# if computed.isRegularSkill}}
+        {{#if computed.isRegularSkill}}
           <tr>
             <td class="align-right">Grundfähigkeit</td>
             <td>
@@ -116,32 +116,30 @@
               </div>
             </td>
           </tr>
-          <tr>
+          <tr class="{{hiddenClass unless=computed.hasOneTimeCost}}">
             <td class="align-right">Aktivierungskosten</td>
             <td>
               <div class="flex-row multi-item {{errorClass when=computed.oneTimeCost.error}}">
-                <input type="text" name="data.cost.oneTime" value="{{data.cost.oneTime}}" class="formula" />
+                <input type="text" name="data.cost.oneTime.formula" value="{{data.cost.oneTime.formula}}" class="formula" />
                 {{expressionVariables computed.oneTimeCost.variables}}
               </div>
             </td>
           </tr>
-          {{#if computed.hasPerTurnCost}}
-            <tr>
-              <td class="align-right">Kosten pro Runde</td>
-              <td>
-                <div class="flex-row multi-item {{errorClass when=computed.perTurnCost.error}}">
-                  <input type="text" name="data.cost.perTurn" value="{{data.cost.perTurn}}" class="formula" />
-                  {{expressionVariables computed.perTurnCost.variables}}
-                </div>
-              </td>
-            </tr>
-          {{/if}}
+          <tr class="{{hiddenClass unless=computed.hasPerTurnCost}}">
+            <td class="align-right">Kosten pro Runde</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.perTurnCost.error}}">
+                <input type="text" name="data.cost.perTurn.formula" value="{{data.cost.perTurn.formula}}" class="formula" />
+                {{expressionVariables computed.perTurnCost.variables}}
+              </div>
+            </td>
+          </tr>
           <tr>
             <td class="align-right">Effekt</td>
             <td>
               <div class="flex-row multi-item {{errorClass when=computed.effect.error}}">
-                <input type="text" name="data.effect.value" value="{{data.effect.value}}" class="formula" placeholder="Formula" />
-                <input type="text" name="data.effect.d6" value="{{data.effect.d6}}" placeholder="d6" />
+                <input type="text" name="data.effect.formula" value="{{data.effect.formula}}" class="formula" placeholder="Formula" />
+                <input type="text" name="data.effect.d6" value="{{data.effect.d6}}" placeholder="w6" title="w6" />
                 <select name="data.effect.modifier" title="Modifier">
                   {{#select data.effect.modifier}}
                     {{#each effectModifiers as |modifier|}}
