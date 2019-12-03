@@ -3,24 +3,31 @@ import ObjectUtils from './ObjectUtils.js'
 import Species from './Species.js'
 import Attributes from './Attributes.js'
 import XpTable from './XpTable.js'
+import Metrics from './Metrics.js'
 
 function detectPropertyType(property) {
   const key = property.key
   if (key.length === 2) {
     return 'attribute'
   } else if (key.length === 3) {
-    return 'skill'
+    if (key.match(/[A-Z][a-z][A-Z]/)) {
+      return 'metric'
+    } else {
+      return 'skill'
+    }
   } else {
     throw new Error(`Unknown property type: ${key}`)
   }
 }
 
-function getBaseValue(property) {
+function getBaseValue(actor, property, { target = 'value' } = {}) {
   switch (detectPropertyType(property)) {
     case 'attribute':
       return 0
     case 'skill':
       return 5
+    case 'metric':
+      return target === 'value' ? 5 : property.calcBaseValue(actor)
     default:
       throw new Error(`Property type without base value: ${property.key}`)
   }
@@ -36,9 +43,12 @@ export function calcGp(char) {
 export function calcFreeXp(char) {
   return calcTotalXp(char) -
     Attributes.list.reduce((acc, cur) => {
-      return acc + ObjectUtils.try(char.data.attributes[cur.key], 'xp', { default: 0 })
+      return acc + ObjectUtils.try(char.data.attributes, cur.key, 'xp', { default: 0 })
     }, 0) -
-    char.items.filter(item => item.type === 'skill').reduce((acc, skill) => acc + calcSkillXp(skill.data), 0)
+    char.items.filter(item => item.type === 'skill').reduce((acc, skill) => acc + calcSkillXp(skill.data), 0) -
+    Metrics.list.reduce((acc, cur) => {
+      return acc + ObjectUtils.try(char.data.metrics, cur.key, 'xp', { default: 0 })
+    }, 0)
 }
 
 export function calcTotalXp(char) {
@@ -66,18 +76,14 @@ export function explainMod(actor, property) {
   }
 }
 
-export function calcMod(actor, property) {
-  return explainMod(actor, property).total
-}
-
-export function explainPropertyBaseValue(actor, property) {
+export function explainPropertyBaseValue(actor, property, options) {
   const result = explainMod(actor, property)
   const gp = ObjectUtils.try(property, 'gp', { default: 0 })
   if (gp !== 0) {
     result.total += gp
     result.components.unshift({ label: 'GP', value: gp })
   }
-  const base = getBaseValue(property)
+  const base = getBaseValue(actor, property, options)
   if (base !== 0) {
     result.total += base
     result.components.unshift({ label: 'Basis', value: base })
@@ -85,12 +91,12 @@ export function explainPropertyBaseValue(actor, property) {
   return result
 }
 
-export function calcPropertyBaseValue(actor, property) {
-  return explainPropertyBaseValue(actor, property).total
+export function calcPropertyBaseValue(actor, property, options) {
+  return explainPropertyBaseValue(actor, property, options).total
 }
 
-export function explainPropertyValue(actor, property) {
-  const result = explainPropertyBaseValue(actor, property)
+export function explainPropertyValue(actor, property, options) {
+  const result = explainPropertyBaseValue(actor, property, options)
   const gained = ObjectUtils.try(property, 'gained', { default: [] }).length
   if (gained !== 0) {
     result.total += gained
@@ -104,34 +110,26 @@ export function explainPropertyValue(actor, property) {
   return result
 }
 
-export function calcAttributeUpgradeCost(actor, attribute) {
-  const baseVal = calcPropertyBaseValue(actor, attribute)
-  const gainLog = ObjectUtils.try(attribute, 'gained', { default: [] })
-  return XpTable.getUpgradeCost({
-    category: ObjectUtils.try(attribute, 'xpCategory', { default: Config.character.attributes.xpCategory }),
+export function calcUpgradeCost(actor, property, { max } = {}) {
+  const baseVal = calcPropertyBaseValue(actor, property)
+  const gainLog = ObjectUtils.try(property, 'gained', { default: [] })
+  const result = XpTable.getUpgradeCost({
+    category: property.tmpXpCategory || property.xpCategory,
     from: baseVal + gainLog.length,
     to: baseVal + gainLog.length + 1,
   })
+  if (max != null && result > max) {
+    return null
+  }
+  return result
 }
 
-export function calcSkillUpgradeCost(actor, skill) {
-  const baseVal = calcPropertyBaseValue(actor, skill)
-  const gainLog = ObjectUtils.try(skill, 'gained', { default: [] })
-  return XpTable.getUpgradeCost({
-    category: skill.tmpXpCategory || skill.xpCategory,
-    from: baseVal + gainLog.length,
-    to: baseVal + gainLog.length + 1,
-  })
-}
-
-export default {
-  calcAttributeUpgradeCost,
-  calcPropertyBaseValue,
-  calcFreeXp,
-  calcGp,
-  calcMod,
-  calcTotalXp,
-  explainPropertyValue,
-  explainPropertyBaseValue,
-  explainMod
+export function explainMetricMax(actor, metric) {
+  const baseValue = metric.calcBaseValue(actor)
+  return {
+    total: baseValue,
+    components: [
+      { label: 'Basis', value: baseValue },
+    ]
+  }
 }

@@ -1,0 +1,15 @@
+<div class="flex-row multi-item sw-tor">
+  {{#each rolls as |roll|}}
+    <div class="multi-item check-roll dice-tooltip">
+      <div title="{{roll.label}}"><strong>{{formatAttrKey roll.key}}</strong> {{roll.value}}</div>
+      <div class="flex-row multi-item dice-rolls flex-center">
+        <span class="roll d20">{{roll.die}}</span>
+        <span>/</span>
+        <span>{{roll.target}}</span>
+      </div>
+      <div class="align-center">
+        {{formatCheckDiff roll.diff}}
+      </div>
+    </div>
+  {{/each}}
+</div>

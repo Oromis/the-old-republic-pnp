@@ -5,6 +5,22 @@ import AutoSubmitSheet from './AutoSubmitSheet.js'
 import Attributes from './Attributes.js'
 import SkillCategories from './SkillCategories.js'
 import XpTable from './XpTable.js'
+import RangeTypes from './RangeTypes.js'
+import DurationTypes from './DurationTypes.js'
+import { Parser } from './vendor/expr-eval/expr-eval.js'
+import ObjectUtils from './ObjectUtils.js'
+import EffectModifiers from './EffectModifiers.js'
+import ForceDispositions from './ForceDispositions.js'
+
+function analyzeExpression({ path, defaultExpr = '' }) {
+  try {
+    const text = ObjectUtils.try(...path) || defaultExpr
+    const expr = Parser.parse(text)
+    return { variables: expr.variables() }
+  } catch (e) {
+    return { error: true }
+  }
+}
 
 export default class SkillSheet extends ItemSheet {
   constructor(...args) {
@@ -40,9 +56,37 @@ export default class SkillSheet extends ItemSheet {
    */
   getData() {
     const data = super.getData()
+    const isForceSkill = this.skill.type === 'force-skill'
+
     data.attributes = Attributes.list
     data.skillCategories = SkillCategories.list
     data.xpCategories = XpTable.getCategories()
+    data.computed = {
+      isRegularSkill: this.skill.type === 'skill',
+      isForceSkill,
+    }
+
+    if (isForceSkill) {
+      data.rangeTypes = RangeTypes.list
+      data.durationTypes = DurationTypes.list
+      data.effectModifiers = EffectModifiers.list
+      data.dispositions = ForceDispositions.list
+      data.computed.hasRangeField = data.data.range.type === RangeTypes.map.m.key
+      data.computed.hasDurationField = data.data.duration.type === DurationTypes.map.rounds.key
+      if (data.computed.hasDurationField) {
+        data.computed.duration = analyzeExpression({ path: [data.data.duration, 'formula'] })
+      }
+      const durationType = ObjectUtils.try(DurationTypes.map, ObjectUtils.try(data.data.duration, 'type'), { default: DurationTypes.map.instant })
+      data.computed.hasPerTurnCost = !!durationType.hasPerTurnCost
+      if (data.computed.hasPerTurnCost) {
+        data.computed.perTurnCost = analyzeExpression({ path: [data.data.cost, 'perTurn', 'formula'], defaultExpr: '0' })
+      }
+      data.computed.hasOneTimeCost = !!durationType.hasOneTimeCost
+      if (data.computed.hasOneTimeCost) {
+        data.computed.oneTimeCost = analyzeExpression({ path: [data.data.cost, 'oneTime', 'formula'], defaultExpr: '0' })
+      }
+      data.computed.effect = analyzeExpression({ path: [data.data.effect, 'formula'], defaultExpr: '0' })
+    }
     return data
   }
 
@@ -81,5 +125,9 @@ export default class SkillSheet extends ItemSheet {
     }
 
     return this.object.update(formData)
+  }
+
+  get skill() {
+    return this.item
   }
 }

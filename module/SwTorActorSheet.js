@@ -8,14 +8,51 @@ import ItemTypes from './ItemTypes.js'
 import SkillCategories from './SkillCategories.js'
 import {
   calcPropertyBaseValue,
-  calcAttributeUpgradeCost,
-  calcSkillUpgradeCost,
   calcFreeXp,
   calcGp,
   calcTotalXp,
   explainPropertyValue,
-  explainMod, calcSkillXp
+  explainMod, calcSkillXp, calcUpgradeCost
 } from './CharacterFormulas.js'
+import Metrics from './Metrics.js'
+import RangeTypes from './RangeTypes.js'
+import DurationTypes from './DurationTypes.js'
+import { Parser } from './vendor/expr-eval/expr-eval.js'
+import ForceDispositions from './ForceDispositions.js'
+import EffectModifiers from './EffectModifiers.js'
+
+function calcGained(actor, property, { freeXp }) {
+  const gainLog = ObjectUtils.try(property, 'gained', { default: [] }).length
+  return {
+    canDowngrade: gainLog > 0,
+    value: gainLog,
+    upgradeCost: calcUpgradeCost(actor, property, { max: freeXp }),
+  }
+}
+
+function calcGainChange(actor, property, { action, defaultXpCategory }) {
+  const prevXp = ObjectUtils.try(property, 'xp', { default: 0 })
+  const gainLog = ObjectUtils.try(property, 'gained', { default: [] })
+  let newGainLog, newXp
+  if (action === '+') {
+    const xpCategory = ObjectUtils.try(property, 'tmpXpCategory') ||
+      ObjectUtils.try(property, 'xpCategory', { default: defaultXpCategory })
+    const xpCost = calcUpgradeCost(actor, property)
+    newXp = prevXp + xpCost
+    newGainLog = [...gainLog, { xpCategory, xp: xpCost }]
+  } else {
+    const baseVal = calcPropertyBaseValue(actor, property)
+    newGainLog = gainLog.slice(0, gainLog.length - 1)
+    const removed = gainLog[gainLog.length - 1]
+    const xpCost = removed.xp || XpTable.getUpgradeCost({
+      category: removed.xpCategory,
+      from: baseVal + newGainLog.length,
+      to: baseVal + gainLog.length
+    })
+    newXp = prevXp - xpCost
+  }
+  return { xp: newXp, gainLog: newGainLog }
+}
 
 function processDeltaValue(text, oldValue) {
   const matches = /\s*([+\-*/])\s*([+\-]?[\d.]+)/.exec(text)
@@ -38,8 +75,32 @@ function processDeltaValue(text, oldValue) {
   }
 
   // If we get here then the format is invalid
-  ui.notifications.error(`Ungültiger Wert: ${text}. Expected one of <Number>, +<Number>, -<Number>, *<Number>, /<Number>`)
+  ui.notifications.error(`Ungültiger Wert: ${text}. Formate: <Number>, +<Number>, -<Number>, *<Number>, /<Number>`)
   return oldValue
+}
+
+function evalSkillExpression(expr, skill, { vars, round }) {
+  let error = false
+  let value = null
+  let variables = null
+  const defaultVariables = {
+    skill: skill.value.total,
+    [skill.data.key]: skill.value.total,
+    [skill.data.key.toUpperCase()]: skill.value.total,
+  }
+  const defaultVariableNames = Object.keys(defaultVariables)
+
+  try {
+    const parsed = Parser.parse(expr)
+    variables = parsed.variables().filter(name => defaultVariableNames.indexOf(name) === -1)
+    value = parsed.evaluate({ ...defaultVariables, ...vars })
+    if (round != null) {
+      value = Math.round(value * (10 ** round)) / (10 ** round)
+    }
+  } catch (e) {
+    error = true
+  }
+  return { value, error, variables }
 }
 
 /**
@@ -85,14 +146,91 @@ export default class SwTorActorSheet extends ActorSheet {
     const data = super.getData()
     let gp = calcGp(data.data)
     const freeXp = calcFreeXp(data)
-    const inventory = [], skills = []
+    let inventory = [], skills = []
+
     data.items.forEach(item => {
-      if (item.type === 'skill') {
+      if (item.type === 'skill' || item.type === 'force-skill') {
         skills.push(item)
       } else {
         inventory.push(item)
       }
     })
+
+    const attributes = Attributes.list.map(generalAttr => {
+      const attr = { ...generalAttr, ...data.data.attributes[generalAttr.key] }
+      return {
+        ...attr,
+        gained: calcGained(this.actorData, attr, { freeXp }),
+        value: explainPropertyValue(this.actorData, attr),
+        mod: explainMod(this.actorData, attr),
+      }
+    })
+    const attributesMap = ObjectUtils.asObject(attributes, 'key')
+
+    skills = skills.map(skill => {
+      const value = explainPropertyValue(this.actorData, skill.data)
+      return {
+        ...skill,
+        xp: calcSkillXp(skill.data),
+        xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
+        gained: calcGained(this.actorData, skill.data, { freeXp }),
+        value,
+        check: {
+          rolls: [
+            {
+              key: skill.data.attribute1,
+              label: attributesMap[skill.data.attribute1].label,
+              value: attributesMap[skill.data.attribute1].value.total
+            },
+            {
+              key: skill.data.attribute2,
+              label: attributesMap[skill.data.attribute2].label,
+              value: attributesMap[skill.data.attribute2].value.total
+            },
+            { key: skill.data.key, label: skill.name, value: value.total },
+          ],
+        },
+      }
+    })
+
+    const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
+      skill.range = RangeTypes.map[skill.data.range.type].format(skill.data.range)
+      const durationType = ObjectUtils.try(DurationTypes.map[skill.data.duration.type], { default: DurationTypes.map.instant })
+      if (durationType.hasFormula) {
+        const expressionResult = evalSkillExpression(skill.data.duration.formula, skill, { round: 0 })
+        skill.duration = { ...expressionResult, value: `${expressionResult.value} ${durationType.label}` }
+      } else {
+        skill.duration = { value: durationType.label }
+      }
+      skill.cost = []
+      if (durationType.hasOneTimeCost) {
+        skill.cost.push({
+          key: 'oneTime',
+          ...evalSkillExpression(ObjectUtils.try(skill.data.cost, 'oneTime', 'formula'), skill, { vars: ObjectUtils.try(skill.data.cost, 'oneTime', 'vars'), round: 0 }),
+        })
+      }
+      if (durationType.hasPerTurnCost) {
+        skill.cost.push({
+          key: 'perTurn',
+          ...evalSkillExpression(ObjectUtils.try(skill.data.cost, 'perTurn', 'formula'), skill, { vars: ObjectUtils.try(skill.data.cost, 'perTurn', 'vars'), round: 0 }),
+          postfix: 'pro Runde',
+        })
+      }
+      const effectModifier = ObjectUtils.try(skill.data.effect, 'modifier')
+      skill.effect = {
+        prefix: effectModifier ? EffectModifiers.map[effectModifier].label : null,
+        ...evalSkillExpression(ObjectUtils.try(skill.data.effect, 'formula'), skill, { round: 0 }),
+        d6: +ObjectUtils.try(skill.data.effect, 'd6', { default: 0 }),
+      }
+      skill.disposition = ObjectUtils.try(ForceDispositions.map, skill.data.disposition, { default: ForceDispositions.map.neutral })
+      return skill
+    })
+
+    const computed = {
+      attributes: ObjectUtils.asObject(attributes, 'key'),
+      skills: ObjectUtils.asObject(skills, 'key'),
+    }
+
     data.computed = {
       gp,
       freeXp,
@@ -100,47 +238,28 @@ export default class SwTorActorSheet extends ActorSheet {
       xpFromGp: data.data.xp.gp * Config.character.gpToXpRate,
       xpCategories: XpTable.getCategories(),
       speciesName: ObjectUtils.try(Species.map[data.data.species], 'name', { default: 'None' }),
-      attributes: Attributes.list.map(generalAttr => {
-        const charAttr = data.data.attributes[generalAttr.key]
-        const attr = { ...generalAttr, ...charAttr,  }
-
-        let upgradeCost = calcAttributeUpgradeCost(this.actorData, attr)
-        if (upgradeCost > freeXp) {
-          upgradeCost = null
+      attributes: computed.attributes,
+      skillCategories: [
+        ...SkillCategories.list.map(cat => ({
+          label: cat.label,
+          skills: skills.filter(skill => skill.data.category === cat.key)
+        })),
+        { label: 'Mächte', skills: forceSkills }
+      ],
+      forceSkills: forceSkills.length > 0 ? forceSkills : null,
+      metrics: Metrics.list.map(generalMetric => {
+        const metric = {
+          ...generalMetric,
+          ...ObjectUtils.try(data.data, 'metrics', generalMetric.key),
         }
-        const gainLog = ObjectUtils.try(charAttr, 'gained', { default: [] }).length
+
         return {
-          ...attr,
-          gained: {
-            canDowngrade: gainLog > 0,
-            value: gainLog,
-            upgradeCost,
-          },
-          value: explainPropertyValue(this.actorData, attr),
-          mod: explainMod(this.actorData, attr),
+          ...metric,
+          gained: generalMetric.xpCategory ? calcGained(this.actorData, metric, { freeXp }) : null,
+          max: explainPropertyValue(computed, metric, { target: 'max' }),
+          mod: explainMod(this.actorData, metric),
         }
       }),
-      skillCategories: SkillCategories.list.map(cat => ({
-        label: cat.label,
-        skills: skills.filter(skill => skill.data.category === cat.key).map(skill => {
-          const gainLog = ObjectUtils.try(skill, 'data', 'gained', { default: [] }).length
-          let upgradeCost = calcSkillUpgradeCost(this.actorData, skill.data)
-          if (upgradeCost > freeXp) {
-            upgradeCost = null
-          }
-          return {
-            ...skill,
-            xp: calcSkillXp(skill.data),
-            xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
-            gained: {
-              canDowngrade: gainLog > 0,
-              value: gainLog,
-              upgradeCost,
-            },
-            value: explainPropertyValue(this.actorData, skill.data),
-          }
-        })
-      })),
       inventory,
       flags: {
         hasGp: gp > 0,
@@ -180,6 +299,10 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('button.set-value').click(this._onSetValueButton)
     html.find('button.change-attr-gained').click(this._onChangeAttrGained)
     html.find('button.change-skill-gained').click(this._onChangeSkillGained)
+    html.find('button.change-metric-gained').click(this._onChangeMetricGained)
+    html.find('.use-force').click(this._onUseForce)
+    html.find('.do-roll').click(this._onDoRoll)
+    html.find('.roll-check').click(this._onRollCheck)
 
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
@@ -194,9 +317,6 @@ export default class SwTorActorSheet extends ActorSheet {
       this.actor.deleteOwnedItem(li.data("itemId"));
       li.slideUp(200, () => this.render(false));
     });
-
-    // Add or Remove Attribute
-    html.find(".attributes").on("click", ".attribute-control", this._onClickAttributeControl.bind(this));
   }
 
   /* -------------------------------------------- */
@@ -251,67 +371,104 @@ export default class SwTorActorSheet extends ActorSheet {
   }
 
   _onChangeAttrGained = event => {
-    const action = event.target.getAttribute('data-action')
-    const key = event.target.getAttribute('data-attr')
+    const action = event.currentTarget.getAttribute('data-action')
+    const key = event.currentTarget.getAttribute('data-attr')
+    const defaultXpCategory = Attributes.map[key].xpCategory
     const attribute = {
       ...Attributes.map[key],
       ...this.actorData.attributes[key],
     }
-    const prevXp = ObjectUtils.try(attribute, 'xp', { default: 0 })
-    const gainLog = ObjectUtils.try(attribute, 'gained', { default: [] })
-    let newGainLog, newXp
-    if (action === '+') {
-      const xpCategory = ObjectUtils.try(attribute, 'xpCategory', { default: Config.character.attributes.xpCategory })
-      newGainLog = [...gainLog, { xpCategory }]
-      newXp = prevXp + calcAttributeUpgradeCost(this.actorData, attribute)
-    } else {
-      const baseVal = calcPropertyBaseValue(this.actorData, attribute)
-      newGainLog = gainLog.slice(0, gainLog.length - 1)
-      const removed = gainLog[gainLog.length - 1]
-      newXp = prevXp - XpTable.getUpgradeCost({
-        category: removed.xpCategory,
-        from: baseVal + newGainLog.length,
-        to: baseVal + gainLog.length
-      })
-    }
+
+    const { xp, gainLog } = calcGainChange(this.actorData, attribute, { action, defaultXpCategory })
     this.actor.update({
-      [`data.attributes.${key}.gained`]: newGainLog,
-      [`data.attributes.${key}.xp`]: newXp,
-      [`data.attributes.${key}.xpCategory`]: Attributes.map[key].xpCategory,  // Reset XP category after every change
+      [`data.attributes.${key}.gained`]: gainLog,
+      [`data.attributes.${key}.xp`]: xp,
+      [`data.attributes.${key}.xpCategory`]: defaultXpCategory,  // Reset XP category after every change
     })
   }
 
   _onChangeSkillGained = event => {
-    const action = event.target.getAttribute('data-action')
-    const key = event.target.getAttribute('data-skill')
+    const action = event.currentTarget.getAttribute('data-action')
+    const key = event.currentTarget.getAttribute('data-skill')
     const skill = this.getSkill(key)
-    const prevXp = ObjectUtils.try(skill, 'data', 'xp', { default: 0 })
-    const gainLog = ObjectUtils.try(skill, 'data', 'gained', { default: [] })
-    let newGainLog, newXp
-    if (action === '+') {
-      const xpCategory = ObjectUtils.try(skill, 'data', 'tmpXpCategory') || ObjectUtils.try(skill, 'data', 'xpCategory')
-      newGainLog = [...gainLog, { xpCategory }]
-      newXp = prevXp + calcSkillUpgradeCost(this.actorData, skill.data)
-    } else {
-      const baseVal = calcPropertyBaseValue(this.actorData, skill.data)
-      newGainLog = gainLog.slice(0, gainLog.length - 1)
-      const removed = gainLog[gainLog.length - 1]
-      newXp = prevXp - XpTable.getUpgradeCost({
-        category: removed.xpCategory,
-        from: baseVal + newGainLog.length,
-        to: baseVal + gainLog.length
-      })
-    }
+
+    const { xp, gainLog } = calcGainChange(this.actorData, skill.data, { action })
+
     const skillEntity = this.actor.getOwnedItem(skill.id)
     if (skillEntity != null) {
       skillEntity.update({
-        'data.gained': newGainLog,
-        'data.xp': newXp,
-        'data.tmpXpCategory': ObjectUtils.try(skill, 'data', 'xpCategory'), // Reset after every skill point
+        'data.gained': gainLog,
+        'data.xp': xp,
+        'data.tmpXpCategory': ObjectUtils.try(skill.data, 'xpCategory'), // Reset after every skill point
       })
     } else {
       throw new Error(`Skill entity does not exist: ${key}, ${skill.id}`)
     }
+  }
+
+  _onChangeMetricGained = event => {
+    const action = event.currentTarget.getAttribute('data-action')
+    const key = event.currentTarget.getAttribute('data-metric')
+    const metric = {
+      ...Metrics.map[key],
+      ...this.actorData.metrics[key],
+    }
+
+    const { xp, gainLog } = calcGainChange(this.actorData, metric, { action })
+    this.actor.update({
+      [`data.metrics.${key}.gained`]: gainLog,
+      [`data.metrics.${key}.xp`]: xp,
+      [`data.metrics.${key}.xpCategory`]: Metrics.map[key].xpCategory,  // Reset XP category after every change
+    })
+  }
+
+  _onUseForce = event => {
+    let amount = +event.currentTarget.getAttribute('data-amount')
+    if (isNaN(amount)) {
+      ui.notifications.error(`Ungültiger Machtpunkte-Wert: ${amount}`)
+    } else {
+      const options = [Metrics.map.MaP, Metrics.map.AuP, Metrics.map.LeP]
+      const changeset = {}
+      for (const option of options) {
+        if (amount <= 0) {
+          break
+        }
+        const delta = option === Metrics.map.LeP ? amount : Math.min(amount, this.actorData.metrics[option.key].value)
+        if (delta !== 0) {
+          amount -= delta
+          changeset[`data.metrics.${option.key}.value`] = this.actorData.metrics[option.key].value - delta
+        }
+      }
+      this.actor.update(changeset)
+    }
+  }
+
+  _onDoRoll = event => {
+    const formula = event.currentTarget.getAttribute('data-formula')
+    new Roll(formula).toMessage({
+      flavor: event.currentTarget.getAttribute('data-label')
+    })
+  }
+
+  _onRollCheck = async event => {
+    const check = JSON.parse(event.currentTarget.getAttribute('data-check'))
+    const die = new Die(20)
+    die.roll(check.rolls.length)
+
+    const chatData = {
+      user: game.user._id,
+      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+      rollMode: game.settings.get("core", "rollMode"),
+      sound: CONFIG.sounds.dice,
+      content: await renderTemplate('systems/sw-tor/templates/check-roll.html', {
+        rolls: check.rolls.map((roll, i) => {
+          const target = Math.floor(roll.value / 5)
+          return { ...roll, die: die.results[i], target, diff: target - die.results[i] }
+        })
+      })
+    }
+
+    ChatMessage.create(chatData)
   }
 
   _processDeltaProperty(formData, path) {
@@ -358,6 +515,7 @@ export default class SwTorActorSheet extends ActorSheet {
       this._processDeltaProperty(formData, `data.attributes.${attr.key}.buff`)
     })
 
+    // Skills
     for (const key of Object.keys(formData)) {
       const match = /skills\.([\w\-_]+)\.(.*)/.exec(key)
       if (match) {
@@ -368,6 +526,8 @@ export default class SwTorActorSheet extends ActorSheet {
             let value = formData[key]
             if (match[2] === 'data.buff') {
               value = processDeltaValue(value, skill.data.buff || 0)
+            } else if (match[2].indexOf('.vars.') !== -1) {
+              value = value === '' || isNaN(value) ? '' : +value
             }
             skillEntity.update({ [match[2]]: value })
           }
@@ -375,6 +535,11 @@ export default class SwTorActorSheet extends ActorSheet {
         delete formData[key]
       }
     }
+
+    Metrics.list.forEach(metric => {
+      this._processDeltaProperty(formData, `data.metrics.${metric.key}.value`)
+      this._processDeltaProperty(formData, `data.metrics.${metric.key}.buff`)
+    })
 
     if (parsed.input.totalXp != null) {
       const newVal = Math.round(processDeltaValue(parsed.input.totalXp, calcTotalXp(this.actor.data)))

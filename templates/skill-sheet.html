@@ -22,18 +22,20 @@
           <td><input type="text" class="uppercase" name="data.key" value="{{data.key}}" minlength="3" maxlength="3"/>
           </td>
         </tr>
-        <tr>
-          <td class="align-right">Kategorie</td>
-          <td>
-            <select name="data.category" title="Kategorie">
-              {{#select data.category}}
-                {{#each skillCategories as |category|}}
-                  <option value="{{category.key}}">{{category.label}}</option>
-                {{/each}}
-              {{/select}}
-            </select>
-          </td>
-        </tr>
+        {{#if computed.isRegularSkill}}
+          <tr>
+            <td class="align-right">Kategorie</td>
+            <td>
+              <select name="data.category" title="Kategorie">
+                {{#select data.category}}
+                  {{#each skillCategories as |category|}}
+                    <option value="{{category.key}}">{{category.label}}</option>
+                  {{/each}}
+                {{/select}}
+              </select>
+            </td>
+          </tr>
+        {{/if}}
         <tr>
           <td class="align-right">Primärattribut</td>
           <td>
@@ -59,9 +61,9 @@
           </td>
         </tr>
         <tr>
-          <td class="align-right">Steigerungskategorie</td>
+          <td class="align-right">Steigerungsklasse</td>
           <td>
-            <select name="data.xpCategory" title="Steigerungskategorie">
+            <select name="data.xpCategory">
               {{#select data.xpCategory}}
                 {{#each xpCategories as |category|}}
                   <option value="{{category}}">{{category}}</option>
@@ -70,12 +72,100 @@
             </select>
           </td>
         </tr>
-        <tr>
-          <td class="align-right">Grundfähigkeit</td>
-          <td>
-            <input type="checkbox" name="data.isBasicSkill" {{checked data.isBasicSkill}} />
-          </td>
-        </tr>
+        {{#if computed.isRegularSkill}}
+          <tr>
+            <td class="align-right">Grundfähigkeit</td>
+            <td>
+              <input type="checkbox" name="data.isBasicSkill" {{checked data.isBasicSkill}} />
+            </td>
+          </tr>
+        {{/if}}
+        {{#if computed.isForceSkill}}
+          <tr>
+            <td class="align-right">Reichweite</td>
+            <td>
+              <div class="flex-row multi-item">
+                {{#if computed.hasRangeField}}
+                  <input type="text" name="data.range.number" value="{{data.range.number}}" placeholder="[m]" />
+                {{/if}}
+                <select name="data.range.type">
+                  {{#select data.range.type}}
+                    {{#each rangeTypes as |type|}}
+                      <option value="{{type.key}}">{{type.label}}</option>
+                    {{/each}}
+                  {{/select}}
+                </select>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Wirkungsdauer</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.duration.error}}">
+                {{#if computed.hasDurationField}}
+                  <input type="text" name="data.duration.formula" value="{{data.duration.formula}}" placeholder="[n]" class="formula" />
+                {{/if}}
+                <select name="data.duration.type">
+                  {{#select data.duration.type}}
+                    {{#each durationTypes as |type|}}
+                      <option value="{{type.key}}">{{type.label}}</option>
+                    {{/each}}
+                  {{/select}}
+                </select>
+                {{expressionVariables computed.duration.variables}}
+              </div>
+            </td>
+          </tr>
+          <tr class="{{hiddenClass unless=computed.hasOneTimeCost}}">
+            <td class="align-right">Aktivierungskosten</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.oneTimeCost.error}}">
+                <input type="text" name="data.cost.oneTime.formula" value="{{data.cost.oneTime.formula}}" class="formula" />
+                {{expressionVariables computed.oneTimeCost.variables}}
+              </div>
+            </td>
+          </tr>
+          <tr class="{{hiddenClass unless=computed.hasPerTurnCost}}">
+            <td class="align-right">Kosten pro Runde</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.perTurnCost.error}}">
+                <input type="text" name="data.cost.perTurn.formula" value="{{data.cost.perTurn.formula}}" class="formula" />
+                {{expressionVariables computed.perTurnCost.variables}}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Effekt</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.effect.error}}">
+                <input type="text" name="data.effect.formula" value="{{data.effect.formula}}" class="formula" placeholder="Formula" />
+                <input type="text" name="data.effect.d6" value="{{data.effect.d6}}" placeholder="w6" title="w6" />
+                <select name="data.effect.modifier" title="Modifier">
+                  {{#select data.effect.modifier}}
+                    {{#each effectModifiers as |modifier|}}
+                      <option value="{{modifier.key}}">{{modifier.label}}</option>
+                    {{/each}}
+                  {{/select}}
+                </select>
+                {{expressionVariables computed.effect.variables}}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Ausrichtung</td>
+            <td>
+              <div class="flex-row multi-item">
+                <select name="data.disposition">
+                  {{#select data.disposition}}
+                    {{#each dispositions as |disposition|}}
+                      <option value="{{disposition.key}}">{{disposition.label}}</option>
+                    {{/each}}
+                  {{/select}}
+                </select>
+              </div>
+            </td>
+          </tr>
+        {{/if}}
       </tbody>
     </table>
   </section>

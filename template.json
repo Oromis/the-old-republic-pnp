@@ -3,7 +3,21 @@
     "types": ["pc", "npc"],
     "templates": {
       "common": {
-        "attributes": []
+        "attributes": [],
+        "metrics": {
+          "LeP": {
+            "value": 0
+          },
+          "AuP": {
+            "value": 0
+          },
+          "MaP": {
+            "value": 0
+          },
+          "EnP": {
+            "value": 0
+          }
+        }
       }
     },
     "pc": {
@@ -24,7 +38,7 @@
     }
   },
   "Item": {
-    "types": ["skill", "training", "congenital", "special-ability", "weapon", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"],
+    "types": ["skill", "force-skill", "training", "congenital", "special-ability", "weapon", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"],
     "templates": {
       "described": {
         "description": ""
@@ -33,16 +47,37 @@
         "quantity": 1,
         "weight": 0,
         "price": 0
+      },
+      "skill-base": {
+        "key": "",
+        "attribute1": null,
+        "attribute2": null,
+        "xpCategory": null
       }
     },
     "skill": {
-      "templates": ["described"],
-      "key": "",
+      "templates": ["described", "skill-base"],
       "category": null,
-      "attribute1": null,
-      "attribute2": null,
-      "xpCategory": null,
       "isBasicSkill": false
+    },
+    "force-skill": {
+      "templates": ["described", "skill-base"],
+      "range": {
+        "type": ""
+      },
+      "cost": {
+        "perTurn": { "formula": ""},
+        "oneTime": { "formula": ""}
+      },
+      "effect": {
+        "formula": "",
+        "d6": 0,
+        "modifier": null
+      },
+      "duration": {
+        "type": ""
+      },
+      "disposition": ""
     },
     "training": {
       "templates": ["described"],

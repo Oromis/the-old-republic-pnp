@@ -23,10 +23,10 @@ function getCostTable(category) {
 
 export default {
   /**
-   * Calculates the XP cost of upgrading a metric from one value to another
+   * Calculates the XP cost of upgrading a property from one value to another
    * @param category The XP Table category ("A", "B", "C", ...)
-   * @param from The starting value of the metric
-   * @param to The desired value of the metric
+   * @param from The starting value of the property
+   * @param to The desired value of the property
    * @returns {number} The amount of XP it costs to reach the desired level
    */
   getUpgradeCost({ category, from = 0, to = from + 1 }) {
@@ -57,10 +57,10 @@ export default {
   },
 
   /**
-   * Calculates the number of points gained from investing a specified amount of XP into a metric
+   * Calculates the number of points gained from investing a specified amount of XP into a property
    * @param category The XP Table category ("A", "B", "C", ...)
    * @param xp The amount of XP to invest
-   * @param from The starting value of the metric
+   * @param from The starting value of the property
    * @returns {number} The number of whole points gained. Will not return fractional results.
    */
   getPointsFromXp({ category, xp, from = baseLevel - 1 }) {
