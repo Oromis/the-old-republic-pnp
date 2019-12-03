@@ -260,7 +260,11 @@ export default class SwTorActorSheet extends ActorSheet {
           mod: explainMod(this.actorData, metric),
         }
       }),
-      inventory,
+      inventory: ItemTypes.list.map(type => ({
+        key: type.key,
+        label: type.label,
+        items: inventory.filter(item => item.type === type.key)
+      })),
       flags: {
         hasGp: gp > 0,
         canRefundXpToGp: data.data.xp.gp > 0
@@ -304,6 +308,7 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('.do-roll').click(this._onDoRoll)
     html.find('.roll-check').click(this._onRollCheck)
 
+    html.find('.item-create').click(this._onCreateItem)
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
       const li = $(ev.currentTarget).parents("[data-item-id]");
@@ -320,6 +325,17 @@ export default class SwTorActorSheet extends ActorSheet {
   }
 
   /* -------------------------------------------- */
+
+  _onCreateItem = () => {
+    event.preventDefault()
+    const type = event.currentTarget.getAttribute('data-type')
+    const itemData = {
+      name: `Neuer Gegenstand`,
+      type,
+      data: {}
+    }
+    return this.actor.createOwnedItem(itemData);
+  }
 
   async _onClickAttributeControl(event) {
     event.preventDefault();

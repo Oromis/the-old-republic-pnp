@@ -1,5 +1,5 @@
 const list = [
-  { key: 'melee-weapon', label: 'Nahkampfwaffe' },
+  { key: 'melee-weapon', label: 'Nahkampf' },
   { key: 'ranged-weapon', label: 'Fernkampf' },
   { key: 'wearable', label: 'Anziehbar' },
   { key: 'consumable', label: 'Verbrauchsgegenstand' },
