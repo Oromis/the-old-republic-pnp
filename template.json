@@ -38,7 +38,7 @@
     }
   },
   "Item": {
-    "types": ["skill", "force-skill", "training", "congenital", "special-ability", "weapon", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"],
+    "types": ["skill", "force-skill", "training", "congenital", "special-ability", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"],
     "templates": {
       "described": {
         "description": ""
@@ -47,6 +47,17 @@
         "quantity": 1,
         "weight": 0,
         "price": 0
+      },
+      "weapon": {
+        "damage": {
+          "formula": ""
+        },
+        "damageType": ""
+      },
+      "equippable": {
+        "condition": 100,
+        "slotTypes": [],
+        "effects": []
       },
       "skill-base": {
         "key": "",
@@ -99,16 +110,26 @@
       "requirements": {}
     },
     "melee-weapon": {
-      "templates": ["described", "physical"]
+      "templates": ["described", "physical", "weapon", "equippable"],
+      "hasStrengthModifier": false
     },
     "ranged-weapon": {
-      "templates": ["described", "physical"]
+      "templates": ["described", "physical", "weapon", "equippable"],
+      "precision": {
+        "formula": ""
+      },
+      "projectileEnergy": {
+        "formula": ""
+      }
     },
     "wearable": {
-      "templates": ["described", "physical"]
+      "templates": ["described", "physical", "equippable"],
+      "armor": 0,
+      "encumberance": 0
     },
     "consumable": {
-      "templates": ["described", "physical"]
+      "templates": ["described", "physical"],
+      "effects": []
     },
     "other": {
       "templates": ["described", "physical"]

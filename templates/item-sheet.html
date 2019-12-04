@@ -1,16 +1,88 @@
 <form class="{{cssClass}} multi-item" autocomplete="off">
   <header class="sheet-header flex-row multi-item">
     <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
-    <div class="header-fields flex-grow">
+    <div class="header-fields flex-grow multi-item">
       <div class="flex-row multi-item flex-cross-start">
         <h1 class="char-name flex-grow">
           <input name="name" class="full-width" type="text" value="{{item.name}}" placeholder="Name"/>
         </h1>
+      </div>
+      <div class="flex-row">
+        <textarea placeholder="Beschreibung" name="data.description" class="flex-grow">{{data.description}}</textarea>
       </div>
     </div>
   </header>
 
   {{!-- Sheet Body --}}
   <section class="sheet-body">
+    <table>
+      <tbody>
+        <tr>
+          <td class="align-right">Gewicht</td>
+          <td>
+            <input type="text" name="data.weight" value="{{data.weight}}" />
+          </td>
+        </tr>
+        <tr>
+          <td class="align-right">Preis</td>
+          <td>
+            <input type="text" name="data.price" value="{{data.price}}" />
+          </td>
+        </tr>
+        {{#if flags.isWeapon}}
+          <tr>
+            <td class="align-right">Schaden</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.damage.error}}">
+                <input type="text" name="data.damage.formula" value="{{data.damage.formula}}" class="formula" />
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Schadenstyp</td>
+            <td>
+              <select name="data.damageType">
+                {{#select data.damageType}}
+                  {{#each damageTypes as |type|}}
+                    <option value="{{type.key}}">{{type.label}}</option>
+                  {{/each}}
+                {{/select}}
+              </select>
+            </td>
+          </tr>
+        {{/if}}
+        {{#if flags.isMeleeWeapon}}
+          <tr title="Stellt ein, ob sich die Körperkraft des Kämpfers auf den Schaden auswirkt">
+            <td class="align-right">Körperkraftmodifikator</td>
+            <td>
+              <input type="checkbox" name="data.hasStrengthModifier" {{checked data.hasStrengthModifier}} />
+            </td>
+          </tr>
+        {{/if}}
+        {{#if flags.isEquippable}}
+          <tr>
+            <td class="align-right">Slottypen</td>
+            <td>
+              <div class="flex-row multi-item flex-wrap">
+                {{#each data.slotTypes as |slotType index|}}
+                  <div class="flex-row multi-item">
+                    <select name="data.slotTypes[{{index}}]">
+                      <option value="">[Auswählen]</option>
+                      {{#select slotType}}
+                        {{#each ../slotTypes as |type|}}
+                          <option value="{{type.key}}">{{type.label}}</option>
+                        {{/each}}
+                      {{/select}}
+                    </select>
+                    <a class="delete-slot-type" data-index="{{index}}"><i class="fas fa-trash"></i></a>
+                  </div>
+                {{/each}}
+                <a class="new-slot-type"><i class="fas fa-plus"></i></a>
+              </div>
+            </td>
+          </tr>
+        {{/if}}
+      </tbody>
+    </table>
   </section>
 </form>

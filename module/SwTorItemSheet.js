@@ -1,4 +1,7 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
+import DamageTypes from './DamageTypes.js'
+import {analyzeDamageFormula, analyzeExpression} from './SheetUtils.js'
+import SlotTypes from './SlotTypes.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -36,7 +39,20 @@ export default class SwTorItemSheet extends ItemSheet {
    * The prepared data object contains both the actor data as well as additional sheet options
    */
   getData() {
-    return super.getData()
+    const data = super.getData()
+    const type = data.item.type
+    data.computed = {}
+    data.flags = {
+      isWeapon: type === 'melee-weapon' || type === 'ranged-weapon',
+      isMeleeWeapon: type === 'melee-weapon',
+      isEquippable: type === 'melee-weapon' || type === 'ranged-weapon' || type === 'wearable',
+    }
+    if (data.flags.isWeapon) {
+      data.computed.damage = analyzeDamageFormula({ path: [data.data.damage, 'formula'], defaultExpr: '0' })
+    }
+    data.damageTypes = DamageTypes.list
+    data.slotTypes = SlotTypes.list
+    return data
   }
 
   /* -------------------------------------------- */
@@ -58,6 +74,18 @@ export default class SwTorItemSheet extends ItemSheet {
 
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return
+
+    html.find('.new-slot-type').click(() => {
+      this.item.update({
+        'data.slotTypes': [...(this.item.data.data.slotTypes || []), null]
+      })
+    })
+    html.find('.delete-slot-type').click(e => {
+      const targetIndex = +e.currentTarget.getAttribute('data-index')
+      this.item.update({
+        'data.slotTypes': (this.item.data.data.slotTypes || []).filter((s, i) => i !== targetIndex)
+      })
+    })
   }
 
   /* -------------------------------------------- */
@@ -68,6 +96,16 @@ export default class SwTorItemSheet extends ItemSheet {
    * @private
    */
   _updateObject(event, formData) {
-    return this.object.update(formData)
+    const slotTypes = []
+    for (const key of Object.keys(formData)) {
+      const match = key.match(/data.slotTypes\[(\d+)]/)
+      if (match) {
+        slotTypes[match[1]] = formData[key]
+        delete formData[key]
+      }
+    }
+    formData['data.slotTypes'] = slotTypes
+
+    return this.item.update(formData)
   }
 }
