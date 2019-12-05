@@ -37,8 +37,10 @@ Hooks.once("init", async function() {
     class: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(`class="${when ? then : otherwise}"`),
     errorClass: ({ hash }) => conditionalClass(ERROR_CLASS, hash),
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
+    isMultiple: arg => arg > 1,
     formatAttrKey: key => key.toUpperCase(),
     formatAttrLabel: key => ObjectUtils.try(Attributes.map[key], 'label'),
+    formatPercentage: val => `${Math.round(val)}%`,
     formatCheckDiff: diff => new Handlebars.SafeString(`
       <span class="check-diff ${diff >= 0 ? 'good' : 'bad'}">
         ${diff > 0 ? '+' : ''}${diff}

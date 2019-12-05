@@ -12,7 +12,7 @@ import {
   calcGp,
   calcTotalXp,
   explainPropertyValue,
-  explainMod, calcSkillXp, calcUpgradeCost
+  explainMod, calcSkillXp, calcUpgradeCost, calcMaxInventoryWeight
 } from './CharacterFormulas.js'
 import Metrics from './Metrics.js'
 import RangeTypes from './RangeTypes.js'
@@ -115,7 +115,7 @@ export default class SwTorActorSheet extends ActorSheet {
      * @type {string}
      */
     this._sheetTab = "attributes"
-    this._itemFilter = ''
+    this._inventoryHidden = {}
 
     new AutoSubmitSheet(this)
   }
@@ -261,19 +261,23 @@ export default class SwTorActorSheet extends ActorSheet {
         }
       }),
       inventory: ItemTypes.list.map(type => ({
-        key: type.key,
-        label: type.label,
+        ...type,
         items: inventory.filter(item => item.type === type.key)
       })),
+      weight: {
+        value: inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
+        max: calcMaxInventoryWeight(computed),
+      },
       flags: {
         hasGp: gp > 0,
         canRefundXpToGp: data.data.xp.gp > 0
       },
     }
+    data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
     data.speciesList = Species.list
     data.itemTypes = ItemTypes.list
     data.ui = {
-      itemFilter: this._itemFilter,
+      inventoryHidden: this._inventoryHidden
     }
     return data
   }
@@ -322,6 +326,12 @@ export default class SwTorActorSheet extends ActorSheet {
       this.actor.deleteOwnedItem(li.data("itemId"));
       li.slideUp(200, () => this.render(false));
     });
+
+    html.find('.toggle-inventory-view').click(event => {
+      const category = event.currentTarget.getAttribute('data-category')
+      this._inventoryHidden[category] = !this._inventoryHidden[category]
+      this.actor.render()
+    })
   }
 
   /* -------------------------------------------- */
@@ -562,8 +572,6 @@ export default class SwTorActorSheet extends ActorSheet {
       formData['data.xp.gained'] = newVal -
         (ObjectUtils.try(this.actorData, 'xp', 'gp', { default: 0 }) * Config.character.gpToXpRate)
     }
-
-    this._itemFilter = formData['ui.itemFilter']
 
     // Update the Actor
     return this.actor.update(formData);

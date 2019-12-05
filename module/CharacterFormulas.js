@@ -1,7 +1,7 @@
 import Config from './Config.js'
 import ObjectUtils from './ObjectUtils.js'
 import Species from './Species.js'
-import Attributes from './Attributes.js'
+import Attributes, {attrValue} from './Attributes.js'
 import XpTable from './XpTable.js'
 import Metrics from './Metrics.js'
 
@@ -124,12 +124,6 @@ export function calcUpgradeCost(actor, property, { max } = {}) {
   return result
 }
 
-export function explainMetricMax(actor, metric) {
-  const baseValue = metric.calcBaseValue(actor)
-  return {
-    total: baseValue,
-    components: [
-      { label: 'Basis', value: baseValue },
-    ]
-  }
+export function calcMaxInventoryWeight(actor) {
+  return (attrValue(actor, 'kk') + attrValue(actor, 'ko')) / 2
 }

@@ -87,15 +87,23 @@
     width: 28px;
 }
 
-.sw-tor .skill-key-col {
+.sw-tor .skill-key-col, .sw-tor .weight-col {
     width: 34px;
+}
+
+.sw-tor .price-col {
+    width: 38px;
+}
+
+.sw-tor .damage-col {
+    width: 62px;
 }
 
 .sw-tor .value-col {
     width: 50px;
 }
 
-.sw-tor .gain-col {
+.sw-tor .gain-col, .sw-tor .encumberance-col {
     width: 88px;
 }
 

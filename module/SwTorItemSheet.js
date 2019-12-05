@@ -2,6 +2,7 @@ import AutoSubmitSheet from './AutoSubmitSheet.js'
 import DamageTypes from './DamageTypes.js'
 import {analyzeDamageFormula, analyzeExpression} from './SheetUtils.js'
 import SlotTypes from './SlotTypes.js'
+import ItemTypes from './ItemTypes.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -40,16 +41,17 @@ export default class SwTorItemSheet extends ItemSheet {
    */
   getData() {
     const data = super.getData()
-    const type = data.item.type
+    const type = ItemTypes.map[data.item.type] || ItemTypes.map.other
     data.computed = {}
     data.flags = {
-      isWeapon: type === 'melee-weapon' || type === 'ranged-weapon',
-      isMeleeWeapon: type === 'melee-weapon',
-      isRangedWeapon: type === 'ranged-weapon',
-      isWearable: type === 'wearable',
-      isEquippable: type === 'melee-weapon' || type === 'ranged-weapon' || type === 'wearable',
+      isWeapon: type.isWeapon,
+      isMeleeWeapon: type.isMeleeWeapon,
+      isRangedWeapon: type.isRangedWeapon,
+      isWearable: type.isWearable,
+      isEquippable: type.isEquippable,
+      hasEffects: type.hasEffects,
+      isOwned: this.item.isOwned
     }
-    data.flags.hasEffects = data.flags.isEquippable || type === 'consumable'
     if (data.flags.isWeapon) {
       data.computed.damage = analyzeDamageFormula({ path: [data.data.damage, 'formula'], defaultExpr: '0' })
     }
@@ -58,7 +60,7 @@ export default class SwTorItemSheet extends ItemSheet {
       data.computed.projectileEnergy = analyzeExpression({ path: [data.data.projectileEnergy, 'formula'] })
     }
     if (data.flags.hasEffects) {
-      data.computed.effects = Object.entries(data.data.effects).map(([key, value]) => ({ key, value }))
+      data.computed.effects = Object.entries(data.data.effects || {}).map(([key, value]) => ({ key, value }))
     }
     data.damageTypes = DamageTypes.list
     data.slotTypes = SlotTypes.list
@@ -132,7 +134,7 @@ export default class SwTorItemSheet extends ItemSheet {
         delete formData[valueKey]
       }
     }
-    for (const key of Object.keys(this.item.data.data.effects)) {
+    for (const key of Object.keys(this.item.data.data.effects || {})) {
       if (!Object.keys(effects).includes(key)) {
         effects[`-=${key}`] = null
       }

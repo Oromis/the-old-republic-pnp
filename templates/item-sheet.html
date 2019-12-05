@@ -17,6 +17,14 @@
   <section class="sheet-body">
     <table>
       <tbody>
+        {{#if flags.isOwned}}
+          <tr>
+            <td class="align-right label-col">Anzahl</td>
+            <td>
+              <input type="text" name="data.quantity" value="{{data.quantity}}" />
+            </td>
+          </tr>
+        {{/if}}
         <tr>
           <td class="align-right label-col">Gewicht</td>
           <td>
@@ -115,6 +123,14 @@
               </div>
             </td>
           </tr>
+          {{#if flags.isOwned}}
+            <tr>
+              <td class="align-right label-col">Zustand</td>
+              <td>
+                <input type="text" name="data.condition" value="{{data.condition}}" placeholder="[0-100]" />
+              </td>
+            </tr>
+          {{/if}}
         {{/if}}
         {{#if flags.hasEffects}}
           <tr>

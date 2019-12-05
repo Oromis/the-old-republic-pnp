@@ -1,6 +1,10 @@
 import Config from './Config.js'
 import ObjectUtils from './ObjectUtils.js'
 
+export function attrValue(actor, attr) {
+  return ObjectUtils.try(actor.attributes[attr], 'value', 'total', { default: 0 })
+}
+
 const list = [
   {
     key: 'ch',
