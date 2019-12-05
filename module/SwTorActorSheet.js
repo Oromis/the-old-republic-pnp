@@ -229,6 +229,7 @@ export default class SwTorActorSheet extends ActorSheet {
     const computed = {
       attributes: ObjectUtils.asObject(attributes, 'key'),
       skills: ObjectUtils.asObject(skills, 'key'),
+      equippedItems: inventory, // TODO not all inventory items are equipped
     }
 
     data.computed = {
@@ -565,6 +566,7 @@ export default class SwTorActorSheet extends ActorSheet {
     Metrics.list.forEach(metric => {
       this._processDeltaProperty(formData, `data.metrics.${metric.key}.value`)
       this._processDeltaProperty(formData, `data.metrics.${metric.key}.buff`)
+      // formData[`data.metrics.${metric.key}.max`] = 100
     })
 
     if (parsed.input.totalXp != null) {

@@ -436,7 +436,10 @@
               <td>
                 <input type="text" name="data.metrics.{{metric.key}}.buff" value="{{metric.buff}}" />
               </td>
-              <td title="{{formatExplanation metric.max.components}}">{{metric.max.total}}</td>
+              <td title="{{formatExplanation metric.max.components}}">
+                {{metric.max.total}}
+                <input type="hidden" name="data.metrics.{{metric.key}}.max" value="{{metric.max.total}}" />
+              </td>
             </tr>
           {{/each}}
         </tbody>

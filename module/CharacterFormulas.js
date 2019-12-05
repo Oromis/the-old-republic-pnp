@@ -107,6 +107,15 @@ export function explainPropertyValue(actor, property, options) {
     result.total += buff
     result.components.push({ label: 'Buff', value: buff })
   }
+  const items = actor.equippedItems || []
+  for (const item of items) {
+    const effects = item.data.effects || {}
+    const value = +(effects[property.key] || 0)
+    if (value !== 0) {
+      result.total += value
+      result.components.push({ label: item.name, value })
+    }
+  }
   return result
 }
 

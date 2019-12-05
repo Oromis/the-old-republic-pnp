@@ -21,20 +21,20 @@
           <tr>
             <td class="align-right label-col">Anzahl</td>
             <td>
-              <input type="text" name="data.quantity" value="{{data.quantity}}" />
+              <input type="text" name="data.quantity" value="{{data.quantity}}" data-dtype="Number" />
             </td>
           </tr>
         {{/if}}
         <tr>
           <td class="align-right label-col">Gewicht</td>
           <td>
-            <input type="text" name="data.weight" value="{{data.weight}}" />
+            <input type="text" name="data.weight" value="{{data.weight}}" data-dtype="Number" />
           </td>
         </tr>
         <tr>
           <td class="align-right">Preis</td>
           <td>
-            <input type="text" name="data.price" value="{{data.price}}" />
+            <input type="text" name="data.price" value="{{data.price}}" data-dtype="Number" />
           </td>
         </tr>
         {{#if flags.isWeapon}}
@@ -91,13 +91,13 @@
           <tr>
             <td class="align-right">Rüstung</td>
             <td>
-              <input type="text" name="data.armor" value="{{data.armor}}" />
+              <input type="text" name="data.armor" value="{{data.armor}}" data-dtype="Number" />
             </td>
           </tr>
           <tr>
             <td class="align-right">Behinderung</td>
             <td>
-              <input type="text" name="data.encumberance" value="{{data.encumberance}}" />
+              <input type="text" name="data.encumberance" value="{{data.encumberance}}" data-dtype="Number" />
             </td>
           </tr>
         {{/if}}
@@ -127,7 +127,7 @@
             <tr>
               <td class="align-right label-col">Zustand</td>
               <td>
-                <input type="text" name="data.condition" value="{{data.condition}}" placeholder="[0-100]" />
+                <input type="text" name="data.condition" value="{{data.condition}}" placeholder="[0-100]" data-dtype="Number" />
               </td>
             </tr>
           {{/if}}
