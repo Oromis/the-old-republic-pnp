@@ -111,7 +111,7 @@ export function explainPropertyValue(actor, property, options) {
   for (const item of items) {
     const effects = item.data.effects || {}
     const value = +(effects[property.key] || 0)
-    if (value !== 0) {
+    if (value !== 0 && !isNaN(value)) {
       result.total += value
       result.components.push({ label: item.name, value })
     }
