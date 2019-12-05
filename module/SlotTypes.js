@@ -6,6 +6,7 @@ const list = [
   { key: 'arm', label: 'Arm' },
   { key: 'hand', label: 'Hand' },
   { key: 'hip', label: 'Hüfte' },
+  { key: 'implant', label: 'Implantat' },
   { key: 'legs', label: 'Beine' },
   { key: 'foot', label: 'Fuß' },
 ]

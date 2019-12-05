@@ -76,6 +76,7 @@
     <a class="item" data-tab="attributes">Attribute</a>
     <a class="item" data-tab="skills">Fähigkeiten</a>
     <a class="item {{hiddenClass unless=computed.forceSkills}}" data-tab="force-skills">Mächte</a>
+    <a class="item" data-tab="equipment">Ausrüstung</a>
     <a class="item" data-tab="items">Inventar</a>
     <a class="item" data-tab="other">Sonstiges</a>
   </nav>
@@ -294,6 +295,23 @@
           {{/each}}
         </tbody>
       </table>
+    </div>
+
+    {{!-- Equipment Tab --}}
+    <div class="tab equipment" data-group="primary" data-tab="equipment">
+      <div class="equipment-grid multi-item">
+        {{#each computed.slots as |row|}}
+          <div class="equipment-row multi-item">
+            {{#each row as |slot|}}
+              <div class="equipment-tile">
+                {{#if slot}}
+                  <div class="equipment-slot" style="background-image: url({{slot.img}})"></div>
+                {{/if}}
+              </div>
+            {{/each}}
+          </div>
+        {{/each}}
+      </div>
     </div>
 
     {{!-- Inventory Tab --}}

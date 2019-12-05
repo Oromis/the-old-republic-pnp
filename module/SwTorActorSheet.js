@@ -20,6 +20,7 @@ import DurationTypes from './DurationTypes.js'
 import { Parser } from './vendor/expr-eval/expr-eval.js'
 import ForceDispositions from './ForceDispositions.js'
 import EffectModifiers from './EffectModifiers.js'
+import Slots from './Slots.js'
 
 function calcGained(actor, property, { freeXp }) {
   const gainLog = ObjectUtils.try(property, 'gained', { default: [] }).length
@@ -232,6 +233,8 @@ export default class SwTorActorSheet extends ActorSheet {
       equippedItems: inventory, // TODO not all inventory items are equipped
     }
 
+    const actorSlots = data.data.slots || {}
+
     data.computed = {
       gp,
       freeXp,
@@ -261,6 +264,10 @@ export default class SwTorActorSheet extends ActorSheet {
           mod: explainMod(this.actorData, metric),
         }
       }),
+      slots: Slots.layout.map(row => row.map(slot => slot == null ? null : ({
+        ...slot,
+        item: actorSlots[slot.key] != null ? this.actor.getOwnedItem(actorSlots[slot.key]) : null,
+      }))),
       inventory: ItemTypes.list.map(type => ({
         ...type,
         items: inventory.filter(item => item.type === type.key)
@@ -516,25 +523,6 @@ export default class SwTorActorSheet extends ActorSheet {
   _updateObject(event, formData) {
     // Handle the free-form attributes list
     const parsed = expandObject(formData)
-    // const formAttrs = expandObject(formData).data.attributes || {};
-    // const attributes = Object.values(formAttrs).reduce((obj, v) => {
-    //   let k = v["key"].trim();
-    //   if ( /[\s.]/.test(k) )  return ui.notifications.error("Attribute keys may not contain spaces or periods");
-    //   delete v["key"];
-    //   obj[k] = v;
-    //   return obj;
-    // }, {});
-    //
-    // // Remove attributes which are no longer used
-    // for ( let k of Object.keys(this.object.data.data.attributes) ) {
-    //   if ( !attributes.hasOwnProperty(k) ) attributes[`-=${k}`] = null;
-    // }
-    //
-    // // Re-combine formData
-    // formData = Object.entries(formData).filter(e => !e[0].startsWith("data.attributes")).reduce((obj, e) => {
-    //   obj[e[0]] = e[1];
-    //   return obj;
-    // }, {_id: this.actor._id, "data.attributes": attributes});
 
     // Take care of attributes.
     Attributes.list.forEach(attr => {
@@ -566,7 +554,6 @@ export default class SwTorActorSheet extends ActorSheet {
     Metrics.list.forEach(metric => {
       this._processDeltaProperty(formData, `data.metrics.${metric.key}.value`)
       this._processDeltaProperty(formData, `data.metrics.${metric.key}.buff`)
-      // formData[`data.metrics.${metric.key}.max`] = 100
     })
 
     if (parsed.input.totalXp != null) {

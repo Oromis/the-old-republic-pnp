@@ -161,6 +161,23 @@
     text-align: center;
 }
 
+/* Equipment */
+.sw-tor .equipment-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.sw-tor .equipment-tile {
+    width: 64px;
+    height: 64px;
+    position: relative;
+}
+
+.sw-tor .equipment-slot {
+    background-size: 100%;
+    height: 100%;
+}
+
 /* Metrics */
 .sw-tor .metric {
     flex-grow: 1;
