@@ -45,10 +45,20 @@ export default class SwTorItemSheet extends ItemSheet {
     data.flags = {
       isWeapon: type === 'melee-weapon' || type === 'ranged-weapon',
       isMeleeWeapon: type === 'melee-weapon',
+      isRangedWeapon: type === 'ranged-weapon',
+      isWearable: type === 'wearable',
       isEquippable: type === 'melee-weapon' || type === 'ranged-weapon' || type === 'wearable',
     }
+    data.flags.hasEffects = data.flags.isEquippable || type === 'consumable'
     if (data.flags.isWeapon) {
       data.computed.damage = analyzeDamageFormula({ path: [data.data.damage, 'formula'], defaultExpr: '0' })
+    }
+    if (data.flags.isRangedWeapon) {
+      data.computed.precision = analyzeExpression({ path: [data.data.precision, 'formula'] })
+      data.computed.projectileEnergy = analyzeExpression({ path: [data.data.projectileEnergy, 'formula'] })
+    }
+    if (data.flags.hasEffects) {
+      data.computed.effects = Object.entries(data.data.effects).map(([key, value]) => ({ key, value }))
     }
     data.damageTypes = DamageTypes.list
     data.slotTypes = SlotTypes.list
@@ -86,6 +96,18 @@ export default class SwTorItemSheet extends ItemSheet {
         'data.slotTypes': (this.item.data.data.slotTypes || []).filter((s, i) => i !== targetIndex)
       })
     })
+
+    html.find('.new-effect').click(() => {
+      this.item.update({
+        'data.effects': { ...this.item.data.data.effects, '': null }
+      })
+    })
+    html.find('.delete-effect').click(e => {
+      const targetKey = e.currentTarget.getAttribute('data-key')
+      this.item.update({
+        'data.effects': { [`-=${targetKey}`]: null }
+      })
+    })
   }
 
   /* -------------------------------------------- */
@@ -97,14 +119,26 @@ export default class SwTorItemSheet extends ItemSheet {
    */
   _updateObject(event, formData) {
     const slotTypes = []
+    const effects = {}
     for (const key of Object.keys(formData)) {
-      const match = key.match(/data.slotTypes\[(\d+)]/)
-      if (match) {
+      let match
+      if ((match = key.match(/data\.slotTypes\[(\d+)]/))) {
         slotTypes[match[1]] = formData[key]
         delete formData[key]
+      } else if ((match = key.match(/data\.effects\[(\d+)]\.key/))) {
+        const valueKey = `data.effects[${match[1]}].value`
+        effects[formData[key]] = formData[valueKey]
+        delete formData[key]
+        delete formData[valueKey]
+      }
+    }
+    for (const key of Object.keys(this.item.data.data.effects)) {
+      if (!Object.keys(effects).includes(key)) {
+        effects[`-=${key}`] = null
       }
     }
     formData['data.slotTypes'] = slotTypes
+    formData['data.effects'] = effects
 
     return this.item.update(formData)
   }

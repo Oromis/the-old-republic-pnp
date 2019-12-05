@@ -18,7 +18,7 @@
     <table>
       <tbody>
         <tr>
-          <td class="align-right">Gewicht</td>
+          <td class="align-right label-col">Gewicht</td>
           <td>
             <input type="text" name="data.weight" value="{{data.weight}}" />
           </td>
@@ -59,6 +59,40 @@
             </td>
           </tr>
         {{/if}}
+        {{#if flags.isRangedWeapon}}
+          <tr>
+            <td class="align-right">Präzision</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.precision.error}}">
+                <input type="text" name="data.precision.formula" value="{{data.precision.formula}}" class="formula" />
+                {{expressionVariables computed.precision.variables}}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Projektilenergie</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.projectileEnergy.error}}">
+                <input type="text" name="data.projectileEnergy.formula" value="{{data.projectileEnergy.formula}}" class="formula" />
+                {{expressionVariables computed.projectileEnergy.variables}}
+              </div>
+            </td>
+          </tr>
+        {{/if}}
+        {{#if flags.isWearable}}
+          <tr>
+            <td class="align-right">Rüstung</td>
+            <td>
+              <input type="text" name="data.armor" value="{{data.armor}}" />
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Behinderung</td>
+            <td>
+              <input type="text" name="data.encumberance" value="{{data.encumberance}}" />
+            </td>
+          </tr>
+        {{/if}}
         {{#if flags.isEquippable}}
           <tr>
             <td class="align-right">Slottypen</td>
@@ -78,6 +112,23 @@
                   </div>
                 {{/each}}
                 <a class="new-slot-type"><i class="fas fa-plus"></i></a>
+              </div>
+            </td>
+          </tr>
+        {{/if}}
+        {{#if flags.hasEffects}}
+          <tr>
+            <td class="align-right">Effekte</td>
+            <td>
+              <div class="multi-item">
+                {{#each computed.effects as |effect index|}}
+                  <div class="flex-row multi-item">
+                    <input type="text" name="data.effects[{{index}}].key" value="{{effect.key}}" placeholder="Key" data-prev="{{effect.key}}" />
+                    <input type="text" name="data.effects[{{index}}].value" value="{{effect.value}}" placeholder="Wert" />
+                    <a class="delete-effect" data-key="{{effect.key}}" title="{{effect.key}} löschen"><i class="fas fa-trash"></i></a>
+                  </div>
+                {{/each}}
+                <a class="new-effect" title="Neuen Effekt erzeugen"><i class="fas fa-plus"></i></a>
               </div>
             </td>
           </tr>

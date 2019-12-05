@@ -13,5 +13,5 @@ export function analyzeExpression({ path, defaultExpr = '' }) {
 
 export function analyzeDamageFormula({ path, defaultExpr = '' }) {
   const text = ObjectUtils.try(...path) || defaultExpr
-  return { error: !text.match(/^\s*\d+\s*(\+\s*\d+d\d+(\/\d+)?\s*)?$/g) }
+  return { error: !text.match(/^\s*\d+\s*(\+\s*\d+[wd]\d+(\/\d+)?\s*)?$/g) }
 }

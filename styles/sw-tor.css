@@ -107,6 +107,10 @@
     width: 48px;
 }
 
+.sw-tor .label-col {
+    width: 35%;
+}
+
 .sw-tor .buff-col {
     width: 64px;
 }
