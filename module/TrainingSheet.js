@@ -1,12 +1,10 @@
-/**
- * Extend the basic ItemSheet with some very simple modifications
- */
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import CharacterDispositions from './CharacterDispositions.js'
 import {detectPropertyType} from './CharacterFormulas.js'
 import Attributes from './Attributes.js'
-import Skills from "./Skills.js"
-import ObjectUtils from "./ObjectUtils.js"
+import Skills from './Skills.js'
+import ObjectUtils from './ObjectUtils.js'
+import Metrics from './Metrics.js'
 
 function resolveModLabel(key) {
   let type = detectPropertyType({key})
@@ -14,6 +12,8 @@ function resolveModLabel(key) {
     return ObjectUtils.try(Skills.getMap()[key], 'label', { default: key })
   } else if(type === 'attribute') {
     return Attributes.map[key].label
+  } else if(type === 'metric') {
+    return Metrics.map[key].label
   }
   return key
 }
@@ -103,6 +103,12 @@ export default class TrainingSheet extends ItemSheet {
       this.addMod(key, value)
       this.render(false)
     });
+
+    html.find('.mod-new').on('keypress', e => {
+      if (e.key === 'Enter') {
+        html.find('.mod-add').click()
+      }
+    })
   }
 
   /**
