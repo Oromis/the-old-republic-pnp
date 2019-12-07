@@ -5,7 +5,7 @@ import Attributes, {attrValue} from './Attributes.js'
 import XpTable from './XpTable.js'
 import Metrics from './Metrics.js'
 
-function detectPropertyType(property) {
+export function detectPropertyType(property) {
   const key = property.key
   if (key.length === 2) {
     return 'attribute'

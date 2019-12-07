@@ -66,8 +66,8 @@
       <tbody>
       {{#each modsList as |mod|}}
         <tr data-mod-key="{{mod.key}}">
-          <td class="">{{mod.key}}</td>
-          <td class="">{{mod.key}}</td>
+          <td>{{mod.label}}</td>
+          <td>{{mod.key}}</td>
           <td>
             <input type="text" name="data.mods.{{mod.key}}" value="{{mod.value}}" />
           </td>
@@ -78,9 +78,9 @@
       {{/each}}
       <tr>
         <td></td>
-        <td class=""><input type="text" name="data.newMod.key" value="" /></td>
-        <td class=""><input type="text" name="data.newMod.value" value="" /></td>
-        <td><a class="item-control item-add" title="Hinzufuegen"><i class="fas fa-plus"></i></a></td>
+        <td><input type="text" placeholder="Key" class="mod-new-key" /></td>
+        <td><input type="text" placeholder="0" class="mod-new-value" /></td>
+        <td><a class="mod-control mod-add" title="Hinzufuegen"><i class="fas fa-plus"></i></a></td>
       </tr>
       </tbody>
     </table>

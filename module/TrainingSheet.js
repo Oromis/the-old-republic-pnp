@@ -2,7 +2,21 @@
  * Extend the basic ItemSheet with some very simple modifications
  */
 import AutoSubmitSheet from './AutoSubmitSheet.js'
-import CharacterDispositions from "./CharacterDispositions.js"
+import CharacterDispositions from './CharacterDispositions.js'
+import {detectPropertyType} from './CharacterFormulas.js'
+import Attributes from './Attributes.js'
+import Skills from "./Skills.js"
+import ObjectUtils from "./ObjectUtils.js"
+
+function resolveModLabel(key) {
+  let type = detectPropertyType({key})
+  if(type === 'skill') {
+    return ObjectUtils.try(Skills.getMap()[key], 'label', { default: key })
+  } else if(type === 'attribute') {
+    return Attributes.map[key].label
+  }
+  return key
+}
 
 export default class TrainingSheet extends ItemSheet {
   constructor(...args) {
@@ -38,7 +52,11 @@ export default class TrainingSheet extends ItemSheet {
    */
   getData() {
     const data = super.getData()
-    data.modsList = Object.keys(data.data.mods).map(key => ({key, value: data.data.mods[key]}))
+    data.modsList = Object.keys(data.data.mods).map(key => ({
+      key,
+      value: data.data.mods[key],
+      label: resolveModLabel(key)
+    }))
     data.dispositionList = CharacterDispositions.list
     return data
   }
@@ -67,13 +85,20 @@ export default class TrainingSheet extends ItemSheet {
     this.form.ondragover = ev => this._onDragOver(ev)
     this.form.ondrop = ev => this._onDrop(ev)
 
-    // Delete Inventory Item
+    // Delete Mod Item
     html.find('.mod-delete').click(ev => {
       const li = $(ev.currentTarget).parents("[data-mod-key]")
-      let mods = this.object.data.data.mods
-      delete mods[li.data("modKey")]
-      this.object.update({ [`data.mods`]: mods })
+      this.deleteMod(li.data("modKey"))
       li.slideUp(200, () => this.render(false))
+    });
+
+    // Add New Mod Item
+    html.find('.mod-add').click(ev => {
+      const li = $(ev.currentTarget).parents("[data-mod-key]")
+      let key = html.find('.mod-new-key')[0].value
+      let value = html.find('.mod-new-value')[0].value
+      this.addMod(key, value)
+      this.render(false)
     });
   }
 
@@ -107,12 +132,11 @@ export default class TrainingSheet extends ItemSheet {
 
     // Case 1 - Import from a Compendium pack
     if ( data.pack ) {
-      //actor.importItemFromCollection(data.pack, data.id);
       let pack = game.packs.find(p => p.collection === data.pack)
       pack.getEntry(data.id).then(e => {
         if(e.type !== "skill")
           return
-        this.object.update({ [`data.mods.${e.data.key}`]: 0 })
+        this.addMod(e.data.key)
       })
     }
 
@@ -122,16 +146,16 @@ export default class TrainingSheet extends ItemSheet {
     else if ( data.data ) {
       if(data.data.type !== "skill")
         return
-      this.object.update({ [`data.mods.${data.data.data.key}`]: 0 })
+      this.addMod(data.data.data.key)
     }
 
     // Case 3 - Import from World entity
     else {
       let item = game.items.get(data.id);
       if ( !item ) return;
-      if(data.data.type !== "skill")
+      if(item.data.type !== "skill")
         return
-      this.object.update({ [`data.mods.${data.data.data.key}`]: 0 })
+      this.addMod(item.data.data.key)
     }
     return false;
   }
@@ -144,6 +168,16 @@ export default class TrainingSheet extends ItemSheet {
    * @private
    */
   _updateObject(event, formData) {
-    return this.object.update(formData)
+    return this.item.update(formData)
+  }
+
+  addMod(key, value) {
+    this.item.update({ [`data.mods.${key}`]: (value || 0) })
+  }
+
+  deleteMod(key) {
+    this.item.update({
+      'data.mods': { [`-=${key}`]: null }
+    })
   }
 }
