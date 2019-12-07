@@ -7,20 +7,10 @@ import SkillCategories from './SkillCategories.js'
 import XpTable from './XpTable.js'
 import RangeTypes from './RangeTypes.js'
 import DurationTypes from './DurationTypes.js'
-import { Parser } from './vendor/expr-eval/expr-eval.js'
 import ObjectUtils from './ObjectUtils.js'
 import EffectModifiers from './EffectModifiers.js'
 import ForceDispositions from './ForceDispositions.js'
-
-function analyzeExpression({ path, defaultExpr = '' }) {
-  try {
-    const text = ObjectUtils.try(...path) || defaultExpr
-    const expr = Parser.parse(text)
-    return { variables: expr.variables() }
-  } catch (e) {
-    return { error: true }
-  }
-}
+import {analyzeExpression} from './SheetUtils.js'
 
 export default class SkillSheet extends ItemSheet {
   constructor(...args) {

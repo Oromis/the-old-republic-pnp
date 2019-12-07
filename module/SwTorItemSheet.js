@@ -1,4 +1,8 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
+import DamageTypes from './DamageTypes.js'
+import {analyzeDamageFormula, analyzeExpression} from './SheetUtils.js'
+import SlotTypes from './SlotTypes.js'
+import ItemTypes from './ItemTypes.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -36,7 +40,31 @@ export default class SwTorItemSheet extends ItemSheet {
    * The prepared data object contains both the actor data as well as additional sheet options
    */
   getData() {
-    return super.getData()
+    const data = super.getData()
+    const type = ItemTypes.map[data.item.type] || ItemTypes.map.other
+    data.computed = {}
+    data.flags = {
+      isWeapon: type.isWeapon,
+      isMeleeWeapon: type.isMeleeWeapon,
+      isRangedWeapon: type.isRangedWeapon,
+      isWearable: type.isWearable,
+      isEquippable: type.isEquippable,
+      hasEffects: type.hasEffects,
+      isOwned: this.item.isOwned
+    }
+    if (data.flags.isWeapon) {
+      data.computed.damage = analyzeDamageFormula({ path: [data.data.damage, 'formula'], defaultExpr: '0' })
+    }
+    if (data.flags.isRangedWeapon) {
+      data.computed.precision = analyzeExpression({ path: [data.data.precision, 'formula'] })
+      data.computed.projectileEnergy = analyzeExpression({ path: [data.data.projectileEnergy, 'formula'] })
+    }
+    if (data.flags.hasEffects) {
+      data.computed.effects = Object.entries(data.data.effects || {}).map(([key, value]) => ({ key, value }))
+    }
+    data.damageTypes = DamageTypes.list
+    data.slotTypes = SlotTypes.list
+    return data
   }
 
   /* -------------------------------------------- */
@@ -58,6 +86,30 @@ export default class SwTorItemSheet extends ItemSheet {
 
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return
+
+    html.find('.new-slot-type').click(() => {
+      this.item.update({
+        'data.slotTypes': [...(this.item.data.data.slotTypes || []), null]
+      })
+    })
+    html.find('.delete-slot-type').click(e => {
+      const targetIndex = +e.currentTarget.getAttribute('data-index')
+      this.item.update({
+        'data.slotTypes': (this.item.data.data.slotTypes || []).filter((s, i) => i !== targetIndex)
+      })
+    })
+
+    html.find('.new-effect').click(() => {
+      this.item.update({
+        'data.effects': { ...this.item.data.data.effects, '': null }
+      })
+    })
+    html.find('.delete-effect').click(e => {
+      const targetKey = e.currentTarget.getAttribute('data-key')
+      this.item.update({
+        'data.effects': { [`-=${targetKey}`]: null }
+      })
+    })
   }
 
   /* -------------------------------------------- */
@@ -68,6 +120,28 @@ export default class SwTorItemSheet extends ItemSheet {
    * @private
    */
   _updateObject(event, formData) {
-    return this.object.update(formData)
+    const slotTypes = []
+    const effects = {}
+    for (const key of Object.keys(formData)) {
+      let match
+      if ((match = key.match(/data\.slotTypes\[(\d+)]/))) {
+        slotTypes[match[1]] = formData[key]
+        delete formData[key]
+      } else if ((match = key.match(/data\.effects\[(\d+)]\.key/))) {
+        const valueKey = `data.effects[${match[1]}].value`
+        effects[formData[key]] = formData[valueKey]
+        delete formData[key]
+        delete formData[valueKey]
+      }
+    }
+    for (const key of Object.keys(this.item.data.data.effects || {})) {
+      if (!Object.keys(effects).includes(key)) {
+        effects[`-=${key}`] = null
+      }
+    }
+    formData['data.slotTypes'] = slotTypes
+    formData['data.effects'] = effects
+
+    return this.item.update(formData)
   }
 }

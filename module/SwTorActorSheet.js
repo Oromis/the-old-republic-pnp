@@ -12,7 +12,7 @@ import {
   calcGp,
   calcTotalXp,
   explainPropertyValue,
-  explainMod, calcSkillXp, calcUpgradeCost
+  explainMod, calcSkillXp, calcUpgradeCost, calcMaxInventoryWeight
 } from './CharacterFormulas.js'
 import Metrics from './Metrics.js'
 import RangeTypes from './RangeTypes.js'
@@ -20,6 +20,7 @@ import DurationTypes from './DurationTypes.js'
 import { Parser } from './vendor/expr-eval/expr-eval.js'
 import ForceDispositions from './ForceDispositions.js'
 import EffectModifiers from './EffectModifiers.js'
+import Slots from './Slots.js'
 
 function calcGained(actor, property, { freeXp }) {
   const gainLog = ObjectUtils.try(property, 'gained', { default: [] }).length
@@ -115,7 +116,7 @@ export default class SwTorActorSheet extends ActorSheet {
      * @type {string}
      */
     this._sheetTab = "attributes"
-    this._itemFilter = ''
+    this._inventoryHidden = {}
 
     new AutoSubmitSheet(this)
   }
@@ -229,7 +230,10 @@ export default class SwTorActorSheet extends ActorSheet {
     const computed = {
       attributes: ObjectUtils.asObject(attributes, 'key'),
       skills: ObjectUtils.asObject(skills, 'key'),
+      equippedItems: inventory, // TODO not all inventory items are equipped
     }
+
+    const actorSlots = data.data.slots || {}
 
     data.computed = {
       gp,
@@ -260,16 +264,28 @@ export default class SwTorActorSheet extends ActorSheet {
           mod: explainMod(this.actorData, metric),
         }
       }),
-      inventory,
+      slots: Slots.layout.map(row => row.map(slot => slot == null ? null : ({
+        ...slot,
+        item: actorSlots[slot.key] != null ? this.actor.getOwnedItem(actorSlots[slot.key]) : null,
+      }))),
+      inventory: ItemTypes.list.map(type => ({
+        ...type,
+        items: inventory.filter(item => item.type === type.key)
+      })),
+      weight: {
+        value: inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
+        max: calcMaxInventoryWeight(computed),
+      },
       flags: {
         hasGp: gp > 0,
         canRefundXpToGp: data.data.xp.gp > 0
       },
     }
+    data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
     data.speciesList = Species.list
     data.itemTypes = ItemTypes.list
     data.ui = {
-      itemFilter: this._itemFilter,
+      inventoryHidden: this._inventoryHidden
     }
     return data
   }
@@ -304,6 +320,7 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('.do-roll').click(this._onDoRoll)
     html.find('.roll-check').click(this._onRollCheck)
 
+    html.find('.item-create').click(this._onCreateItem)
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
       const li = $(ev.currentTarget).parents("[data-item-id]");
@@ -317,9 +334,26 @@ export default class SwTorActorSheet extends ActorSheet {
       this.actor.deleteOwnedItem(li.data("itemId"));
       li.slideUp(200, () => this.render(false));
     });
+
+    html.find('.toggle-inventory-view').click(event => {
+      const category = event.currentTarget.getAttribute('data-category')
+      this._inventoryHidden[category] = !this._inventoryHidden[category]
+      this.actor.render()
+    })
   }
 
   /* -------------------------------------------- */
+
+  _onCreateItem = () => {
+    event.preventDefault()
+    const type = event.currentTarget.getAttribute('data-type')
+    const itemData = {
+      name: `Neuer Gegenstand`,
+      type,
+      data: {}
+    }
+    return this.actor.createOwnedItem(itemData);
+  }
 
   async _onClickAttributeControl(event) {
     event.preventDefault();
@@ -489,25 +523,6 @@ export default class SwTorActorSheet extends ActorSheet {
   _updateObject(event, formData) {
     // Handle the free-form attributes list
     const parsed = expandObject(formData)
-    // const formAttrs = expandObject(formData).data.attributes || {};
-    // const attributes = Object.values(formAttrs).reduce((obj, v) => {
-    //   let k = v["key"].trim();
-    //   if ( /[\s.]/.test(k) )  return ui.notifications.error("Attribute keys may not contain spaces or periods");
-    //   delete v["key"];
-    //   obj[k] = v;
-    //   return obj;
-    // }, {});
-    //
-    // // Remove attributes which are no longer used
-    // for ( let k of Object.keys(this.object.data.data.attributes) ) {
-    //   if ( !attributes.hasOwnProperty(k) ) attributes[`-=${k}`] = null;
-    // }
-    //
-    // // Re-combine formData
-    // formData = Object.entries(formData).filter(e => !e[0].startsWith("data.attributes")).reduce((obj, e) => {
-    //   obj[e[0]] = e[1];
-    //   return obj;
-    // }, {_id: this.actor._id, "data.attributes": attributes});
 
     // Take care of attributes.
     Attributes.list.forEach(attr => {
@@ -546,8 +561,6 @@ export default class SwTorActorSheet extends ActorSheet {
       formData['data.xp.gained'] = newVal -
         (ObjectUtils.try(this.actorData, 'xp', 'gp', { default: 0 }) * Config.character.gpToXpRate)
     }
-
-    this._itemFilter = formData['ui.itemFilter']
 
     // Update the Actor
     return this.actor.update(formData);

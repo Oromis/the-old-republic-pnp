@@ -1,16 +1,155 @@
 <form class="{{cssClass}} multi-item" autocomplete="off">
   <header class="sheet-header flex-row multi-item">
     <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
-    <div class="header-fields flex-grow">
+    <div class="header-fields flex-grow multi-item">
       <div class="flex-row multi-item flex-cross-start">
         <h1 class="char-name flex-grow">
           <input name="name" class="full-width" type="text" value="{{item.name}}" placeholder="Name"/>
         </h1>
+      </div>
+      <div class="flex-row">
+        <textarea placeholder="Beschreibung" name="data.description" class="flex-grow">{{data.description}}</textarea>
       </div>
     </div>
   </header>
 
   {{!-- Sheet Body --}}
   <section class="sheet-body">
+    <table>
+      <tbody>
+        {{#if flags.isOwned}}
+          <tr>
+            <td class="align-right label-col">Anzahl</td>
+            <td>
+              <input type="text" name="data.quantity" value="{{data.quantity}}" data-dtype="Number" />
+            </td>
+          </tr>
+        {{/if}}
+        <tr>
+          <td class="align-right label-col">Gewicht</td>
+          <td>
+            <input type="text" name="data.weight" value="{{data.weight}}" data-dtype="Number" />
+          </td>
+        </tr>
+        <tr>
+          <td class="align-right">Preis</td>
+          <td>
+            <input type="text" name="data.price" value="{{data.price}}" data-dtype="Number" />
+          </td>
+        </tr>
+        {{#if flags.isWeapon}}
+          <tr>
+            <td class="align-right">Schaden</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.damage.error}}">
+                <input type="text" name="data.damage.formula" value="{{data.damage.formula}}" class="formula" />
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Schadenstyp</td>
+            <td>
+              <select name="data.damageType">
+                {{#select data.damageType}}
+                  {{#each damageTypes as |type|}}
+                    <option value="{{type.key}}">{{type.label}}</option>
+                  {{/each}}
+                {{/select}}
+              </select>
+            </td>
+          </tr>
+        {{/if}}
+        {{#if flags.isMeleeWeapon}}
+          <tr title="Stellt ein, ob sich die Körperkraft des Kämpfers auf den Schaden auswirkt">
+            <td class="align-right">Körperkraftmodifikator</td>
+            <td>
+              <input type="checkbox" name="data.hasStrengthModifier" {{checked data.hasStrengthModifier}} />
+            </td>
+          </tr>
+        {{/if}}
+        {{#if flags.isRangedWeapon}}
+          <tr>
+            <td class="align-right">Präzision</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.precision.error}}">
+                <input type="text" name="data.precision.formula" value="{{data.precision.formula}}" class="formula" />
+                {{expressionVariables computed.precision.variables}}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Projektilenergie</td>
+            <td>
+              <div class="flex-row multi-item {{errorClass when=computed.projectileEnergy.error}}">
+                <input type="text" name="data.projectileEnergy.formula" value="{{data.projectileEnergy.formula}}" class="formula" />
+                {{expressionVariables computed.projectileEnergy.variables}}
+              </div>
+            </td>
+          </tr>
+        {{/if}}
+        {{#if flags.isWearable}}
+          <tr>
+            <td class="align-right">Rüstung</td>
+            <td>
+              <input type="text" name="data.armor" value="{{data.armor}}" data-dtype="Number" />
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Behinderung</td>
+            <td>
+              <input type="text" name="data.encumberance" value="{{data.encumberance}}" data-dtype="Number" />
+            </td>
+          </tr>
+        {{/if}}
+        {{#if flags.isEquippable}}
+          <tr>
+            <td class="align-right">Slottypen</td>
+            <td>
+              <div class="flex-row multi-item flex-wrap">
+                {{#each data.slotTypes as |slotType index|}}
+                  <div class="flex-row multi-item">
+                    <select name="data.slotTypes[{{index}}]">
+                      <option value="">[Auswählen]</option>
+                      {{#select slotType}}
+                        {{#each ../slotTypes as |type|}}
+                          <option value="{{type.key}}">{{type.label}}</option>
+                        {{/each}}
+                      {{/select}}
+                    </select>
+                    <a class="delete-slot-type" data-index="{{index}}"><i class="fas fa-trash"></i></a>
+                  </div>
+                {{/each}}
+                <a class="new-slot-type"><i class="fas fa-plus"></i></a>
+              </div>
+            </td>
+          </tr>
+          {{#if flags.isOwned}}
+            <tr>
+              <td class="align-right label-col">Zustand</td>
+              <td>
+                <input type="text" name="data.condition" value="{{data.condition}}" placeholder="[0-100]" data-dtype="Number" />
+              </td>
+            </tr>
+          {{/if}}
+        {{/if}}
+        {{#if flags.hasEffects}}
+          <tr>
+            <td class="align-right">Effekte</td>
+            <td>
+              <div class="multi-item">
+                {{#each computed.effects as |effect index|}}
+                  <div class="flex-row multi-item">
+                    <input type="text" name="data.effects[{{index}}].key" value="{{effect.key}}" placeholder="Key" data-prev="{{effect.key}}" />
+                    <input type="text" name="data.effects[{{index}}].value" value="{{effect.value}}" placeholder="Wert" />
+                    <a class="delete-effect" data-key="{{effect.key}}" title="{{effect.key}} löschen"><i class="fas fa-trash"></i></a>
+                  </div>
+                {{/each}}
+                <a class="new-effect" title="Neuen Effekt erzeugen"><i class="fas fa-plus"></i></a>
+              </div>
+            </td>
+          </tr>
+        {{/if}}
+      </tbody>
+    </table>
   </section>
 </form>

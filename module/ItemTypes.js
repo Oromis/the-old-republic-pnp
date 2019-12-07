@@ -1,8 +1,8 @@
 const list = [
-  { key: 'melee-weapon', label: 'Nahkampfwaffe' },
-  { key: 'ranged-weapon', label: 'Fernkampf' },
-  { key: 'wearable', label: 'Anziehbar' },
-  { key: 'consumable', label: 'Verbrauchsgegenstand' },
+  { key: 'melee-weapon', label: 'Nahkampf', isWeapon: true, isMeleeWeapon: true, isEquippable: true, hasEffects: true },
+  { key: 'ranged-weapon', label: 'Fernkampf', isWeapon: true, isRangedWeapon: true, isEquippable: true, hasEffects: true },
+  { key: 'wearable', label: 'Anziehbar', isEquippable: true, hasEffects: true, isWearable: true },
+  { key: 'consumable', label: 'Verbrauchsgegenstand', hasEffects: true },
   { key: 'other', label: 'Sonstiges' },
 ]
 

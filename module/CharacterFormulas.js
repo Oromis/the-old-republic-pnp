@@ -1,7 +1,7 @@
 import Config from './Config.js'
 import ObjectUtils from './ObjectUtils.js'
 import Species from './Species.js'
-import Attributes from './Attributes.js'
+import Attributes, {attrValue} from './Attributes.js'
 import XpTable from './XpTable.js'
 import Metrics from './Metrics.js'
 
@@ -107,6 +107,15 @@ export function explainPropertyValue(actor, property, options) {
     result.total += buff
     result.components.push({ label: 'Buff', value: buff })
   }
+  const items = actor.equippedItems || []
+  for (const item of items) {
+    const effects = item.data.effects || {}
+    const value = +(effects[property.key] || 0)
+    if (value !== 0 && !isNaN(value)) {
+      result.total += value
+      result.components.push({ label: item.name, value })
+    }
+  }
   return result
 }
 
@@ -124,12 +133,6 @@ export function calcUpgradeCost(actor, property, { max } = {}) {
   return result
 }
 
-export function explainMetricMax(actor, metric) {
-  const baseValue = metric.calcBaseValue(actor)
-  return {
-    total: baseValue,
-    components: [
-      { label: 'Basis', value: baseValue },
-    ]
-  }
+export function calcMaxInventoryWeight(actor) {
+  return (attrValue(actor, 'kk') + attrValue(actor, 'ko')) / 2
 }
