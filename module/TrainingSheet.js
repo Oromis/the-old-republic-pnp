@@ -40,7 +40,7 @@ export default class TrainingSheet extends ItemSheet {
 			classes: ["sw-tor", "sheet", "item"],
 			template: "systems/sw-tor/templates/training-sheet.html",
 			width: 520,
-			height: 360,
+			height: 700,
 		})
   }
 
@@ -61,6 +61,13 @@ export default class TrainingSheet extends ItemSheet {
       ...e,
       value: data.data.dispositions[e.key]
     }))
+    if(data.data.baseTraining) {
+      let desc = ''
+      for (const key of Object.keys(data.data.baseTraining.data.mods)) {
+        desc = desc.concat('\n', resolveModLabel(key), ': ', data.data.baseTraining.data.mods[key])
+      }
+      data.baseTrainingEffects = desc
+    }
     return data
   }
 
@@ -109,6 +116,14 @@ export default class TrainingSheet extends ItemSheet {
         html.find('.mod-add').click()
       }
     })
+
+    // Delete BaseTraining Item
+    html.find('.baseTraining-delete').click(ev => {
+      this.item.update({
+        'data.baseTraining': null
+      })
+      this.render(false)
+    });
   }
 
   /**
@@ -143,28 +158,20 @@ export default class TrainingSheet extends ItemSheet {
     if ( data.pack ) {
       let pack = game.packs.find(p => p.collection === data.pack)
       pack.getEntry(data.id).then(e => {
-        if(e.type !== "skill")
-          return
-        this.addMod(e.data.key)
+        this.handleDrop(e.type, e)
       })
     }
 
-    //TODO Here must be cleaned up
-
     // Case 2 - Data explicitly provided
     else if ( data.data ) {
-      if(data.data.type !== "skill")
-        return
-      this.addMod(data.data.data.key)
+      this.handleDrop(data.data.type, data.data)
     }
 
     // Case 3 - Import from World entity
     else {
       let item = game.items.get(data.id);
       if ( !item ) return;
-      if(item.data.type !== "skill")
-        return
-      this.addMod(item.data.data.key)
+      this.handleDrop(item.data.type, item.data)
     }
     return false;
   }
@@ -188,5 +195,15 @@ export default class TrainingSheet extends ItemSheet {
     this.item.update({
       'data.mods': { [`-=${key}`]: null }
     })
+  }
+
+  handleDrop(type, item) {
+    if(type === 'skill') {
+      this.addMod(item.data.key)
+    } else if(type === 'training') {
+      this.item.update({
+        'data.baseTraining': item
+      })
+    }
   }
 }

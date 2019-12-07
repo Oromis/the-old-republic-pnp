@@ -23,35 +23,48 @@
         </tr>
       </thead>
       <tbody>
-      <tr>
-        <td class="">GP</td>
-        <td>
-          <input type="text" name="data.gp" value="{{data.gp}}" />
-        </td>
-      </tr>
-      <tr>
-        <td class="">Fraktion</td>
-        <td>
-          <input type="text" class="text" name="data.fraction" value="{{data.fraction}}" />
-        </td>
-      </tr>
-      <tr>
-        <td class="">Ausrichtung</td>
-        <td class="flex-row">
-          {{#each dispositionList as |dispo|}}
-            <div class="checkbox-element">
-              <input type="checkbox" id="{{dispo.key}}" name="data.dispositions.{{dispo.key}}" {{#if dispo.value}}checked{{/if}} />
-              <label for="{{dispo.key}}">{{dispo.label}}</label>
-            </div>
-          {{/each}}
-        </td>
-      </tr>
-      <tr>
-        <td class="">Zusätzliche Informationen</td>
-        <td>
-          <textarea placeholder="" name="data.additionalInformation" class="flex-grow">{{data.additionalInformation}}</textarea>
-        </td>
-      </tr>
+        <tr>
+          <td class="">GP</td>
+          <td>
+            <input type="text" name="data.gp" value="{{data.gp}}" />
+          </td>
+        </tr>
+        <tr>
+          <td class="">Fraktion</td>
+          <td>
+            <input type="text" class="text" name="data.fraction" value="{{data.fraction}}" />
+          </td>
+        </tr>
+        <tr>
+          <td class="">Ausrichtung</td>
+          <td class="flex-row">
+            {{#each dispositionList as |dispo|}}
+              <div class="checkbox-element">
+                <input type="checkbox" id="{{dispo.key}}" name="data.dispositions.{{dispo.key}}" {{#if dispo.value}}checked{{/if}} />
+                <label for="{{dispo.key}}">{{dispo.label}}</label>
+              </div>
+            {{/each}}
+          </td>
+        </tr>
+        <tr>
+          <td class="">Zusätzliche Informationen</td>
+          <td>
+            <textarea placeholder="" name="data.additionalInformation" class="flex-grow">{{data.additionalInformation}}</textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>Zugehoerige Grundausbildung</td>
+          <td>
+            {{#if data.baseTraining}}
+              <span title="{{baseTrainingEffects}}">{{data.baseTraining.name}}</span>
+              <a class="baseTraining-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+            {{else}}
+              <div class="drop-zone">
+                <span>Drop base training here!</span>
+              </div>
+            {{/if}}
+          </td>
+        </tr>
       </tbody>
     </table>
     <table>
@@ -77,7 +90,11 @@
         </tr>
       {{/each}}
       <tr>
-        <td></td>
+        <td>
+          <div class="drop-zone">
+            <span>Drop skills here!</span>
+          </div>
+        </td>
         <td><input type="text" placeholder="Key" class="mod-new mod-new-key" /></td>
         <td><input type="text" placeholder="0" class="mod-new mod-new-value" /></td>
         <td><a class="mod-control mod-add" title="Hinzufuegen"><i class="fas fa-plus"></i></a></td>

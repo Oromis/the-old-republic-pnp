@@ -94,6 +94,7 @@
       "templates": ["described"],
       "fraction": "",
       "dispositions": {},
+      "baseTraining": null,
       "gp": 0,
       "mods": {},
       "additionalInformation": "",
