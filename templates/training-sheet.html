@@ -40,7 +40,7 @@
         <td class="flex-row">
           {{#each dispositionList as |dispo|}}
             <div class="checkbox-element">
-              <input type="checkbox" id="{{dispo.key}}" name="data.disposition" value="{{dispo.key}}" />
+              <input type="checkbox" id="{{dispo.key}}" name="data.dispositions.{{dispo.key}}" {{#if dispo.value}}checked{{/if}} />
               <label for="{{dispo.key}}">{{dispo.label}}</label>
             </div>
           {{/each}}

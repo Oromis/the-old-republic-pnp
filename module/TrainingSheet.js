@@ -57,7 +57,10 @@ export default class TrainingSheet extends ItemSheet {
       value: data.data.mods[key],
       label: resolveModLabel(key)
     }))
-    data.dispositionList = CharacterDispositions.list
+    data.dispositionList = CharacterDispositions.list.map(e => ({
+      ...e,
+      value: data.data.dispositions[e.key]
+    }))
     return data
   }
 

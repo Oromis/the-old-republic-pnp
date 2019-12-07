@@ -93,7 +93,7 @@
     "training": {
       "templates": ["described"],
       "fraction": "",
-      "disposition": "",
+      "dispositions": {},
       "gp": 0,
       "mods": {},
       "additionalInformation": "",
