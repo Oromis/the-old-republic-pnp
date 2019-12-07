@@ -37,13 +37,13 @@
       </tr>
       <tr>
         <td class="">Ausrichtung</td>
-        <td>{{!--
+        <td class="flex-row">
           {{#each dispositionList as |dispo|}}
-            <div>
+            <div class="checkbox-element">
               <input type="checkbox" id="{{dispo.key}}" name="data.disposition" value="{{dispo.key}}" />
               <label for="{{dispo.key}}">{{dispo.label}}</label>
             </div>
-          {{/each}}--}}
+          {{/each}}
         </td>
       </tr>
       <tr>
@@ -78,8 +78,8 @@
       {{/each}}
       <tr>
         <td></td>
-        <td class=""><input type="text" name="data.mods.{{mod.key}}" value="{{mod.value}}" /></td>
-        <td class=""><input type="text" name="data.mods.{{mod.key}}" value="{{mod.value}}" /></td>
+        <td class=""><input type="text" name="data.newMod.key" value="" /></td>
+        <td class=""><input type="text" name="data.newMod.value" value="" /></td>
         <td><a class="item-control item-add" title="Hinzufuegen"><i class="fas fa-plus"></i></a></td>
       </tr>
       </tbody>
