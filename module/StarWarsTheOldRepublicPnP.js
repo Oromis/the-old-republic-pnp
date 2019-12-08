@@ -73,7 +73,7 @@ Hooks.once("init", async function() {
 	 * Set an initiative formula for the system
 	 * @type {String}
 	 */
-	CONFIG.initiative.formula = "1d6 + (@attributes.in.value + @attributes.sc.value) / 20"
+	CONFIG.initiative.formula = "1d6 + (@attributes.in.value + @attributes.sc.value) / 10"
 
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet)

@@ -119,6 +119,7 @@ export default class SwTorActorSheet extends ActorSheet {
      */
     this._sheetTab = "attributes"
     this._inventoryHidden = {}
+    this._needsUpdate = false
 
     new AutoSubmitSheet(this)
   }
@@ -171,7 +172,6 @@ export default class SwTorActorSheet extends ActorSheet {
       equippedItems,
     }
 
-    let needsUpdate = false
     const attributes = Attributes.list.map(generalAttr => {
       const attr = { ...generalAttr, ...data.data.attributes[generalAttr.key] }
       const result = {
@@ -181,7 +181,7 @@ export default class SwTorActorSheet extends ActorSheet {
         mod: explainMod(computed, attr),
       }
       if (result.value.total !== ObjectUtils.try(data.data.attributes, generalAttr.key, 'value')) {
-        needsUpdate = true
+        this._needsUpdate = true
       }
       return result
     })
@@ -306,7 +306,6 @@ export default class SwTorActorSheet extends ActorSheet {
       flags: {
         hasGp: gp > 0,
         canRefundXpToGp: data.data.xp.gp > 0,
-        needsUpdate,
       },
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
@@ -348,15 +347,17 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('.do-roll').click(this._onDoRoll)
     html.find('.roll-check').click(this._onRollCheck)
     html.find('.item-create').click(this._onCreateItem)
-    // if (html.attr('data-needs-update') === 'true') {
-    //   if (timeout != null) {
-    //     clearTimeout(timeout)
-    //   }
-    //   timeout = setTimeout(() => {
-    //     timeout = null
-    //     this._onSubmit(new Event('click'))
-    //   }, 100)
-    // }
+
+    if (this._needsUpdate) {
+      if (timeout != null) {
+        clearTimeout(timeout)
+      }
+      timeout = setTimeout(() => {
+        timeout = null
+        this._needsUpdate = false
+        this._onSubmit(new Event('click'))
+      }, 100)
+    }
 
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
@@ -638,7 +639,7 @@ export default class SwTorActorSheet extends ActorSheet {
 
     // Skills
     for (const key of Object.keys(formData)) {
-      const match = /skills\.([\w\-_]+)\.(.*)/.exec(key)
+      const match = /skills\.([\wüäö\-_]+)\.(.*)/.exec(key)
       if (match) {
         const skill = this.getSkill(match[1])
         if (skill != null) {
@@ -651,7 +652,11 @@ export default class SwTorActorSheet extends ActorSheet {
               value = value === '' || isNaN(value) ? '' : +value
             }
 
-            skillEntity.update({ [match[2]]: value })
+            const payload = { [match[2]]: value }
+            const oldValue = ObjectUtils.try(skill, ...match[2].split('.'))
+            if (value !== oldValue) {
+              skillEntity.update(payload)
+            }
           }
         }
         delete formData[key]
