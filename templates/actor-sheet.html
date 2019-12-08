@@ -1,4 +1,4 @@
-<form class="{{cssClass}} multi-item" autocomplete="off">
+<form class="{{cssClass}} multi-item charsheet-form" autocomplete="off" data-needs-update="{{computed.flags.needsUpdate}}">
 
   {{!-- Sheet Header --}}
   <header class="sheet-header flex-row multi-item">
@@ -142,7 +142,10 @@
               <td>
                 <input type="text" name="data.attributes.{{attr.key}}.buff" value="{{attr.buff}}" />
               </td>
-              <td title="{{formatExplanation attr.value.components}}">{{attr.value.total}}</td>
+              <td title="{{formatExplanation attr.value.components}}">
+                {{attr.value.total}}
+                <input type="hidden" name="data.attributes.{{attr.key}}.value" value="{{attr.value.total}}" data-dtype="Number" />
+              </td>
             </tr>
           {{/each}}
         </tbody>
@@ -472,7 +475,7 @@
               </td>
               <td title="{{formatExplanation metric.max.components}}">
                 {{metric.max.total}}
-                <input type="hidden" name="data.metrics.{{metric.key}}.max" value="{{metric.max.total}}" />
+                <input type="hidden" name="data.metrics.{{metric.key}}.max" value="{{metric.max.total}}" data-dtype="Number" />
               </td>
             </tr>
           {{/each}}
