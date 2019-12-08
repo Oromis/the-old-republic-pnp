@@ -57,7 +57,7 @@
           <td>
             {{#if data.baseTraining}}
               <span title="{{baseTrainingEffects}}">{{data.baseTraining.name}}</span>
-              <a class="baseTraining-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+              <a class="baseTraining-control baseTraining-delete" title="Löschen"><i class="fas fa-trash"></i></a>
             {{else}}
               <div class="drop-zone">
                 <span>Drop base training here!</span>
@@ -95,8 +95,8 @@
             <span>Drop skills here!</span>
           </div>
         </td>
-        <td><input type="text" placeholder="Key" class="mod-new mod-new-key" /></td>
-        <td><input type="text" placeholder="0" class="mod-new mod-new-value" /></td>
+        <td><input type="text" placeholder="Key" class="mod-new mod-new-key" name="data.newKey" value="{{data.newKey}}" /></td>
+        <td><input type="text" placeholder="0" class="mod-new mod-new-value" name="data.newValue" value="{{data.newValue}}" /></td>
         <td><a class="mod-control mod-add" title="Hinzufuegen"><i class="fas fa-plus"></i></a></td>
       </tr>
       </tbody>

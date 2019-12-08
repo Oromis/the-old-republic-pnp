@@ -14,9 +14,9 @@ function resolveModLabel(key) {
   if(type === 'skill') {
     return ObjectUtils.try(Skills.getMap()[key], 'label', { default: key })
   } else if(type === 'attribute') {
-    return Attributes.map[key].label
+    return ObjectUtils.try(Attributes.map[key], 'label', { default: key })
   } else if(type === 'metric') {
-    return Metrics.map[key].label
+    return ObjectUtils.try(Metrics.map[key], 'label', { default: key })
   }
   return key
 }
@@ -115,6 +115,10 @@ export default class TrainingSheet extends ItemSheet {
       let key = html.find('.mod-new-key')[0].value
       let value = html.find('.mod-new-value')[0].value
       this.addMod(key, value)
+      this.item.update({
+        'data.newKey': '',
+        'data.newValue': '',
+      })
       this.render(false)
     });
 
@@ -195,6 +199,8 @@ export default class TrainingSheet extends ItemSheet {
   }
 
   addMod(key, value) {
+    if(key.length < 1)
+      return
     this.item.update({ [`data.mods.${key}`]: (value || 0) })
   }
 
