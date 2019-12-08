@@ -85,10 +85,10 @@ export function calcPropertyTrainingsMod(actor, property) {
   if(detectPropertyType(property) !== 'skill') {
     return actor.trainings.map(t => ObjectUtils.try(t.data.mods, getKey(property), {default: 0})).reduce((acc, v) => acc + (+v), 0)
   }
-  const from = (Skills.getMap()[getKey(property)].isBasicSkill ? 5 : 0) + calcPropertySpeciesMod(actor, property)
+  const from = (ObjectUtils.try(Skills.getMap(), getKey(property), 'isBasicSkill', { default: false }) ? 5 : 0) + calcPropertySpeciesMod(actor, property)
   const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, getKey(property), from)).reduce((acc, v) => acc + (+v), 0)
   return XpTable.getPointsFromXp({
-    category: Skills.getMap()[getKey(property)].xpCategory,
+    category: property.xpCategory,
     xp,
     from
   })

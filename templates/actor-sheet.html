@@ -322,34 +322,49 @@
 
     {{!-- Equipment Tab --}}
     <div class="tab equipment" data-group="primary" data-tab="equipment">
-      <div class="equipment-grid multi-item">
-        {{#each computed.slots as |row|}}
-          <div class="equipment-row multi-item">
-            {{#each row as |slot|}}
-              <div class="equipment-tile">
-                {{#if slot}}
-                  <div class="equipment-slot" style="background-image: url({{slot.img}})">
-                    {{#if slot.item}}
-                      <img src="{{slot.item.img}}" alt="{{slot.item.name}}" class="equipment-item" />
-                    {{/if}}
-                    <div class="equipment-popup">
-                      <h4>{{slot.label}}</h4>
-                      {{#if slot.options}}
-                        <ul>
-                          {{#each slot.options as |item|}}
-                            <li>
-                              <a class="equip-btn {{embedClass name='link-active' when=item.active}}" data-slot="{{slot.key}}" data-item="{{item.id}}">{{item.name}}</a>
-                            </li>
-                          {{/each}}
-                        </ul>
-                      {{/if}}
-                    </div>
-                  </div>
-                {{/if}}
+      <div class="flex-row multi-item flex-cross-start">
+        <div class="flex-grow flex-zero">
+          <h3 class="align-center">Offensive</h3>
+          <div class="multi-item">
+            {{#select computed.weaponSlots as |slot|}}
+              <div>
+                <h4></h4>
               </div>
-            {{/each}}
+            {{/select}}
           </div>
-        {{/each}}
+        </div>
+        <div class="equipment-grid multi-item">
+          {{#each computed.slots as |row|}}
+            <div class="equipment-row multi-item">
+              {{#each row as |slot|}}
+                <div class="equipment-tile">
+                  {{#if slot}}
+                    <div class="equipment-slot" style="background-image: url({{slot.img}})">
+                      {{#if slot.item}}
+                        <img src="{{slot.item.img}}" alt="{{slot.item.name}}" class="equipment-item" />
+                      {{/if}}
+                      <div class="equipment-popup">
+                        <h4>{{slot.label}}</h4>
+                        {{#if slot.options}}
+                          <ul>
+                            {{#each slot.options as |item|}}
+                              <li>
+                                <a class="equip-btn {{embedClass name='link-active' when=item.active}}" data-slot="{{slot.key}}" data-item="{{item.id}}">{{item.name}}</a>
+                              </li>
+                            {{/each}}
+                          </ul>
+                        {{/if}}
+                      </div>
+                    </div>
+                  {{/if}}
+                </div>
+              {{/each}}
+            </div>
+          {{/each}}
+        </div>
+        <div class="flex-grow flex-zero">
+          <h3 class="align-center">Defensive</h3>
+        </div>
       </div>
     </div>
 

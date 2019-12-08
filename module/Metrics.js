@@ -30,7 +30,7 @@ const list = [
     xpCategory: Config.character.MaP.xpCategory,
     backgroundColor: '#e3caff',
     calcBaseValue(actor) {
-      return Math.round((attrValue(actor, 'ch') + attrValue(actor, 'in') + attrValue(actor, 'kl') + attrValue(actor, 'wi')) / 2)
+      return Math.round((attrValue(actor, 'ch') + attrValue(actor, 'in') + attrValue(actor, 'kl') + attrValue(actor, 'wk')) / 2)
     }
   },
   {

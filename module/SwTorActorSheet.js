@@ -154,6 +154,10 @@ export default class SwTorActorSheet extends ActorSheet {
     let inventory = [], skills = [], freeItems = [], equippedItems = [], trainings = []
 
     const actorSlots = data.data.slots || {}
+    const weaponSlots = [
+      { ...Slots.map['right-hand'] },
+      { ...Slots.map['left-hand'] },
+    ]
 
     data.items.forEach(item => {
       if (item.type === 'skill' || item.type === 'force-skill') {
@@ -162,8 +166,15 @@ export default class SwTorActorSheet extends ActorSheet {
         trainings.push(item)
       } else {
         inventory.push(item)
-        if (Object.values(actorSlots).indexOf(item.id) !== -1) {
+        const slotEntry = Object.entries(actorSlots).find(([_, v]) => v === item.id)
+        if (slotEntry != null) {
           equippedItems.push(item)
+          for (const weaponSlot of weaponSlots) {
+            if (weaponSlot.key === slotEntry[0]) {
+              weaponSlot.item = item
+              break
+            }
+          }
         } else {
           freeItems.push(item)
         }
@@ -303,6 +314,7 @@ export default class SwTorActorSheet extends ActorSheet {
         ...type,
         items: inventory.filter(item => item.type === type.key)
       })),
+      weaponSlots,
       weight: {
         value: inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
         max: calcMaxInventoryWeight(computedActorData),
