@@ -7,17 +7,20 @@ import AutoSubmitSheet from './AutoSubmitSheet.js'
 import ItemTypes from './ItemTypes.js'
 import SkillCategories from './SkillCategories.js'
 import {
-  calcPropertyBaseValue,
   calcFreeXp,
   calcGp,
+  calcMaxInventoryWeight,
+  calcPropertyBaseValue,
+  calcSkillXp,
   calcTotalXp,
-  explainPropertyValue,
-  explainMod, calcSkillXp, calcUpgradeCost, calcMaxInventoryWeight
+  calcUpgradeCost,
+  explainMod,
+  explainPropertyValue
 } from './CharacterFormulas.js'
 import Metrics from './Metrics.js'
 import RangeTypes from './RangeTypes.js'
 import DurationTypes from './DurationTypes.js'
-import { Parser } from './vendor/expr-eval/expr-eval.js'
+import {Parser} from './vendor/expr-eval/expr-eval.js'
 import ForceDispositions from './ForceDispositions.js'
 import EffectModifiers from './EffectModifiers.js'
 import Slots from './Slots.js'
@@ -140,14 +143,7 @@ export default class SwTorActorSheet extends ActorSheet {
 
   /* -------------------------------------------- */
 
-  /**
-   * Prepare data for rendering the Actor sheet
-   * The prepared data object contains both the actor data as well as additional sheet options
-   */
-  getData() {
-    const data = super.getData()
-    let gp = calcGp(data)
-    const freeXp = calcFreeXp(data)
+  computeActorData(data) {
     let inventory = [], skills = [], freeItems = [], equippedItems = [], trainings = []
 
     const actorSlots = data.data.slots || {}
@@ -167,11 +163,29 @@ export default class SwTorActorSheet extends ActorSheet {
       }
     })
 
-    const computedActorData = {
+    return {
       ...this.actorData,
       equippedItems,
+      freeItems,
       trainings,
+      skills,
+      inventory,
     }
+  }
+
+  /**
+   * Prepare data for rendering the Actor sheet
+   * The prepared data object contains both the actor data as well as additional sheet options
+   */
+  getData() {
+    const data = super.getData()
+
+    const actorSlots = data.data.slots || {}
+
+    const computedActorData = this.computeActorData(data)
+
+    let gp = calcGp(computedActorData)
+    const freeXp = calcFreeXp(computedActorData)
 
     const attributes = Attributes.list.map(generalAttr => {
       const attr = { ...generalAttr, ...data.data.attributes[generalAttr.key] }
@@ -186,11 +200,11 @@ export default class SwTorActorSheet extends ActorSheet {
     const attributesMap = ObjectUtils.asObject(attributes, 'key')
     computedActorData.attributes = ObjectUtils.asObject(attributes, 'key')
 
-    skills = skills.map(skill => {
+    const skills = computedActorData.skills.map(skill => {
       const value = explainPropertyValue(computedActorData, skill.data)
       return {
         ...skill,
-        xp: calcSkillXp(skill.data),
+        xp: calcSkillXp(computedActorData, skill.data),
         xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
         gained: calcGained(computedActorData, skill.data, { freeXp }),
         value,
@@ -250,7 +264,7 @@ export default class SwTorActorSheet extends ActorSheet {
     data.computed = {
       gp,
       freeXp,
-      totalXp: calcTotalXp(data),
+      totalXp: calcTotalXp(computedActorData),
       xpFromGp: data.data.xp.gp * Config.character.gpToXpRate,
       xpCategories: XpTable.getCategories(),
       speciesName: ObjectUtils.try(Species.map[data.data.species], 'name', { default: 'None' }),
@@ -280,24 +294,24 @@ export default class SwTorActorSheet extends ActorSheet {
         if (slot == null) {
           return null
         } else {
-          const equippedItem = equippedItems.find(item => item.id === actorSlots[slot.key])
+          const equippedItem = computedActorData.equippedItems.find(item => item.id === actorSlots[slot.key])
           return {
             ...slot,
             item: equippedItem,
             options: [
               { id: null, name: '<Leer>', active: equippedItem == null },
               ...(equippedItem != null ? [{ ...equippedItem, active: true }] : []),
-              ...freeItems.filter(item => Array.isArray(item.data.slotTypes) && item.data.slotTypes.indexOf(slot.type) !== -1)
+              ...computedActorData.freeItems.filter(item => Array.isArray(item.data.slotTypes) && item.data.slotTypes.indexOf(slot.type) !== -1)
             ]
           }
         }
       })),
       inventory: ItemTypes.list.map(type => ({
         ...type,
-        items: inventory.filter(item => item.type === type.key)
+        items: computedActorData.inventory.filter(item => item.type === type.key)
       })),
       weight: {
-        value: inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
+        value: computedActorData.inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
         max: calcMaxInventoryWeight(computedActorData),
       },
       flags: {
@@ -307,7 +321,7 @@ export default class SwTorActorSheet extends ActorSheet {
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
     data.speciesList = Species.list
-    data.trainings = trainings.map(t => ({
+    data.trainings = computedActorData.trainings.map(t => ({
       ...t,
       desc: describeTraining(t)
     }))
@@ -478,7 +492,7 @@ export default class SwTorActorSheet extends ActorSheet {
   }
 
   _onGpToXp = () => {
-    const gp = calcGp(this.actor.data)
+    const gp = calcGp(this.computeActorData(this.actor.data))
     if (gp > 0) {
       this.actor.update({ 'data.xp.gp': ObjectUtils.try(this.actor.data.data, 'xp', 'gp', { default: 0 }) + 1 })
     }
@@ -654,7 +668,7 @@ export default class SwTorActorSheet extends ActorSheet {
     })
 
     if (parsed.input.totalXp != null) {
-      const newVal = Math.round(processDeltaValue(parsed.input.totalXp, calcTotalXp(this.actor.data)))
+      const newVal = Math.round(processDeltaValue(parsed.input.totalXp, calcTotalXp(this.computeActorData(this.actor.data))))
       formData['data.xp.gained'] = newVal -
         (ObjectUtils.try(this.actorData, 'xp', 'gp', { default: 0 }) * Config.character.gpToXpRate)
     }
