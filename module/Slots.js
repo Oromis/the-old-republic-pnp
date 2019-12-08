@@ -3,7 +3,7 @@ import ObjectUtils from './ObjectUtils.js'
 const list = [
   { key: 'head', label: 'Kopf', type: 'head', img: 'systems/sw-tor/icons/slots/ihead.webp' },
   { key: 'implant', label: 'Implantat', type: 'implant', img: 'systems/sw-tor/icons/slots/iimplant.webp' },
-  { key: 'torso', label: 'Oberkörper', img: 'systems/sw-tor/icons/slots/iarmor.webp' },
+  { key: 'torso', label: 'Oberkörper', type: 'torso', img: 'systems/sw-tor/icons/slots/iarmor.webp' },
   { key: 'left-arm', label: 'Linker Arm', type: 'arm', img: 'systems/sw-tor/icons/slots/iforearm_l.webp' },
   { key: 'right-arm', label: 'Rechter Arm', type: 'arm', img: 'systems/sw-tor/icons/slots/iforearm_r.webp' },
   { key: 'left-hand', label: 'Linke Hand', type: 'hand', img: 'systems/sw-tor/icons/slots/ihand_l.webp' },
