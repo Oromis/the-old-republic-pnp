@@ -4,7 +4,6 @@ import Species from './Species.js'
 import Attributes, {attrValue} from './Attributes.js'
 import XpTable from './XpTable.js'
 import Metrics from './Metrics.js'
-import Skills from "./Skills.js"
 
 export function detectPropertyType(property) {
   const key = property.key
@@ -70,12 +69,13 @@ export function calcSkillXp(actor, property) {
   return result
 }
 
-function calcXpFromTrainingSkill(training, key, from) {
+function calcXpFromTrainingSkill(training, property, from) {
+  const key = getKey(property)
   if(training.data.baseTraining) {
     from += (+training.data.baseTraining.data.mods[key]) || 0
   }
   return XpTable.getUpgradeCost({
-    category: Skills.getMap()[key].xpCategory,
+    category: property.xpCategory,
     from: from,
     to: from + (+training.data.mods[key])
   })
@@ -85,10 +85,10 @@ export function calcPropertyTrainingsMod(actor, property) {
   if(detectPropertyType(property) !== 'skill') {
     return actor.trainings.map(t => ObjectUtils.try(t.data.mods, getKey(property), {default: 0})).reduce((acc, v) => acc + (+v), 0)
   }
-  const from = Skills.getMap()[getKey(property)].isBasicSkill ? 5 : 0
-  const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, getKey(property), from)).reduce((acc, v) => acc + (+v), 0)
+  const from = property.isBasicSkill ? 5 : 0
+  const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, property, from)).reduce((acc, v) => acc + (+v), 0)
   return XpTable.getPointsFromXp({
-    category: Skills.getMap()[getKey(property)].xpCategory,
+    category: property.xpCategory,
     xp,
     from
   })
@@ -124,7 +124,7 @@ export function explainPropertyBaseValue(actor, property, options) {
   }
   let base = getBaseValue(actor, property, options)
   if(detectPropertyType(property) === 'skill'
-      && !Skills.getMap()[getKey(property)].isBasicSkill
+      && !property.isBasicSkill
       && calcPropertyTrainingsMod(actor, property) > 0) {
     base = 0
   }
