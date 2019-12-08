@@ -21,6 +21,7 @@ import { Parser } from './vendor/expr-eval/expr-eval.js'
 import ForceDispositions from './ForceDispositions.js'
 import EffectModifiers from './EffectModifiers.js'
 import Slots from './Slots.js'
+import {describeTraining} from "./TrainingSheet.js"
 
 let timeout = null
 
@@ -148,15 +149,17 @@ export default class SwTorActorSheet extends ActorSheet {
    */
   getData() {
     const data = super.getData()
-    let gp = calcGp(data.data)
+    let gp = calcGp(data)
     const freeXp = calcFreeXp(data)
-    let inventory = [], skills = [], freeItems = [], equippedItems = []
+    let inventory = [], skills = [], freeItems = [], equippedItems = [], trainings = []
 
     const actorSlots = data.data.slots || {}
 
     data.items.forEach(item => {
       if (item.type === 'skill' || item.type === 'force-skill') {
         skills.push(item)
+      } else if(item.type === 'training') {
+        trainings.push(item)
       } else {
         inventory.push(item)
         if (Object.values(actorSlots).indexOf(item.id) !== -1) {
@@ -167,18 +170,19 @@ export default class SwTorActorSheet extends ActorSheet {
       }
     })
 
-    const computed = {
+    const computedActorData = {
       ...this.actorData,
       equippedItems,
+      trainings,
     }
 
     const attributes = Attributes.list.map(generalAttr => {
       const attr = { ...generalAttr, ...data.data.attributes[generalAttr.key] }
       const result = {
         ...attr,
-        gained: calcGained(computed, attr, { freeXp }),
-        value: explainPropertyValue(computed, attr),
-        mod: explainMod(computed, attr),
+        gained: calcGained(computedActorData, attr, { freeXp }),
+        value: explainPropertyValue(computedActorData, attr),
+        mod: explainMod(computedActorData, attr),
       }
       if (result.value.total !== ObjectUtils.try(data.data.attributes, generalAttr.key, 'value')) {
         this._needsUpdate = true
@@ -187,15 +191,15 @@ export default class SwTorActorSheet extends ActorSheet {
     })
 
     const attributesMap = ObjectUtils.asObject(attributes, 'key')
-    computed.attributes = ObjectUtils.asObject(attributes, 'key')
+    computedActorData.attributes = ObjectUtils.asObject(attributes, 'key')
 
     skills = skills.map(skill => {
-      const value = explainPropertyValue(this.actorData, skill.data)
+      const value = explainPropertyValue(computedActorData, skill.data)
       return {
         ...skill,
         xp: calcSkillXp(skill.data),
         xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
-        gained: calcGained(this.actorData, skill.data, { freeXp }),
+        gained: calcGained(computedActorData, skill.data, { freeXp }),
         value,
         check: {
           rolls: [
@@ -215,7 +219,7 @@ export default class SwTorActorSheet extends ActorSheet {
       }
     })
 
-    computed.skills = ObjectUtils.asObject(skills, 'key')
+    computedActorData.skills = ObjectUtils.asObject(skills, 'key')
 
     const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
       skill.range = RangeTypes.map[skill.data.range.type].format(skill.data.range)
@@ -257,7 +261,7 @@ export default class SwTorActorSheet extends ActorSheet {
       xpFromGp: data.data.xp.gp * Config.character.gpToXpRate,
       xpCategories: XpTable.getCategories(),
       speciesName: ObjectUtils.try(Species.map[data.data.species], 'name', { default: 'None' }),
-      attributes: computed.attributes,
+      attributes: computedActorData.attributes,
       skillCategories: [
         ...SkillCategories.list.map(cat => ({
           label: cat.label,
@@ -274,9 +278,9 @@ export default class SwTorActorSheet extends ActorSheet {
 
         return {
           ...metric,
-          gained: generalMetric.xpCategory ? calcGained(this.actorData, metric, { freeXp }) : null,
-          max: explainPropertyValue(computed, metric, { target: 'max' }),
-          mod: explainMod(this.actorData, metric),
+          gained: generalMetric.xpCategory ? calcGained(computedActorData, metric, { freeXp }) : null,
+          max: explainPropertyValue(computedActorData, metric, { target: 'max' }),
+          mod: explainMod(computedActorData, metric),
         }
       }),
       slots: Slots.layout.map(row => row.map(slot => {
@@ -301,7 +305,7 @@ export default class SwTorActorSheet extends ActorSheet {
       })),
       weight: {
         value: inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
-        max: calcMaxInventoryWeight(computed),
+        max: calcMaxInventoryWeight(computedActorData),
       },
       flags: {
         hasGp: gp > 0,
@@ -310,6 +314,10 @@ export default class SwTorActorSheet extends ActorSheet {
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
     data.speciesList = Species.list
+    data.trainings = trainings.map(t => ({
+      ...t,
+      desc: describeTraining(t)
+    }))
     data.itemTypes = ItemTypes.list
     data.ui = {
       inventoryHidden: this._inventoryHidden
@@ -488,7 +496,7 @@ export default class SwTorActorSheet extends ActorSheet {
   }
 
   _onGpToXp = () => {
-    const gp = calcGp(this.actor.data.data)
+    const gp = calcGp(this.actor.data)
     if (gp > 0) {
       this.actor.update({ 'data.xp.gp': ObjectUtils.try(this.actor.data.data, 'xp', 'gp', { default: 0 }) + 1 })
     }

@@ -4,8 +4,9 @@ import Species from './Species.js'
 import Attributes, {attrValue} from './Attributes.js'
 import XpTable from './XpTable.js'
 import Metrics from './Metrics.js'
+import Skills from "./Skills.js"
 
-function detectPropertyType(property) {
+export function detectPropertyType(property) {
   const key = property.key
   if (key.length === 2) {
     return 'attribute'
@@ -18,6 +19,10 @@ function detectPropertyType(property) {
   } else {
     throw new Error(`Unknown property type: ${key}`)
   }
+}
+
+function getKey(property) {
+  return typeof property === 'string' ? property : property.key
 }
 
 function getBaseValue(actor, property, { target = 'value' } = {}) {
@@ -34,10 +39,11 @@ function getBaseValue(actor, property, { target = 'value' } = {}) {
 }
 
 export function calcGp(char) {
-  return (char.gp.initial || Config.character.initialGp)
-    - (char.xp.gp || 0)
-    - ObjectUtils.try(Species.map[char.species], 'gp', { default: 0 })
-    - Object.values(char.attributes).reduce((acc, cur) => acc + (cur.gp || 0), 0)
+  return (char.data.gp.initial || Config.character.initialGp)
+    - (char.data.xp.gp || 0)
+    - ObjectUtils.try(Species.map[char.data.species], 'gp', { default: 0 })
+    - Object.values(char.data.attributes).reduce((acc, cur) => acc + (cur.gp || 0), 0)
+    - char.items.filter(i => i.type === 'training').reduce((acc, cur) => acc + (+cur.data.gp), 0)
 }
 
 export function calcFreeXp(char) {
@@ -64,11 +70,44 @@ export function calcSkillXp(skill) {
   return result
 }
 
-export function explainMod(actor, property) {
+function calcXpFromTrainingSkill(training, key, from) {
+  if(training.data.baseTraining) {
+    from += (+training.data.baseTraining.data.mods[key]) || 0
+  }
+  return XpTable.getUpgradeCost({
+    category: Skills.getMap()[key].xpCategory,
+    from: from,
+    to: from + (+training.data.mods[key])
+  })
+}
+
+export function calcPropertyTrainingsMod(actor, property) {
+  if(detectPropertyType(property) !== 'skill') {
+    return actor.trainings.map(t => ObjectUtils.try(t.data.mods, getKey(property), {default: 0})).reduce((acc, v) => acc + (+v), 0)
+  }
+  const from = (Skills.getMap()[getKey(property)].isBasicSkill ? 5 : 0) + calcPropertySpeciesMod(actor, property)
+  const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, getKey(property), from)).reduce((acc, v) => acc + (+v), 0)
+  return XpTable.getPointsFromXp({
+    category: Skills.getMap()[getKey(property)].xpCategory,
+    xp,
+    from
+  })
+}
+
+function explainSpeciesMod(actor, property) {
   const key = typeof property === 'string' ? property : property.key
   const species = Species.map[(actor.species || Species.default)]
+  return { label: species.name, value: ObjectUtils.try(species, 'mods', key, { default: 0 })}
+}
+
+function calcPropertySpeciesMod(actor, property) {
+  return explainSpeciesMod(actor, property).value
+}
+
+export function explainMod(actor, property) {
   const components = [
-    { label: species.name, value: ObjectUtils.try(species, 'mods', key, { default: 0 }) }
+    explainSpeciesMod(actor, property),
+    { label: 'Ausbildungen', value: calcPropertyTrainingsMod(actor, property)}
   ].filter(mod => mod.value !== 0)
   return {
     total: components.reduce((acc, cur) => acc + cur.value, 0),

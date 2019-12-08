@@ -1,4 +1,4 @@
-.sw-tor input:not([type=checkbox]), .input-width {
+.sw-tor input:not([type=checkbox]):not(.text), .input-width {
   width: 56px;
 }
 
@@ -23,4 +23,15 @@
 .sw-tor button.char,
 .sw-tor .char-button-placeholder {
   width: 22px;
+}
+
+.sw-tor .checkbox-element {
+  display: flex;
+  margin-right: 5px;
+}
+
+.sw-tor .checkbox-element label {
+  height: 20px;
+  line-height: 20px;
+  margin: 3px 0;
 }
