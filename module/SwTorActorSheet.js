@@ -21,6 +21,7 @@ import { Parser } from './vendor/expr-eval/expr-eval.js'
 import ForceDispositions from './ForceDispositions.js'
 import EffectModifiers from './EffectModifiers.js'
 import Slots from './Slots.js'
+import {describeTraining} from "./TrainingSheet.js"
 
 function calcGained(actor, property, { freeXp }) {
   const gainLog = ObjectUtils.try(property, 'gained', { default: [] }).length
@@ -147,11 +148,13 @@ export default class SwTorActorSheet extends ActorSheet {
     const data = super.getData()
     let gp = calcGp(data.data)
     const freeXp = calcFreeXp(data)
-    let inventory = [], skills = []
+    let inventory = [], skills = [], trainings = []
 
     data.items.forEach(item => {
       if (item.type === 'skill' || item.type === 'force-skill') {
         skills.push(item)
+      } else if(item.type === 'training') {
+        trainings.push(item)
       } else {
         inventory.push(item)
       }
@@ -283,6 +286,10 @@ export default class SwTorActorSheet extends ActorSheet {
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
     data.speciesList = Species.list
+    data.trainings = trainings.map(t => ({
+      ...t,
+      desc: describeTraining(t)
+    }))
     data.itemTypes = ItemTypes.list
     data.ui = {
       inventoryHidden: this._inventoryHidden

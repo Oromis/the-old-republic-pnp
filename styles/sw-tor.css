@@ -49,8 +49,19 @@
     height: 40px;
 }
 
-.sw-tor.sheet .species-div {
+.sw-tor.sheet .species-info {
     height: 35px;
+}
+
+.sw-tor.sheet .trainings {
+    flex-wrap: wrap;
+}
+
+.sw-tor.sheet .vertical-divider {
+    padding-left: 4px;
+    margin: 0 0 0 4px;
+    border-left: 1px solid gray;
+    height: 15px;
 }
 
 /* Navigation Tabs */

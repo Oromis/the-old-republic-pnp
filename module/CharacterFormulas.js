@@ -4,6 +4,7 @@ import Species from './Species.js'
 import Attributes, {attrValue} from './Attributes.js'
 import XpTable from './XpTable.js'
 import Metrics from './Metrics.js'
+import Skills from "./Skills.js"
 
 export function detectPropertyType(property) {
   const key = property.key
@@ -64,11 +65,28 @@ export function calcSkillXp(skill) {
   return result
 }
 
-export function explainMod(actor, property) {
+function calcXpFromTrainingSkill(training, key) {
+  // TODO species mods are missing
+  let base = Skills.getMap()[key].data.isBasicSkill ? 5 : 0
+  if(training.data.baseTraining) {
+    base += training.data.baseTraining.data.mods[key] || 0
+  }
+  return XpTable.getUpgradeCost({
+    category: Skills.getMap()[key].category,
+    from: base,
+    to: base + training.data.mods[key]
+  })
+}
+
+function explainSpeciesMod(actor, property) {
   const key = typeof property === 'string' ? property : property.key
   const species = Species.map[(actor.species || Species.default)]
+  return { label: species.name, value: ObjectUtils.try(species, 'mods', key, { default: 0 })}
+}
+
+export function explainMod(actor, property) {
   const components = [
-    { label: species.name, value: ObjectUtils.try(species, 'mods', key, { default: 0 }) }
+    explainSpeciesMod(actor, property)
   ].filter(mod => mod.value !== 0)
   return {
     total: components.reduce((acc, cur) => acc + cur.value, 0),

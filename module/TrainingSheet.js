@@ -7,7 +7,10 @@ import ObjectUtils from './ObjectUtils.js'
 import Metrics from './Metrics.js'
 
 function resolveModLabel(key) {
-  let type = detectPropertyType({key})
+  let type = ''
+  try {
+    type = detectPropertyType({key})
+  } catch(e) {}
   if(type === 'skill') {
     return ObjectUtils.try(Skills.getMap()[key], 'label', { default: key })
   } else if(type === 'attribute') {
@@ -16,6 +19,14 @@ function resolveModLabel(key) {
     return Metrics.map[key].label
   }
   return key
+}
+
+export function describeTraining(training) {
+  let desc = 'GP: '.concat( training.data.gp)
+  for (const key of Object.keys(training.data.mods)) {
+    desc = desc.concat('\n', resolveModLabel(key), ': ', training.data.mods[key])
+  }
+  return desc
 }
 
 export default class TrainingSheet extends ItemSheet {
@@ -62,11 +73,7 @@ export default class TrainingSheet extends ItemSheet {
       value: data.data.dispositions[e.key]
     }))
     if(data.data.baseTraining) {
-      let desc = ''
-      for (const key of Object.keys(data.data.baseTraining.data.mods)) {
-        desc = desc.concat('\n', resolveModLabel(key), ': ', data.data.baseTraining.data.mods[key])
-      }
-      data.baseTrainingEffects = desc
+      data.baseTrainingEffects = describeTraining(data.data.baseTraining)
     }
     return data
   }
