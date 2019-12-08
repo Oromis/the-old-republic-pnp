@@ -542,7 +542,7 @@ export default class SwTorActorSheet extends ActorSheet {
       ...this.actorData.attributes[key],
     }
 
-    const { xp, gainLog } = calcGainChange(this.actorData, attribute, { action, defaultXpCategory })
+    const { xp, gainLog } = calcGainChange(this.computeActorData(this.actor.data), attribute, { action, defaultXpCategory })
     this.actor.update({
       [`data.attributes.${key}.gained`]: gainLog,
       [`data.attributes.${key}.xp`]: xp,
@@ -555,7 +555,7 @@ export default class SwTorActorSheet extends ActorSheet {
     const key = event.currentTarget.getAttribute('data-skill')
     const skill = this.getSkill(key)
 
-    const { xp, gainLog } = calcGainChange(this.actorData, skill.data, { action })
+    const { xp, gainLog } = calcGainChange(this.computeActorData(this.actor.data), skill.data, { action })
 
     const skillEntity = this.actor.getOwnedItem(skill.id)
     if (skillEntity != null) {
@@ -577,7 +577,7 @@ export default class SwTorActorSheet extends ActorSheet {
       ...this.actorData.metrics[key],
     }
 
-    const { xp, gainLog } = calcGainChange(this.actorData, metric, { action })
+    const { xp, gainLog } = calcGainChange(this.computeActorData(this.actor.data), metric, { action })
     this.actor.update({
       [`data.metrics.${key}.gained`]: gainLog,
       [`data.metrics.${key}.xp`]: xp,
