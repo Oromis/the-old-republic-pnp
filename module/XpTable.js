@@ -74,7 +74,10 @@ export default {
     let points = 0
     let index = Math.min(from + 1 - baseLevel, costTable.length - 1)
     while (budget >= costTable[index]) {
-      ++points
+      if(index === 0)
+        points += baseLevel
+      else
+        ++points
       budget -= costTable[index]
       index = Math.min(costTable.length - 1, index + 1)
     }

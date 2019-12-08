@@ -4,7 +4,6 @@ import Species from './Species.js'
 import Attributes, {attrValue} from './Attributes.js'
 import XpTable from './XpTable.js'
 import Metrics from './Metrics.js'
-import Skills from "./Skills.js"
 
 export function detectPropertyType(property) {
   const key = property.key
@@ -38,44 +37,45 @@ function getBaseValue(actor, property, { target = 'value' } = {}) {
   }
 }
 
-export function calcGp(char) {
-  return (char.data.gp.initial || Config.character.initialGp)
-    - (char.data.xp.gp || 0)
-    - ObjectUtils.try(Species.map[char.data.species], 'gp', { default: 0 })
-    - Object.values(char.data.attributes).reduce((acc, cur) => acc + (cur.gp || 0), 0)
-    - char.items.filter(i => i.type === 'training').reduce((acc, cur) => acc + (+cur.data.gp), 0)
+export function calcGp(actor) {
+  return (actor.gp.initial || Config.character.initialGp)
+    - (actor.xp.gp || 0)
+    - ObjectUtils.try(Species.map[actor.species], 'gp', { default: 0 })
+    - Object.values(actor.attributes).reduce((acc, cur) => acc + (cur.gp || 0), 0)
+    - actor.trainings.reduce((acc, cur) => acc + (+cur.data.gp), 0)
 }
 
-export function calcFreeXp(char) {
-  return calcTotalXp(char) -
+export function calcFreeXp(actor) {
+  return calcTotalXp(actor) -
     Attributes.list.reduce((acc, cur) => {
-      return acc + ObjectUtils.try(char.data.attributes, cur.key, 'xp', { default: 0 })
+      return acc + ObjectUtils.try(actor.attributes, cur.key, 'xp', { default: 0 })
     }, 0) -
-    char.items.filter(item => item.type === 'skill').reduce((acc, skill) => acc + calcSkillXp(skill.data), 0) -
+      actor.skills.reduce((acc, skill) => acc + calcSkillXp(actor, skill.data), 0) -
     Metrics.list.reduce((acc, cur) => {
-      return acc + ObjectUtils.try(char.data.metrics, cur.key, 'xp', { default: 0 })
+      return acc + ObjectUtils.try(actor.metrics, cur.key, 'xp', { default: 0 })
     }, 0)
 }
 
-export function calcTotalXp(char) {
-  return char.data.xp.gp * Config.character.gpToXpRate + char.data.xp.gained
+export function calcTotalXp(actor) {
+  return actor.xp.gp * Config.character.gpToXpRate + actor.xp.gained
 }
 
-export function calcSkillXp(skill) {
-  let result = skill.xp || 0
-  if (!skill.isBasicSkill) {
+export function calcSkillXp(actor, property) {
+  let result = property.xp || 0
+  if (!property.isBasicSkill && calcPropertyTrainingsMod(actor, property) === 0) {
     // Non-basic skills need to be activated
-    result += XpTable.getActivationCost(skill.xpCategory)
+    result += XpTable.getActivationCost(property.xpCategory)
   }
   return result
 }
 
-function calcXpFromTrainingSkill(training, key, from) {
+function calcXpFromTrainingSkill(training, property, from) {
+  const key = getKey(property)
   if(training.data.baseTraining) {
     from += (+training.data.baseTraining.data.mods[key]) || 0
   }
   return XpTable.getUpgradeCost({
-    category: Skills.getMap()[key].xpCategory,
+    category: property.xpCategory,
     from: from,
     to: from + (+training.data.mods[key])
   })
@@ -85,8 +85,8 @@ export function calcPropertyTrainingsMod(actor, property) {
   if(detectPropertyType(property) !== 'skill') {
     return actor.trainings.map(t => ObjectUtils.try(t.data.mods, getKey(property), {default: 0})).reduce((acc, v) => acc + (+v), 0)
   }
-  const from = (ObjectUtils.try(Skills.getMap(), getKey(property), 'isBasicSkill', { default: false }) ? 5 : 0) + calcPropertySpeciesMod(actor, property)
-  const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, getKey(property), from)).reduce((acc, v) => acc + (+v), 0)
+  const from = property.isBasicSkill ? 5 : 0
+  const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, property, from)).reduce((acc, v) => acc + (+v), 0)
   return XpTable.getPointsFromXp({
     category: property.xpCategory,
     xp,
@@ -122,7 +122,12 @@ export function explainPropertyBaseValue(actor, property, options) {
     result.total += gp
     result.components.unshift({ label: 'GP', value: gp })
   }
-  const base = getBaseValue(actor, property, options)
+  let base = getBaseValue(actor, property, options)
+  if(detectPropertyType(property) === 'skill'
+      && !property.isBasicSkill
+      && calcPropertyTrainingsMod(actor, property) > 0) {
+    base = 0
+  }
   if (base !== 0) {
     result.total += base
     result.components.unshift({ label: 'Basis', value: base })
