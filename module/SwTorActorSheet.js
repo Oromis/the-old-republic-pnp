@@ -26,6 +26,8 @@ import EffectModifiers from './EffectModifiers.js'
 import Slots from './Slots.js'
 import {describeTraining} from "./TrainingSheet.js"
 
+let timeout = null
+
 function calcGained(actor, property, { freeXp }) {
   const gainLog = ObjectUtils.try(property, 'gained', { default: [] }).length
   return {
@@ -121,6 +123,7 @@ export default class SwTorActorSheet extends ActorSheet {
      */
     this._sheetTab = "attributes"
     this._inventoryHidden = {}
+    this._needsUpdate = false
 
     new AutoSubmitSheet(this)
   }
@@ -189,12 +192,16 @@ export default class SwTorActorSheet extends ActorSheet {
 
     const attributes = Attributes.list.map(generalAttr => {
       const attr = { ...generalAttr, ...data.data.attributes[generalAttr.key] }
-      return {
+      const result = {
         ...attr,
         gained: calcGained(computedActorData, attr, { freeXp }),
         value: explainPropertyValue(computedActorData, attr),
         mod: explainMod(computedActorData, attr),
       }
+      if (result.value.total !== ObjectUtils.try(data.data.attributes, generalAttr.key, 'value')) {
+        this._needsUpdate = true
+      }
+      return result
     })
 
     const attributesMap = ObjectUtils.asObject(attributes, 'key')
@@ -316,7 +323,7 @@ export default class SwTorActorSheet extends ActorSheet {
       },
       flags: {
         hasGp: gp > 0,
-        canRefundXpToGp: data.data.xp.gp > 0
+        canRefundXpToGp: data.data.xp.gp > 0,
       },
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
@@ -361,8 +368,19 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('.use-force').click(this._onUseForce)
     html.find('.do-roll').click(this._onDoRoll)
     html.find('.roll-check').click(this._onRollCheck)
-
     html.find('.item-create').click(this._onCreateItem)
+
+    if (this._needsUpdate) {
+      if (timeout != null) {
+        clearTimeout(timeout)
+      }
+      timeout = setTimeout(() => {
+        timeout = null
+        this._needsUpdate = false
+        this._onSubmit(new Event('click'))
+      }, 100)
+    }
+
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
       const li = $(ev.currentTarget).parents("[data-item-id]");
@@ -643,7 +661,7 @@ export default class SwTorActorSheet extends ActorSheet {
 
     // Skills
     for (const key of Object.keys(formData)) {
-      const match = /skills\.([\w\-_]+)\.(.*)/.exec(key)
+      const match = /skills\.([\wüäö\-_]+)\.(.*)/.exec(key)
       if (match) {
         const skill = this.getSkill(match[1])
         if (skill != null) {
@@ -655,7 +673,12 @@ export default class SwTorActorSheet extends ActorSheet {
             } else if (match[2].indexOf('.vars.') !== -1) {
               value = value === '' || isNaN(value) ? '' : +value
             }
-            skillEntity.update({ [match[2]]: value })
+
+            const payload = { [match[2]]: value }
+            const oldValue = ObjectUtils.try(skill, ...match[2].split('.'))
+            if (value !== oldValue) {
+              skillEntity.update(payload)
+            }
           }
         }
         delete formData[key]
@@ -674,7 +697,7 @@ export default class SwTorActorSheet extends ActorSheet {
     }
 
     // Update the Actor
-    return this.actor.update(formData);
+    return this.actor.update(formData)
   }
 
   get actorData() {
@@ -682,6 +705,6 @@ export default class SwTorActorSheet extends ActorSheet {
   }
 
   getSkill(key) {
-    return this.actor.data.items.find(item => item.data.key === key)
+    return this.actor.data.items.find(item => ['skill', 'force-skill'].indexOf(item.type) !== -1 && item.data.key === key)
   }
 }

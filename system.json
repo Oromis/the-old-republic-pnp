@@ -38,7 +38,7 @@
       "entity": "Item"
     }
   ],
-  "initiative": "1d6",
+  "initiative": "1d6 + (@attributes.in.value + @attributes.sc.value) / 20",
   "gridDistance": 1.5,
   "gridUnits": "m",
   "primaryTokenAttribute": "health",
