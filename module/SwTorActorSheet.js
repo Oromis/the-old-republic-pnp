@@ -195,6 +195,10 @@ export default class SwTorActorSheet extends ActorSheet {
     const data = super.getData()
 
     const actorSlots = data.data.slots || {}
+    const weaponSlots = [
+      { ...Slots.map['right-hand'] },
+      { ...Slots.map['left-hand'] },
+    ]
 
     const computedActorData = this.computeActorData(data)
 

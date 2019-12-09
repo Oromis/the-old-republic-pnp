@@ -211,12 +211,12 @@ export default class TrainingSheet extends ItemSheet {
   }
 
   handleDrop(type, item) {
-    if(type === 'skill') {
-      this.addMod(item.data.key)
-    } else if(type === 'training') {
+    if(type === 'training') {
       this.item.update({
         'data.baseTraining': item
       })
+    } else if(item.data.key) {
+      this.addMod(item.data.key)
     }
   }
 }
