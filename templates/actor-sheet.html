@@ -326,11 +326,54 @@
         <div class="flex-grow flex-zero">
           <h3 class="align-center">Offensive</h3>
           <div class="multi-item">
-            {{#select computed.weaponSlots as |slot|}}
-              <div>
-                <h4></h4>
+            {{#each computed.weaponSlots as |slot|}}
+              <div class="weapon-slot">
+                <h4>{{slot.label}} - <strong>{{slot.skill.name}}</strong></h4>
+                {{#if slot.skill}}
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td class="weapon-slot-label">Attacke</td>
+                        <td>
+                          <div class="flex-row multi-item">
+                            {{#each slot.skill.check.rolls as |roll|}}
+                              <span title="{{roll.label}}">
+                                <strong>{{formatAttrKey roll.key}}</strong>
+                                {{roll.target}}
+                              </span>
+                            {{/each}}
+                            <span>|</span>
+                            <span title="Ausgleichspunkte">
+                              <strong>AgP</strong>
+                              {{slot.skill.check.AgP}}
+                            </span>
+                            <a class="roll-check" title="Probe werfen" data-check='{{json slot.skill.check}}'><i class="fas fa-dice-d20"></i></a>
+                          </div>
+                        </td>
+                      </tr>
+                      {{#if slot.item}}
+                        <tr>
+                          <td>Schaden</td>
+                          <td>
+                            <div class="flex-row multi-item">
+                              <span>{{slot.item.data.damage.formula}}</span>
+                              <a
+                                  class="do-roll"
+                                  title="Schaden auswürfeln"
+                                  data-formula="{{slot.item.data.damage.formula}}"
+                                  data-label="Attacke mit {{slot.item.name}}"
+                              >
+                                <i class="fas fa-dice-d6"></i>
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                      {{/if}}
+                    </tbody>
+                  </table>
+                {{/if}}
               </div>
-            {{/select}}
+            {{/each}}
           </div>
         </div>
         <div class="equipment-grid multi-item">

@@ -265,6 +265,18 @@
     padding: 4px 8px;
 }
 
+.sw-tor .weapon-slot:not(:first-child) {
+    margin-top: 16px;
+}
+
+.sw-tor .weapon-slot h4 {
+    margin-bottom: 4px;
+}
+
+.sw-tor .weapon-slot-label {
+    width: 60px;
+}
+
 /* Metrics */
 .sw-tor .metric {
     flex-grow: 1;
@@ -301,4 +313,10 @@
 
 .sw-tor .check-diff.bad {
     color: #ff4b48;
+}
+
+.sw-tor .check-AgP {
+    text-align: center;
+    width: 40px;
+    border-left: 1px solid #aaa;
 }

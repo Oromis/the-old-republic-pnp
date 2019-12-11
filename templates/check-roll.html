@@ -1,4 +1,4 @@
-<div class="flex-row multi-item sw-tor">
+<div class="flex-row multi-item sw-tor flex-cross-stretch">
   {{#each rolls as |roll|}}
     <div class="multi-item check-roll dice-tooltip">
       <div title="{{roll.label}}"><strong>{{formatAttrKey roll.key}}</strong> {{roll.value}}</div>
@@ -12,4 +12,11 @@
       </div>
     </div>
   {{/each}}
+  {{#if AgP}}
+    <div class="multi-item check-AgP flex-col flex-space-between">
+      <div title="Ausgleichspunkte"><strong>AgP</strong></div>
+      <strong class="align-center">{{AgP.value}}</strong>
+      <div class="align-center">{{formatCheckDiff AgP.diff}}</div>
+    </div>
+  {{/if}}
 </div>

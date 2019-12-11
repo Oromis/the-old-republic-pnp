@@ -25,6 +25,7 @@ import ForceDispositions from './ForceDispositions.js'
 import EffectModifiers from './EffectModifiers.js'
 import Slots from './Slots.js'
 import {describeTraining} from "./TrainingSheet.js"
+import {makeRoll, resolveModLabel} from './SheetUtils.js'
 
 let timeout = null
 
@@ -151,8 +152,8 @@ export default class SwTorActorSheet extends ActorSheet {
 
     const actorSlots = data.data.slots || {}
     const weaponSlots = [
-      { ...Slots.map['right-hand'] },
-      { ...Slots.map['left-hand'] },
+      { ...Slots.map['right-hand'], skill: { key: 'fau' } },
+      { ...Slots.map['left-hand'], skill: { key: 'fau' } },
     ]
 
     data.items.forEach(item => {
@@ -168,6 +169,9 @@ export default class SwTorActorSheet extends ActorSheet {
           for (const weaponSlot of weaponSlots) {
             if (weaponSlot.key === slotEntry[0]) {
               weaponSlot.item = item
+              if (item.data.skill != null) {
+                weaponSlot.skill = { key: item.data.skill }
+              }
               break
             }
           }
@@ -184,6 +188,7 @@ export default class SwTorActorSheet extends ActorSheet {
       trainings,
       skills,
       inventory,
+      weaponSlots,
     }
   }
 
@@ -195,10 +200,6 @@ export default class SwTorActorSheet extends ActorSheet {
     const data = super.getData()
 
     const actorSlots = data.data.slots || {}
-    const weaponSlots = [
-      { ...Slots.map['right-hand'] },
-      { ...Slots.map['left-hand'] },
-    ]
 
     const computedActorData = this.computeActorData(data)
 
@@ -226,29 +227,37 @@ export default class SwTorActorSheet extends ActorSheet {
       const value = explainPropertyValue(computedActorData, skill.data)
       return {
         ...skill,
+        key: skill.data.key,
         xp: calcSkillXp(computedActorData, skill.data),
         xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
         gained: calcGained(computedActorData, skill.data, { freeXp }),
         value,
         check: {
           rolls: [
-            {
+            makeRoll({
               key: skill.data.attribute1,
               label: attributesMap[skill.data.attribute1].label,
               value: attributesMap[skill.data.attribute1].value.total
-            },
-            {
+            }),
+            makeRoll({
               key: skill.data.attribute2,
               label: attributesMap[skill.data.attribute2].label,
               value: attributesMap[skill.data.attribute2].value.total
-            },
-            { key: skill.data.key, label: skill.name, value: value.total },
+            }),
+            makeRoll({ key: skill.data.key, label: skill.name, value: value.total }),
           ],
+          AgP: Math.floor(value.total / 5),
         },
       }
     })
 
     computedActorData.skills = ObjectUtils.asObject(skills, 'key')
+
+    for (const weaponSlot of computedActorData.weaponSlots) {
+      if (weaponSlot.skill && computedActorData.skills[weaponSlot.skill.key]) {
+        weaponSlot.skill = computedActorData.skills[weaponSlot.skill.key]
+      }
+    }
 
     const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
       skill.range = RangeTypes.map[skill.data.range.type].format(skill.data.range)
@@ -332,7 +341,7 @@ export default class SwTorActorSheet extends ActorSheet {
         ...type,
         items: computedActorData.inventory.filter(item => item.type === type.key)
       })),
-      weaponSlots,
+      weaponSlots: computedActorData.weaponSlots,
       weight: {
         value: computedActorData.inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
         max: calcMaxInventoryWeight(computedActorData),
@@ -625,6 +634,7 @@ export default class SwTorActorSheet extends ActorSheet {
   _onDoRoll = event => {
     const formula = event.currentTarget.getAttribute('data-formula')
     new Roll(formula).toMessage({
+      speaker: { actor: this.actor.id },
       flavor: event.currentTarget.getAttribute('data-label')
     })
   }
@@ -634,17 +644,25 @@ export default class SwTorActorSheet extends ActorSheet {
     const die = new Die(20)
     die.roll(check.rolls.length)
 
+    const payload = {
+      rolls: check.rolls.map((roll, i) => {
+        const target = Math.floor(roll.value / 5)
+        return { ...roll, die: die.results[i], target, diff: target - die.results[i] }
+      }),
+    }
+    if (check.AgP) {
+      payload.AgP = {
+        value: check.AgP,
+        diff: check.AgP - payload.rolls.reduce((acc, cur) => acc + (cur.diff < 0 ? -cur.diff : 0), 0)
+      }
+    }
     const chatData = {
       user: game.user._id,
       type: CONST.CHAT_MESSAGE_TYPES.ROLL,
       rollMode: game.settings.get("core", "rollMode"),
+      speaker: { actor: this.actor.id },
       sound: CONFIG.sounds.dice,
-      content: await renderTemplate('systems/sw-tor/templates/check-roll.html', {
-        rolls: check.rolls.map((roll, i) => {
-          const target = Math.floor(roll.value / 5)
-          return { ...roll, die: die.results[i], target, diff: target - die.results[i] }
-        })
-      })
+      content: await renderTemplate('systems/sw-tor/templates/check-roll.html', payload)
     }
 
     ChatMessage.create(chatData)

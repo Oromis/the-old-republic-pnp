@@ -5,21 +5,7 @@ import Attributes from './Attributes.js'
 import Skills from './Skills.js'
 import ObjectUtils from './ObjectUtils.js'
 import Metrics from './Metrics.js'
-
-function resolveModLabel(key) {
-  let type = ''
-  try {
-    type = detectPropertyType({key})
-  } catch(e) {}
-  if(type === 'skill') {
-    return ObjectUtils.try(Skills.getMap()[key], 'label', { default: key })
-  } else if(type === 'attribute') {
-    return ObjectUtils.try(Attributes.map[key], 'label', { default: key })
-  } else if(type === 'metric') {
-    return ObjectUtils.try(Metrics.map[key], 'label', { default: key })
-  }
-  return key
-}
+import {onDragOver, onDropItem, resolveModLabel} from './SheetUtils.js'
 
 export function describeTraining(training) {
   let desc = 'GP: '.concat( training.data.gp)
@@ -99,8 +85,8 @@ export default class TrainingSheet extends ItemSheet {
     if (!this.options.editable) return
 
     // Make the Training sheet droppable for items
-    this.form.ondragover = ev => this._onDragOver(ev)
-    this.form.ondrop = ev => this._onDrop(ev)
+    this.form.ondragover = onDragOver()
+    this.form.ondrop = onDropItem(this.handleDrop)
 
     // Delete Mod Item
     html.find('.mod-delete').click(ev => {
@@ -137,56 +123,6 @@ export default class TrainingSheet extends ItemSheet {
     });
   }
 
-  /**
-   * Allow the Training sheet to be a displayed as a valid drop-zone
-   * @private
-   */
-  _onDragOver(event) {
-    event.preventDefault();
-    return false;
-  }
-
-  /* -------------------------------------------- */
-
-  /**
-   * Handle dropped data on the Actor sheet
-   * @private
-   */
-  _onDrop(event) {
-    event.preventDefault();
-
-    // Try to extract the data
-    let data;
-    try {
-      data = JSON.parse(event.dataTransfer.getData('text/plain'));
-      if ( data.type !== "Item" ) return;
-    }
-    catch (err) {
-      return false;
-    }
-
-    // Case 1 - Import from a Compendium pack
-    if ( data.pack ) {
-      let pack = game.packs.find(p => p.collection === data.pack)
-      pack.getEntry(data.id).then(e => {
-        this.handleDrop(e.type, e)
-      })
-    }
-
-    // Case 2 - Data explicitly provided
-    else if ( data.data ) {
-      this.handleDrop(data.data.type, data.data)
-    }
-
-    // Case 3 - Import from World entity
-    else {
-      let item = game.items.get(data.id);
-      if ( !item ) return;
-      this.handleDrop(item.data.type, item.data)
-    }
-    return false;
-  }
-
   /* -------------------------------------------- */
 
   /**
@@ -206,11 +142,11 @@ export default class TrainingSheet extends ItemSheet {
 
   deleteMod(key) {
     this.item.update({
-      'data.mods': { [`-=${key}`]: null }
+      [`data.mods.-=${key}`]: null,
     })
   }
 
-  handleDrop(type, item) {
+  handleDrop = (type, item) => {
     if(type === 'training') {
       this.item.update({
         'data.baseTraining': item

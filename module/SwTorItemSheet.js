@@ -1,6 +1,6 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import DamageTypes from './DamageTypes.js'
-import {analyzeDamageFormula, analyzeExpression} from './SheetUtils.js'
+import {analyzeDamageFormula, analyzeExpression, onDragOver, onDropItem, resolveModLabel} from './SheetUtils.js'
 import SlotTypes from './SlotTypes.js'
 import ItemTypes from './ItemTypes.js'
 
@@ -54,6 +54,10 @@ export default class SwTorItemSheet extends ItemSheet {
     }
     if (data.flags.isWeapon) {
       data.computed.damage = analyzeDamageFormula({ path: [data.data.damage, 'formula'], defaultExpr: '0' })
+      data.computed.skill = {
+        key: data.data.skill,
+        label: resolveModLabel(data.data.skill, { defaultLabel: '' }),
+      }
     }
     if (data.flags.isRangedWeapon) {
       data.computed.precision = analyzeExpression({ path: [data.data.precision, 'formula'] })
@@ -87,6 +91,10 @@ export default class SwTorItemSheet extends ItemSheet {
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return
 
+    // Make the Item sheet droppable for other items
+    this.form.ondragover = onDragOver()
+    this.form.ondrop = onDropItem(this._handleDrop)
+
     html.find('.new-slot-type').click(() => {
       this.item.update({
         'data.slotTypes': [...(this.item.data.data.slotTypes || []), null]
@@ -110,6 +118,15 @@ export default class SwTorItemSheet extends ItemSheet {
         'data.effects': { [`-=${targetKey}`]: null }
       })
     })
+  }
+
+  _handleDrop = (type, item) => {
+    if (item.data.category === 'melee' || item.data.category === 'ranged') {
+      // Weapon skill
+      this.item.update({
+        'data.skill': item.data.key,
+      })
+    }
   }
 
   /* -------------------------------------------- */

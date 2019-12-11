@@ -39,6 +39,15 @@
         </tr>
         {{#if flags.isWeapon}}
           <tr>
+            <td class="align-right">Waffenfähigkeit</td>
+            <td>
+              <div class="flex-row multi-item">
+                <input type="text" name="data.skill" value="{{computed.skill.key}}" />
+                <span>{{computed.skill.label}}</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
             <td class="align-right">Schaden</td>
             <td>
               <div class="flex-row multi-item {{errorClass when=computed.damage.error}}">

@@ -52,7 +52,8 @@
         "damage": {
           "formula": ""
         },
-        "damageType": ""
+        "damageType": "",
+        "skill": null
       },
       "equippable": {
         "condition": 100,
