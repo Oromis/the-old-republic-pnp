@@ -296,19 +296,33 @@ export default class SwTorActorSheet extends ActorSheet {
           }
         }
 
-        const advantage = (weaponSlot.precision || 0) +
+        // Defense
+        if (weaponSlot.skill.data.category === 'melee') {
+          weaponSlot.canDefend = true
+          const paradeAdvantage = (weaponSlot.coordination || 0) +
+            ObjectUtils.try(data.data.weaponSlots, weaponSlot.key, 'paradeAdvantage', { default: 0 })
+          weaponSlot.paradeCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
+          for (const roll of weaponSlot.paradeCheck.rolls) {
+            roll.advantage = paradeAdvantage
+          }
+        }
+
+        // Offense
+        const attackAdvantage = (weaponSlot.precision || 0) +
           (weaponSlot.coordination || 0) +
           ObjectUtils.try(data.data.weaponSlots, weaponSlot.key, 'advantage', { default: 0 })
         weaponSlot.attackCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
         for (const roll of weaponSlot.attackCheck.rolls) {
-          roll.advantage = advantage
+          roll.advantage = attackAdvantage
         }
-        weaponSlot.damage = weaponSlot.item.data.damage.formula
-        if (weaponSlot.projectileEnergy != null && weaponSlot.projectileEnergy !== 1) {
-          weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.projectileEnergy}`
-        }
-        if (weaponSlot.strengthModifier != null && weaponSlot.strengthModifier !== 1) {
-          weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.strengthModifier}`
+        if (weaponSlot.item != null) {
+          weaponSlot.damage = weaponSlot.item.data.damage.formula
+          if (weaponSlot.projectileEnergy != null && weaponSlot.projectileEnergy !== 1) {
+            weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.projectileEnergy}`
+          }
+          if (weaponSlot.strengthModifier != null && weaponSlot.strengthModifier !== 1) {
+            weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.strengthModifier}`
+          }
         }
       }
     }
@@ -345,6 +359,8 @@ export default class SwTorActorSheet extends ActorSheet {
       skill.disposition = ObjectUtils.try(ForceDispositions.map, skill.data.disposition, { default: ForceDispositions.map.neutral })
       return skill
     })
+
+    const evasion = computedActorData.skills.aus
 
     data.computed = {
       gp,
@@ -396,6 +412,7 @@ export default class SwTorActorSheet extends ActorSheet {
         items: computedActorData.inventory.filter(item => item.type === type.key)
       })),
       weaponSlots: computedActorData.weaponSlots,
+      evasion,
       weight: {
         value: computedActorData.inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
         max: calcMaxInventoryWeight(computedActorData),

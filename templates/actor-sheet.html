@@ -330,95 +330,61 @@
               <div class="weapon-slot">
                 <h4>{{slot.label}} - <strong>{{slot.skill.name}}</strong></h4>
                 {{#if slot.skill}}
-                  <table>
-                    <tbody>
-                      <tr>
-                        <td class="weapon-slot-label">
-                          <img src="icons/svg/d20.svg" class="table-icon" alt="Attacke" title="Attacke" />
-                        </td>
-                        <td>
-                          <div class="flex-row multi-item">
-                            {{#each slot.attackCheck.rolls as |roll|}}
-                              <span title="{{roll.label}}">
-                                <strong>{{formatAttrKey roll.key}}</strong>
-                                {{roll.target}}
-                              </span>
-                            {{/each}}
-                            <span>|</span>
-                            <span title="Ausgleichspunkte">
-                              <strong>AgP</strong>
-                              {{slot.attackCheck.AgP}}
-                            </span>
-                            <a class="roll-check" title="Probe werfen" data-check='{{json slot.attackCheck}}' data-label="Attacke {{slot.label}}">
-                              <i class="fas fa-dice-d20"></i>
-                            </a>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td class="weapon-slot-label">
-                          <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)" title="Erleichterung (>0) / Erschwernis (<0)" />
-                        </td>
-                        <td>
-                          <div class="flex-row multi-item">
-                            <input type="text" name="data.weaponSlots.{{slot.key}}.advantage"
-                                   value="{{slot.advantage}}" data-dtype="Number"
-                                   title="Erleichterung (>0) / Erschwernis (<0)"
-                            />
-                            {{#if slot.isRanged}}
-                              <img src="icons/svg/target.svg" class="table-icon" alt="Genauigkeit" title="Genauigkeit" />
-                              <span title="Genauigkeit">{{slot.precision}}</span>
-                            {{/if}}
-                            {{#if slot.coordination}}
-                              <i class="fas fa-hand-paper table-icon"></i>
-                              <span title="Koordination">{{slot.coordination}}</span>
-                            {{/if}}
-                          </div>
-                        </td>
-                      </tr>
-                      {{#if slot.item}}
-                        <tr>
-                          <td>
-                            <img src="icons/svg/sword.svg" class="table-icon" alt="Schaden" title="Schaden" />
-                          </td>
-                          <td>
-                            <div class="flex-row multi-item">
-                              <span class="flex-row">
-                                {{slot.item.data.damage.formula}}
-                                {{#if (isRelevantFactor slot.projectileEnergy)}}
-                                  *&nbsp;<span title="Projektilenergie" class="flex-row">{{slot.projectileEnergy}} (<img src="icons/svg/target.svg" class="table-icon small" alt="Projektilenergie" />)</span>
-                                {{/if}}
-                                {{#if (isRelevantFactor slot.strengthModifier)}}
-                                  *&nbsp;<span title="Körperkraftmodifikator" class="flex-row">{{slot.strengthModifier}} (<i class="fas fa-fist-raised table-icon small"></i>)</span>
-                                {{/if}}
-                              </span>
-                              <a
-                                  class="do-roll"
-                                  title="Schaden auswürfeln"
-                                  data-formula="{{slot.damage}}"
-                                  data-label="Schaden {{slot.label}} ({{slot.item.name}})"
-                              >
-                                <i class="fas fa-dice-d6"></i>
-                              </a>
-                            </div>
-                          </td>
-                        </tr>
+                  <div class="line-view multi-item">
+                    <div class="flex-row multi-item">
+                      <img src="icons/svg/d20.svg" class="table-icon" alt="Attacke" title="Attacke" />
+                      {{formatCheckView check=slot.attackCheck label=(concat 'Attacke ' slot.label)}}
+                    </div>
+                    <div class="flex-row multi-item">
+                      <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)" title="Erleichterung (>0) / Erschwernis (<0)" />
+                      <input type="text" name="data.weaponSlots.{{slot.key}}.advantage"
+                             value="{{slot.advantage}}" data-dtype="Number"
+                             title="Erleichterung (>0) / Erschwernis (<0)"
+                      />
+                      {{#if slot.isRanged}}
+                        <img src="icons/svg/target.svg" class="table-icon" alt="Genauigkeit" title="Genauigkeit" />
+                        <span title="Genauigkeit">{{slot.precision}}</span>
                       {{/if}}
-                    </tbody>
-                  </table>
+                      {{#if slot.coordination}}
+                        <i class="fas fa-hand-paper table-icon"></i>
+                        <span title="Koordination">{{slot.coordination}}</span>
+                      {{/if}}
+                    </div>
+                    {{#if slot.item}}
+                      <div class="flex-row multi-item">
+                        <img src="icons/svg/sword.svg" class="table-icon" alt="Schaden" title="Schaden" />
+                        <span class="flex-row">
+                          {{slot.item.data.damage.formula}}
+                          {{#if (isRelevantFactor slot.projectileEnergy)}}
+                            *&nbsp;<span title="Projektilenergie" class="flex-row">{{slot.projectileEnergy}} (<img src="icons/svg/target.svg" class="table-icon small" alt="Projektilenergie" />)</span>
+                          {{/if}}
+                          {{#if (isRelevantFactor slot.strengthModifier)}}
+                            *&nbsp;<span title="Körperkraftmodifikator" class="flex-row">{{slot.strengthModifier}} (<i class="fas fa-fist-raised table-icon small"></i>)</span>
+                          {{/if}}
+                        </span>
+                        <a
+                            class="do-roll"
+                            title="Schaden auswürfeln"
+                            data-formula="{{slot.damage}}"
+                            data-label="Schaden {{slot.label}} ({{slot.item.name}})"
+                        >
+                          <i class="fas fa-dice-d6"></i>
+                        </a>
+                      </div>
+                    {{/if}}
+                  </div>
                 {{/if}}
               </div>
             {{/each}}
-            <table>
-              <tbody>
-                <tr>
-                  <td>Entfernung Gegner</td>
-                  <td>
-                    <input type="text" name="data.combat.enemyDistance" value="{{data.combat.enemyDistance}}" /> m
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div>
+              <label class="flex-row multi-item">
+                <span>Entfernung Gegner</span>
+                <span>
+                  <input type="text" name="data.combat.enemyDistance" value="{{data.combat.enemyDistance}}" />
+                  m
+                </span>
+              </label>
+            </div>
           </div>
         </div>
         <div class="equipment-grid multi-item">
@@ -452,6 +418,45 @@
         </div>
         <div class="flex-grow flex-zero">
           <h3 class="align-center">Defensive</h3>
+          <div class="multi-item align-right">
+            {{#each computed.weaponSlots as |slot|}}
+              {{#if slot.canDefend}}
+                <div class="weapon-slot">
+                  <h4>{{slot.label}} - <strong>{{slot.skill.name}}</strong></h4>
+                  {{#if slot.skill}}
+                    <div class="line-view multi-item">
+                      <div class="flex-row multi-item flex-end">
+                        <img src="icons/svg/shield.svg" class="table-icon" alt="Parade" title="Parade" />
+                        {{formatCheckView check=slot.paradeCheck label=(concat 'Parade ' slot.label)}}
+                      </div>
+                      <div class="flex-row multi-item flex-end">
+                        <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)" title="Erleichterung (>0) / Erschwernis (<0)" />
+                        <input type="text" name="data.weaponSlots.{{slot.key}}.paradeAdvantage"
+                               value="{{slot.paradeAdvantage}}" data-dtype="Number"
+                               title="Erleichterung (>0) / Erschwernis (<0)"
+                        />
+                        {{#if slot.coordination}}
+                          <i class="fas fa-hand-paper table-icon"></i>
+                          <span title="Koordination">{{slot.coordination}}</span>
+                        {{/if}}
+                      </div>
+                    </div>
+                  {{/if}}
+                </div>
+              {{/if}}
+            {{/each}}
+            {{#if computed.evasion}}
+              <div class="weapon-slot">
+                <h4><strong>Ausweichen</strong></h4>
+                <div class="line-view multi-item">
+                  <div class="flex-row multi-item flex-end">
+                    <img src="icons/svg/daze.svg" class="table-icon" alt="Ausweichen" title="Ausweichen" />
+                    {{formatCheckView check=computed.evasion.check label='Ausweichen'}}
+                  </div>
+                </div>
+              </div>
+            {{/if}}
+          </div>
         </div>
       </div>
     </div>

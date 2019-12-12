@@ -34,6 +34,8 @@ function categorizeD20Result(value) {
   }
 }
 
+const formatAttrKey = key => key.toUpperCase()
+
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
@@ -51,9 +53,25 @@ Hooks.once("init", async function() {
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
     isMultiple: arg => arg > 1,
     isRelevantFactor: num => typeof num === 'number' && num !== 1,
-    formatAttrKey: key => key.toUpperCase(),
+    formatAttrKey,
     formatAttrLabel: key => ObjectUtils.try(Attributes.map[key], 'label'),
     formatPercentage: val => `${Math.round(val)}%`,
+    formatCheckView: ({ hash: { check, label } }) => new Handlebars.SafeString(
+      check.rolls.map(roll => `
+        <span title="${roll.label}">
+          <strong>${formatAttrKey(roll.key)}</strong>
+          ${roll.target}
+        </span>
+      `).join('') + `
+      <span>|</span>
+      <span title="Ausgleichspunkte">
+        <strong>AgP</strong>
+        ${check.AgP}
+      </span>
+      <a class="roll-check" title="Probe werfen" data-check='${JSON.stringify(check)}' data-label="${label}">
+        <i class="fas fa-dice-d20"></i>
+      </a>
+    `),
     formatCheckDiff: (diff, classes = '') => new Handlebars.SafeString(
       `<span class="check-diff ${diff >= 0 ? 'good' : 'bad'} ${classes}">` +
         `${diff > 0 ? '+' : ''}${diff}` +

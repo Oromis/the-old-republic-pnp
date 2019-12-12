@@ -20,6 +20,7 @@
 .flex-self-start { align-self: flex-start; }
 .flex-zero { flex-basis: 0; }
 .flex-center { justify-content: center; }
+.flex-end { justify-content: flex-end; }
 .flex-space-between { justify-content: space-between; }
 
 .full-width { width: 100% !important; }

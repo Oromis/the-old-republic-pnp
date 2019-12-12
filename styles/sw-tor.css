@@ -19,7 +19,7 @@
     padding: 4px;
 }
 
-.sw-tor tr:nth-child(2n) {
+.sw-tor tr:nth-child(2n), .sw-tor .line-view > *:nth-child(2n) {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -270,11 +270,7 @@
 }
 
 .sw-tor .weapon-slot h4 {
-    margin-bottom: 4px;
-}
-
-.sw-tor .weapon-slot-label {
-    width: 32px;
+    margin-bottom: 8px;
 }
 
 .sw-tor img.table-icon {
