@@ -87,6 +87,19 @@ function processDeltaValue(text, oldValue) {
   return oldValue
 }
 
+function roundDecimal(val, places) {
+  return Math.round(val * (10 ** places)) / (10 ** places)
+}
+
+function evalExpression(expr, { vars }) {
+  try {
+    const parsed = Parser.parse(expr)
+    return parsed.evaluate(vars)
+  } catch (e) {
+    console.warn(`Evaluating ${expr} failed: `, e)
+  }
+}
+
 function evalSkillExpression(expr, skill, { vars, round }) {
   let error = false
   let value = null
@@ -103,7 +116,7 @@ function evalSkillExpression(expr, skill, { vars, round }) {
     variables = parsed.variables().filter(name => defaultVariableNames.indexOf(name) === -1)
     value = parsed.evaluate({ ...defaultVariables, ...vars })
     if (round != null) {
-      value = Math.round(value * (10 ** round)) / (10 ** round)
+      value = roundDecimal(value, round)
     }
   } catch (e) {
     error = true
@@ -260,15 +273,26 @@ export default class SwTorActorSheet extends ActorSheet {
     for (const weaponSlot of computedActorData.weaponSlots) {
       if (weaponSlot.skill && computedActorData.skills[weaponSlot.skill.key]) {
         weaponSlot.skill = computedActorData.skills[weaponSlot.skill.key]
-        if (weaponSlot.item != null && weaponSlot.skill.data.category === 'ranged') {
-          weaponSlot.isRanged = true
-          const enemyDistance = ObjectUtils.try(data.data.combat, 'enemyDistance')
-          if (enemyDistance != null) {
-            weaponSlot.precision = -evalSkillExpression(
-              ObjectUtils.try(weaponSlot.item.data.precision, 'formula'),
-              weaponSlot.skill,
-              { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance'), round: 0 }
-            ).value
+        if (weaponSlot.item != null) {
+          if (weaponSlot.skill.data.category === 'ranged') {
+            weaponSlot.isRanged = true
+            const enemyDistance = ObjectUtils.try(data.data.combat, 'enemyDistance')
+            if (enemyDistance != null) {
+              weaponSlot.precision = -evalSkillExpression(
+                ObjectUtils.try(weaponSlot.item.data.precision, 'formula'),
+                weaponSlot.skill,
+                { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance'), round: 0 }
+              ).value
+              weaponSlot.projectileEnergy = Math.max(roundDecimal(evalSkillExpression(
+                ObjectUtils.try(weaponSlot.item.data.projectileEnergy, 'formula'),
+                weaponSlot.skill,
+                { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance') }
+              ).value, 3), 0)
+            }
+          }
+
+          if (weaponSlot.item.data.hasStrengthModifier) {
+            weaponSlot.strengthModifier = roundDecimal((computedActorData.attributes.kk.value.total + 50) / 100, 2)
           }
         }
 
@@ -278,6 +302,13 @@ export default class SwTorActorSheet extends ActorSheet {
         weaponSlot.attackCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
         for (const roll of weaponSlot.attackCheck.rolls) {
           roll.advantage = advantage
+        }
+        weaponSlot.damage = weaponSlot.item.data.damage.formula
+        if (weaponSlot.projectileEnergy != null && weaponSlot.projectileEnergy !== 1) {
+          weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.projectileEnergy}`
+        }
+        if (weaponSlot.strengthModifier != null && weaponSlot.strengthModifier !== 1) {
+          weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.strengthModifier}`
         }
       }
     }

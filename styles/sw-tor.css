@@ -284,11 +284,19 @@
     display: block;
 }
 
+.sw-tor img.table-icon.small {
+    width: 16px;
+}
+
 .sw-tor i.table-icon {
     font-size: 24px;
     color: #333;
     border: 0;
     display: block;
+}
+
+.sw-tor i.table-icon.small {
+    font-size: 16px;
 }
 
 /* Metrics */
@@ -329,7 +337,7 @@
     color: #d6403e;
 }
 
-.sw-tor .small {
+.sw-tor span.small {
     font-size: 10px;
 }
 

@@ -84,8 +84,8 @@
 
   <div class="attributes flex-row multi-item flex-wrap">
     {{#each computed.attributes as |attr index|}}
-      <div class="attribute flex-row multi-item">
-        <span class="attribute-label" title="{{attr.label}} - {{attr.desc}}">{{formatAttrKey attr.key}}</span>
+      <div class="attribute">
+        <strong class="attribute-label" title="{{attr.label}} - {{attr.desc}}">{{formatAttrKey attr.key}}</strong>
         <span title="{{formatExplanation attr.value.components}}">{{attr.value.total}}</span>
       </div>
     {{/each}}
@@ -383,12 +383,20 @@
                           </td>
                           <td>
                             <div class="flex-row multi-item">
-                              <span>{{slot.item.data.damage.formula}}</span>
+                              <span class="flex-row">
+                                {{slot.item.data.damage.formula}}
+                                {{#if (isRelevantFactor slot.projectileEnergy)}}
+                                  *&nbsp;<span title="Projektilenergie" class="flex-row">{{slot.projectileEnergy}} (<img src="icons/svg/target.svg" class="table-icon small" alt="Projektilenergie" />)</span>
+                                {{/if}}
+                                {{#if (isRelevantFactor slot.strengthModifier)}}
+                                  *&nbsp;<span title="Körperkraftmodifikator" class="flex-row">{{slot.strengthModifier}} (<i class="fas fa-fist-raised table-icon small"></i>)</span>
+                                {{/if}}
+                              </span>
                               <a
                                   class="do-roll"
                                   title="Schaden auswürfeln"
-                                  data-formula="{{slot.item.data.damage.formula}}"
-                                  data-label="Attacke mit {{slot.item.name}}"
+                                  data-formula="{{slot.damage}}"
+                                  data-label="Schaden {{slot.label}} ({{slot.item.name}})"
                               >
                                 <i class="fas fa-dice-d6"></i>
                               </a>

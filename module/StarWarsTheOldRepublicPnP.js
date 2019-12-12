@@ -50,6 +50,7 @@ Hooks.once("init", async function() {
     errorClass: ({ hash }) => conditionalClass(ERROR_CLASS, hash),
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
     isMultiple: arg => arg > 1,
+    isRelevantFactor: num => typeof num === 'number' && num !== 1,
     formatAttrKey: key => key.toUpperCase(),
     formatAttrLabel: key => ObjectUtils.try(Attributes.map[key], 'label'),
     formatPercentage: val => `${Math.round(val)}%`,
