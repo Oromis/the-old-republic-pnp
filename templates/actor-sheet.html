@@ -333,10 +333,12 @@
                   <table>
                     <tbody>
                       <tr>
-                        <td class="weapon-slot-label">Attacke</td>
+                        <td class="weapon-slot-label">
+                          <img src="icons/svg/d20.svg" class="table-icon" alt="Attacke" title="Attacke" />
+                        </td>
                         <td>
                           <div class="flex-row multi-item">
-                            {{#each slot.skill.check.rolls as |roll|}}
+                            {{#each slot.attackCheck.rolls as |roll|}}
                               <span title="{{roll.label}}">
                                 <strong>{{formatAttrKey roll.key}}</strong>
                                 {{roll.target}}
@@ -345,15 +347,40 @@
                             <span>|</span>
                             <span title="Ausgleichspunkte">
                               <strong>AgP</strong>
-                              {{slot.skill.check.AgP}}
+                              {{slot.attackCheck.AgP}}
                             </span>
-                            <a class="roll-check" title="Probe werfen" data-check='{{json slot.skill.check}}'><i class="fas fa-dice-d20"></i></a>
+                            <a class="roll-check" title="Probe werfen" data-check='{{json slot.attackCheck}}' data-label="Attacke {{slot.label}}">
+                              <i class="fas fa-dice-d20"></i>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="weapon-slot-label">
+                          <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)" title="Erleichterung (>0) / Erschwernis (<0)" />
+                        </td>
+                        <td>
+                          <div class="flex-row multi-item">
+                            <input type="text" name="data.weaponSlots.{{slot.key}}.advantage"
+                                   value="{{slot.advantage}}" data-dtype="Number"
+                                   title="Erleichterung (>0) / Erschwernis (<0)"
+                            />
+                            {{#if slot.isRanged}}
+                              <img src="icons/svg/target.svg" class="table-icon" alt="Genauigkeit" title="Genauigkeit" />
+                              <span title="Genauigkeit">{{slot.precision}}</span>
+                            {{/if}}
+                            {{#if slot.coordination}}
+                              <i class="fas fa-hand-paper table-icon"></i>
+                              <span title="Koordination">{{slot.coordination}}</span>
+                            {{/if}}
                           </div>
                         </td>
                       </tr>
                       {{#if slot.item}}
                         <tr>
-                          <td>Schaden</td>
+                          <td>
+                            <img src="icons/svg/sword.svg" class="table-icon" alt="Schaden" title="Schaden" />
+                          </td>
                           <td>
                             <div class="flex-row multi-item">
                               <span>{{slot.item.data.damage.formula}}</span>
@@ -374,6 +401,16 @@
                 {{/if}}
               </div>
             {{/each}}
+            <table>
+              <tbody>
+                <tr>
+                  <td>Entfernung Gegner</td>
+                  <td>
+                    <input type="text" name="data.combat.enemyDistance" value="{{data.combat.enemyDistance}}" /> m
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
         <div class="equipment-grid multi-item">

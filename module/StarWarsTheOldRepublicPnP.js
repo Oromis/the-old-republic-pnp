@@ -24,6 +24,16 @@ function conditionalClass(className, { when, unless }) {
   }
 }
 
+function categorizeD20Result(value) {
+  if (value === 1) {
+    return 'good'
+  } else if (value === 20) {
+    return 'bad'
+  } else {
+    return ''
+  }
+}
+
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
@@ -43,11 +53,12 @@ Hooks.once("init", async function() {
     formatAttrKey: key => key.toUpperCase(),
     formatAttrLabel: key => ObjectUtils.try(Attributes.map[key], 'label'),
     formatPercentage: val => `${Math.round(val)}%`,
-    formatCheckDiff: diff => new Handlebars.SafeString(`
-      <span class="check-diff ${diff >= 0 ? 'good' : 'bad'}">
-        ${diff > 0 ? '+' : ''}${diff}
-      </span>`
+    formatCheckDiff: (diff, classes = '') => new Handlebars.SafeString(
+      `<span class="check-diff ${diff >= 0 ? 'good' : 'bad'} ${classes}">` +
+        `${diff > 0 ? '+' : ''}${diff}` +
+      '</span>'
     ),
+    formatD20Result: result => new Handlebars.SafeString(`<span class="roll d20 ${categorizeD20Result(result)}">${result}</span>`),
     formatMod,
     formatExplanation: components => components.map(component => `${component.label}: ${formatMod(component.value)}`).join(' | '),
     expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',

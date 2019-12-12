@@ -13,6 +13,20 @@ function zipEntries(acc, cur) {
   return acc
 }
 
+function cloneDeep(aObject) {
+  if (!aObject || typeof aObject !== 'object') {
+    return aObject;
+  }
+
+  const result = Array.isArray(aObject) ? [] : {}
+  for (const k in aObject) {
+    const v = aObject[k]
+    result[k] = (typeof v === "object") ? cloneDeep(v) : v
+  }
+
+  return result
+}
+
 export default Object.freeze({
   asArray,
 
@@ -58,5 +72,15 @@ export default Object.freeze({
       }
     }
     return val
-  }
+  },
+
+  sameValue(value, ...keys) {
+    const result = {}
+    for (const key of keys) {
+      result[key] = value
+    }
+    return result
+  },
+
+  cloneDeep,
 })

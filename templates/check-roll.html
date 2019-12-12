@@ -3,9 +3,9 @@
     <div class="multi-item check-roll dice-tooltip">
       <div title="{{roll.label}}"><strong>{{formatAttrKey roll.key}}</strong> {{roll.value}}</div>
       <div class="flex-row multi-item dice-rolls flex-center">
-        <span class="roll d20">{{roll.die}}</span>
+        {{formatD20Result roll.die}}
         <span>/</span>
-        <span>{{roll.target}}</span>
+        <span>{{roll.target}}{{#if roll.advantage}}{{formatCheckDiff roll.advantage 'small'}}{{/if}}</span>
       </div>
       <div class="align-center">
         {{formatCheckDiff roll.diff}}

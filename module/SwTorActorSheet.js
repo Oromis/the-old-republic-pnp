@@ -151,9 +151,9 @@ export default class SwTorActorSheet extends ActorSheet {
     let inventory = [], skills = [], freeItems = [], equippedItems = [], trainings = []
 
     const actorSlots = data.data.slots || {}
-    const weaponSlots = [
-      { ...Slots.map['right-hand'], skill: { key: 'fau' } },
-      { ...Slots.map['left-hand'], skill: { key: 'fau' } },
+    let weaponSlots = [
+      { ...Slots.map['right-hand'], skill: { key: 'fau' }, ...ObjectUtils.try(data.data.weaponSlots, 'right-hand') },
+      { ...Slots.map['left-hand'], skill: { key: 'fau' }, ...ObjectUtils.try(data.data.weaponSlots, 'left-hand') },
     ]
 
     data.items.forEach(item => {
@@ -163,16 +163,20 @@ export default class SwTorActorSheet extends ActorSheet {
         trainings.push(item)
       } else {
         inventory.push(item)
-        const slotEntry = Object.entries(actorSlots).find(([_, v]) => v === item.id)
-        if (slotEntry != null) {
+        const slotEntries = Object.entries(actorSlots).filter(([_, v]) => v === item.id)
+        if (slotEntries.length > 0) {
           equippedItems.push(item)
           for (const weaponSlot of weaponSlots) {
-            if (weaponSlot.key === slotEntry[0]) {
-              weaponSlot.item = item
-              if (item.data.skill != null) {
-                weaponSlot.skill = { key: item.data.skill }
+            if (slotEntries.some(([key]) => key === weaponSlot.key)) {
+              if (weaponSlots.some(slot => slot.item === item)) {
+                // Item has been covered by a previous slot => remove the entire slot
+                weaponSlots = weaponSlots.filter(slot => slot !== weaponSlot)
+              } else {
+                weaponSlot.item = item
+                if (item.data.skill != null) {
+                  weaponSlot.skill = { key: item.data.skill }
+                }
               }
-              break
             }
           }
         } else {
@@ -256,6 +260,25 @@ export default class SwTorActorSheet extends ActorSheet {
     for (const weaponSlot of computedActorData.weaponSlots) {
       if (weaponSlot.skill && computedActorData.skills[weaponSlot.skill.key]) {
         weaponSlot.skill = computedActorData.skills[weaponSlot.skill.key]
+        if (weaponSlot.item != null && weaponSlot.skill.data.category === 'ranged') {
+          weaponSlot.isRanged = true
+          const enemyDistance = ObjectUtils.try(data.data.combat, 'enemyDistance')
+          if (enemyDistance != null) {
+            weaponSlot.precision = -evalSkillExpression(
+              ObjectUtils.try(weaponSlot.item.data.precision, 'formula'),
+              weaponSlot.skill,
+              { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance'), round: 0 }
+            ).value
+          }
+        }
+
+        const advantage = (weaponSlot.precision || 0) +
+          (weaponSlot.coordination || 0) +
+          ObjectUtils.try(data.data.weaponSlots, weaponSlot.key, 'advantage', { default: 0 })
+        weaponSlot.attackCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
+        for (const roll of weaponSlot.attackCheck.rolls) {
+          roll.advantage = advantage
+        }
       }
     }
 
@@ -641,13 +664,14 @@ export default class SwTorActorSheet extends ActorSheet {
 
   _onRollCheck = async event => {
     const check = JSON.parse(event.currentTarget.getAttribute('data-check'))
+    const flavor = event.currentTarget.getAttribute('data-label') || undefined
     const die = new Die(20)
     die.roll(check.rolls.length)
 
     const payload = {
       rolls: check.rolls.map((roll, i) => {
         const target = Math.floor(roll.value / 5)
-        return { ...roll, die: die.results[i], target, diff: target - die.results[i] }
+        return { ...roll, die: die.results[i], target, diff: target + (roll.advantage || 0) - die.results[i] }
       }),
     }
     if (check.AgP) {
@@ -660,6 +684,7 @@ export default class SwTorActorSheet extends ActorSheet {
       user: game.user._id,
       type: CONST.CHAT_MESSAGE_TYPES.ROLL,
       rollMode: game.settings.get("core", "rollMode"),
+      flavor,
       speaker: { actor: this.actor.id },
       sound: CONFIG.sounds.dice,
       content: await renderTemplate('systems/sw-tor/templates/check-roll.html', payload)
@@ -723,6 +748,8 @@ export default class SwTorActorSheet extends ActorSheet {
       this._processDeltaProperty(formData, `data.metrics.${metric.key}.value`)
       this._processDeltaProperty(formData, `data.metrics.${metric.key}.buff`)
     })
+
+    this._processDeltaProperty(formData, `data.combat.enemyDistance`)
 
     if (parsed.input.totalXp != null) {
       const newVal = Math.round(processDeltaValue(parsed.input.totalXp, calcTotalXp(this.computeActorData(this.actor.data))))

@@ -121,7 +121,8 @@ export default class SwTorItemSheet extends ItemSheet {
   }
 
   _handleDrop = (type, item) => {
-    if (item.data.category === 'melee' || item.data.category === 'ranged') {
+    if ((this.item.type === 'melee-weapon' && item.data.category === 'melee') ||
+      (this.item.type === 'ranged-weapon' && item.data.category === 'ranged')) {
       // Weapon skill
       this.item.update({
         'data.skill': item.data.key,
