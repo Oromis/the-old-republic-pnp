@@ -238,9 +238,7 @@
                 <td title="{{formatExplanation skill.value.components}}">{{skill.value.total}}</td>
                 {{#if ../../data.creationMode.enabled}}
                   <td>
-                    {{#unless skill.data.isBasicSkill}}
-                      <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
-                    {{/unless}}
+                    <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
                   </td>
                 {{/if}}
               </tr>
@@ -456,6 +454,34 @@
                 </div>
               </div>
             {{/if}}
+            <div class="weapon-slot">
+              <h4><strong>Eingehender Schaden</strong></h4>
+              <div class="line-view multi-item">
+                <div class="flex-row multi-item flex-end">
+                  <input type="text" name="data.combat.damageIncoming.amount" value="{{data.combat.damageIncoming.amount}}" placeholder="Schaden" class="formula" />
+                  <select name="data.combat.damageIncoming.type">
+                    {{#select data.combat.damageIncoming.type}}
+                      {{#each damageTypes as |type|}}
+                        <option value="{{type.key}}">
+                          {{type.label}}
+                        </option>
+                      {{/each}}
+                    {{/select}}
+                  </select>
+                  {{damageIcon type=computed.damageIncoming.type classes='table-icon'}}
+                </div>
+                {{#each computed.damageIncoming.resistances as |res|}}
+                  <div class="flex-row multi-item flex-end">
+                    <img src="{{res.icon}}" alt="{{res.label}}" title="{{res.label}}" class="table-icon" />
+                    <span title="{{formatExplanation res.value.components}}">{{res.value.total}}</span>
+                    <span>|</span>
+                    <span>{{res.damageBefore}}</span>
+                    <i class="fas fa-arrow-right"></i>
+                    <span>{{res.damageAfter}}</span>
+                  </div>
+                {{/each}}
+              </div>
+            </div>
           </div>
         </div>
       </div>

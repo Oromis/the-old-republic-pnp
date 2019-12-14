@@ -7,7 +7,9 @@ import Metrics from './Metrics.js'
 
 export function detectPropertyType(property) {
   const key = property.key
-  if (key.length === 2) {
+  if (key.startsWith('r_')) {
+    return 'resistance'
+  } else if (key.length === 2) {
     return 'attribute'
   } else if (key.length === 3) {
     if (key.match(/[A-Z][a-z][A-Z]/)) {
@@ -32,6 +34,8 @@ function getBaseValue(actor, property, { target = 'value' } = {}) {
       return 5
     case 'metric':
       return target === 'value' ? 5 : property.calcBaseValue(actor)
+    case 'resistance':
+      return 0
     default:
       throw new Error(`Property type without base value: ${property.key}`)
   }
@@ -179,4 +183,12 @@ export function calcUpgradeCost(actor, property, { max } = {}) {
 
 export function calcMaxInventoryWeight(actor) {
   return (attrValue(actor, 'kk') + attrValue(actor, 'ko')) / 2
+}
+
+export function explainArmor(equippedItems) {
+  const relevantItems = equippedItems.filter(item => item.data.armor != null && item.data.armor !== 0)
+  return {
+    total: relevantItems.reduce((acc, cur) => acc + cur.data.armor, 0),
+    components: relevantItems.map(item => ({ label: item.name, value: item.data.armor }))
+  }
 }

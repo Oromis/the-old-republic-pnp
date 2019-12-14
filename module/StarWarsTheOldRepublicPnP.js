@@ -97,7 +97,10 @@ Hooks.once("init", async function() {
           <span class="input-width flex-grow">${metric.max.total}</span>
         </label>
       </div>
-    `)
+    `),
+    damageIcon: ({ hash: { type, classes = '' } }) => type != null ? (
+      new Handlebars.SafeString(`<img src="${type.icon}" alt="${type.label}" title="${type.label}" class="${classes}" />`)
+    ) : ''
   })
 
 	/**

@@ -13,7 +13,7 @@ import {
   calcPropertyBaseValue,
   calcSkillXp,
   calcTotalXp,
-  calcUpgradeCost,
+  calcUpgradeCost, explainArmor,
   explainMod,
   explainPropertyValue
 } from './CharacterFormulas.js'
@@ -26,6 +26,8 @@ import EffectModifiers from './EffectModifiers.js'
 import Slots from './Slots.js'
 import {describeTraining} from "./TrainingSheet.js"
 import {makeRoll, resolveModLabel} from './SheetUtils.js'
+import DamageTypes from './DamageTypes.js'
+import ResistanceTypes from './ResistanceTypes.js'
 
 let timeout = null
 
@@ -324,6 +326,8 @@ export default class SwTorActorSheet extends ActorSheet {
             weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.strengthModifier}`
           }
         }
+      } else {
+        weaponSlot.skill = null
       }
     }
 
@@ -360,7 +364,50 @@ export default class SwTorActorSheet extends ActorSheet {
       return skill
     })
 
+    const metrics = Metrics.list.map(generalMetric => {
+      const metric = {
+        ...generalMetric,
+        ...ObjectUtils.try(data.data, 'metrics', generalMetric.key),
+      }
+
+      return {
+        ...metric,
+        gained: generalMetric.xpCategory ? calcGained(computedActorData, metric, { freeXp }) : null,
+        max: explainPropertyValue(computedActorData, metric, { target: 'max' }),
+        mod: explainMod(computedActorData, metric),
+      }
+    })
+    computedActorData.metrics = ObjectUtils.asObject(metrics, 'key')
+
     const evasion = computedActorData.skills.aus
+
+    const resistances = ResistanceTypes.list.map(rt => {
+      let value
+      if (rt.key === 'armor') {
+        value = explainArmor(computedActorData.equippedItems)
+      } else {
+        value = explainPropertyValue(computedActorData, { key: `r_${rt.key}` })
+      }
+      return {
+        ...rt,
+        value,
+      }
+    })
+    let incomingDamage = ObjectUtils.try(data.data.combat, 'damageIncoming', 'amount')
+    const incomingDamageType = DamageTypes.map[ObjectUtils.try(data.data.combat, 'damageIncoming', 'type')]
+    let incomingDamageResistances = []
+    if (incomingDamageType != null) {
+      incomingDamageResistances = resistances.filter(rt => rt.canResist(incomingDamageType))
+      for (const res of incomingDamageResistances) {
+        const { damage, cost } = res.resist(incomingDamage, computedActorData)
+        res.damageBefore = incomingDamage
+        res.damageReduction = incomingDamage - damage
+        res.damageAfter = damage
+        incomingDamage = damage
+
+        // TODO deduct costs
+      }
+    }
 
     data.computed = {
       gp,
@@ -378,19 +425,7 @@ export default class SwTorActorSheet extends ActorSheet {
         { label: 'Mächte', skills: forceSkills }
       ],
       forceSkills: forceSkills.length > 0 ? forceSkills : null,
-      metrics: Metrics.list.map(generalMetric => {
-        const metric = {
-          ...generalMetric,
-          ...ObjectUtils.try(data.data, 'metrics', generalMetric.key),
-        }
-
-        return {
-          ...metric,
-          gained: generalMetric.xpCategory ? calcGained(computedActorData, metric, { freeXp }) : null,
-          max: explainPropertyValue(computedActorData, metric, { target: 'max' }),
-          mod: explainMod(computedActorData, metric),
-        }
-      }),
+      metrics,
       slots: Slots.layout.map(row => row.map(slot => {
         if (slot == null) {
           return null
@@ -421,9 +456,14 @@ export default class SwTorActorSheet extends ActorSheet {
         hasGp: gp > 0,
         canRefundXpToGp: data.data.xp.gp > 0,
       },
+      damageIncoming: {
+        type: incomingDamageType,
+        resistances: incomingDamageResistances,
+      }
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
     data.speciesList = Species.list
+    data.damageTypes = DamageTypes.list
     data.trainings = computedActorData.trainings.map(t => ({
       ...t,
       desc: describeTraining(t)
@@ -486,10 +526,16 @@ export default class SwTorActorSheet extends ActorSheet {
 
     // Delete Inventory Item
     html.find('.item-delete').click(ev => {
-      const li = $(ev.currentTarget).parents("[data-item-id]");
-      this.actor.deleteOwnedItem(li.data("itemId"));
-      li.slideUp(200, () => this.render(false));
-    });
+      const li = $(ev.currentTarget).parents("[data-item-id]")
+      const id = li.data("itemId")
+      const item = this.actor.getOwnedItem(id)
+      if (item != null) {
+        if (confirm(`Willst du das Item "${item.name}" wirklich löschen?`)) {
+          this.actor.deleteOwnedItem(id)
+          li.slideUp(200, () => this.render(false))
+        }
+      }
+    })
 
     html.find('.toggle-inventory-view').click(event => {
       const category = event.currentTarget.getAttribute('data-category')
