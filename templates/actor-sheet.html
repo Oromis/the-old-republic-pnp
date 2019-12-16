@@ -9,6 +9,49 @@
           <h1 class="char-name">
             <input name="name" class="full-width" type="text" value="{{actor.name}}" placeholder="Name" />
           </h1>
+          <div class="flex-row multi-item flex-wrap">
+            {{#each computed.attributes as |attr index|}}
+              <div class="attribute">
+                <strong class="attribute-label" title="{{attr.label}} - {{attr.desc}}">{{formatAttrKey attr.key}}</strong>
+                <span title="{{formatExplanation attr.value.components}}">{{attr.value.total}}</span>
+              </div>
+            {{/each}}
+            <div class="flex-grow"></div>
+          </div>
+          <div class="flex-row multi-item">
+            <div class="species-info flex-row multi-item">
+              <span>Spezies:</span>
+              {{#if data.creationMode.enabled}}
+                <select name="data.species" data-dtype="String">
+                  {{#select actor.data.species}}
+                    {{#each speciesList as |sp|}}
+                      <option value="{{sp.key}}">{{sp.name}}</option>
+                    {{/each}}
+                  {{/select}}
+                </select>
+              {{else}}
+                <span>{{computed.speciesName}}</span>
+              {{/if}}
+            </div>
+            <div class="vertical-divider"></div>
+            <div class="training-info flex-row multi-item">
+              <span>Ausbildungen:</span>
+              <div class="trainings flex-row multi-item">
+                {{#each trainings as |training|}}
+                  <div data-item-id="{{training.id}}">
+                    <span title="{{training.desc}}">{{training.name}}</span>
+                    {{#if ../data.creationMode.enabled}}
+                      <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
+                      <a class="item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+                    {{/if}}
+                    {{#unless @last}}
+                      <span>, </span>
+                    {{/unless}}
+                  </div>
+                {{/each}}
+              </div>
+            </div>
+          </div>
         </div>
         <div class="multi-item">
           <div class="flex-row multi-item">
@@ -36,38 +79,21 @@
                 class="flex-grow"
             />
           </label>
-        </div>
-      </div>
-      <div class="subinfo flex-row multi-item">
-        <div class="species-info flex-row multi-item">
-          <span>Spezies:</span>
-          {{#if data.creationMode.enabled}}
-            <select name="data.species" data-dtype="String">
-              {{#select actor.data.species}}
-                {{#each speciesList as |sp|}}
-                  <option value="{{sp.key}}">{{sp.name}}</option>
-                {{/each}}
-              {{/select}}
-            </select>
-          {{else}}
-            <span>{{computed.speciesName}}</span>
-          {{/if}}
-        </div>
-        <div class="vertical-divider"></div>
-        <div class="training-info flex-row multi-item">
-          <span>Ausbildungen:</span>
-          <div class="trainings flex-row multi-item">
-            {{#each trainings as |training|}}
-              <div data-item-id="{{training.id}}">
-                <span title="{{training.desc}}">{{training.name}}</span>
-                {{#if ../data.creationMode.enabled}}
-                  <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
-                  <a class="item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
-                {{/if}}
-                {{#unless @last}}
-                  <span>, </span>
-                {{/unless}}
-              </div>
+          <div class="flex-row multi-item flex-end">
+            {{#each computed.regeneration as |reg|}}
+              <select class="small" name="data.regeneration.{{reg.key}}.factor" title="Regenerationsfaktor">
+                {{#select reg.factor}}
+                  <option value="2">2</option>
+                  <option value="1">1</option>
+                  <option value="0.5">½</option>
+                  <option value="0.25">¼</option>
+                  <option value="0">0</option>
+                {{/select}}
+              </select>
+              <a class="{{reg.className}} modify-metrics" title="{{reg.label}}: {{formatRegen reg.diff}}"
+                 data-add="{{json reg.diff}}">
+                <i class="fas {{reg.icon}}"></i>
+              </a>
             {{/each}}
           </div>
         </div>
@@ -81,15 +107,6 @@
       </div>
     </div>
   </header>
-
-  <div class="attributes flex-row multi-item flex-wrap">
-    {{#each computed.attributes as |attr index|}}
-      <div class="attribute">
-        <strong class="attribute-label" title="{{attr.label}} - {{attr.desc}}">{{formatAttrKey attr.key}}</strong>
-        <span title="{{formatExplanation attr.value.components}}">{{attr.value.total}}</span>
-      </div>
-    {{/each}}
-  </div>
 
   {{!-- Sheet Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">

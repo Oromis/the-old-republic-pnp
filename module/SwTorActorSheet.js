@@ -375,6 +375,7 @@ export default class SwTorActorSheet extends ActorSheet {
         gained: generalMetric.xpCategory ? calcGained(computedActorData, metric, { freeXp }) : null,
         max: explainPropertyValue(computedActorData, metric, { target: 'max' }),
         mod: explainMod(computedActorData, metric),
+        missing: metric.max - metric.value,
       }
     })
     computedActorData.metrics = ObjectUtils.asObject(metrics, 'key')
@@ -460,7 +461,10 @@ export default class SwTorActorSheet extends ActorSheet {
       weaponSlots: computedActorData.weaponSlots,
       evasion,
       weight: {
-        value: computedActorData.inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
+        value: roundDecimal(
+          computedActorData.inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
+          2
+        ),
         max: calcMaxInventoryWeight(computedActorData),
       },
       flags: {
@@ -471,6 +475,18 @@ export default class SwTorActorSheet extends ActorSheet {
         type: incomingDamageType,
         resistances: incomingDamageResistances,
         cost: incomingDamageCost,
+      },
+      regeneration: {
+        turn: this._prepareRegen('turn', {
+          EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'missing', { default: 0 }),
+          MaP: 2,
+        }, computedActorData, { label: 'Nächste Runde', className: 'next-turn', icon: 'fa-redo' }),
+        day: this._prepareRegen('day', {
+          EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'missing', { default: 0 }),
+          MaP: ObjectUtils.try(computedActorData.metrics.MaP, 'missing', { default: 0 }),
+          AuP: ObjectUtils.try(computedActorData.metrics.AuP, 'missing', { default: 0 }),
+          LeP: ObjectUtils.try(computedActorData.metrics.LeP, 'missing', { default: 0 }),
+        }, computedActorData, { label: 'Nächster Tag', className: 'next-day', icon: 'fa-sun' })
       }
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
@@ -482,9 +498,18 @@ export default class SwTorActorSheet extends ActorSheet {
     }))
     data.itemTypes = ItemTypes.list
     data.ui = {
-      inventoryHidden: this._inventoryHidden
+      inventoryHidden: this._inventoryHidden,
     }
     return data
+  }
+
+  _prepareRegen(key, diff, actor, data) {
+    const factor = ObjectUtils.try(this.actorData.regeneration, key, 'factor', { default: 1 })
+    diff = ObjectUtils.omitZero(ObjectUtils.mapValues(diff, (val, mk) => {
+      const delta = Math.floor(val * factor)
+      return Math.min(delta, actor.metrics[mk].max.total - actor.metrics[mk].value)
+    }))
+    return { key, factor, diff, ...data }
   }
 
   /* -------------------------------------------- */
@@ -513,7 +538,6 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('button.change-attr-gained').click(this._onChangeAttrGained)
     html.find('button.change-skill-gained').click(this._onChangeSkillGained)
     html.find('button.change-metric-gained').click(this._onChangeMetricGained)
-    html.find('.use-force').click(this._onUseForce)
     html.find('.do-roll').click(this._onDoRoll)
     html.find('.roll-check').click(this._onRollCheck)
     html.find('.item-create').click(this._onCreateItem)
@@ -557,9 +581,19 @@ export default class SwTorActorSheet extends ActorSheet {
 
     html.find('.modify-metrics').click(this._onModifyMetrics)
     html.find('.equip-btn').click(this._onChangeEquipment)
+    html.find('.next-turn').click(this._onNextTurn)
+    html.find('.next-day').click(this._onNextDay)
   }
 
   /* -------------------------------------------- */
+
+  _onNextTurn = () => {
+
+  }
+
+  _onNextDay = () => {
+
+  }
 
   _onCreateItem = () => {
     event.preventDefault()
@@ -737,29 +771,8 @@ export default class SwTorActorSheet extends ActorSheet {
     })
   }
 
-  _onUseForce = event => {
-    let amount = +event.currentTarget.getAttribute('data-amount')
-    if (isNaN(amount)) {
-      ui.notifications.error(`Ungültiger Machtpunkte-Wert: ${amount}`)
-    } else {
-      const options = [Metrics.map.MaP, Metrics.map.AuP, Metrics.map.LeP]
-      const changeset = {}
-      for (const option of options) {
-        if (amount <= 0) {
-          break
-        }
-        const delta = option === Metrics.map.LeP ? amount : Math.min(amount, this.actorData.metrics[option.key].value)
-        if (delta !== 0) {
-          amount -= delta
-          changeset[`data.metrics.${option.key}.value`] = this.actorData.metrics[option.key].value - delta
-        }
-      }
-      this.actor.update(changeset)
-    }
-  }
-
   _onDoRoll = event => {
-    const formula = event.currentTarget.getAttribute('data-formula')
+    const formula = event.currentTarget.getAttribute('data-formula').replace(/(\d+)w(\d+)/g, '$1d$2')
     new Roll(formula).toMessage({
       speaker: { actor: this.actor.id },
       flavor: event.currentTarget.getAttribute('data-label')

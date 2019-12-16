@@ -27,6 +27,18 @@ function cloneDeep(aObject) {
   return result
 }
 
+function omitBy(obj, predicate) {
+  return Object.entries(obj)
+    .filter(entry => !predicate(entry[1], entry[0]))
+    .reduce(zipEntries, {})
+}
+
+function mapValues(obj, func) {
+  return Object.entries(obj)
+    .map(([k, v]) => [k, func(v, k)])
+    .reduce(zipEntries, {})
+}
+
 export default Object.freeze({
   asArray,
 
@@ -37,10 +49,10 @@ export default Object.freeze({
       .reduce(zipEntries, {})
   },
 
-  omitBy(obj, predicate) {
-    return Object.entries(obj)
-      .filter(entry => !predicate(entry[1], entry[0]))
-      .reduce(zipEntries, {})
+  mapValues,
+  omitBy,
+  omitZero(obj) {
+    return omitBy(obj, val => val === 0 || val == null)
   },
 
   asObject(array, key) {

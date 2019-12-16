@@ -81,6 +81,7 @@ Hooks.once("init", async function() {
     formatD20Result: result => new Handlebars.SafeString(`<span class="roll d20 ${categorizeD20Result(result)}">${result}</span>`),
     formatMod,
     formatExplanation: components => components.map(component => `${component.label}: ${formatMod(component.value)}`).join(' | '),
+    formatRegen: regen => Object.entries(regen).map(([label, cost]) => `${label}: ${formatMod(cost)}`).join(' | '),
     formatCosts: costs => Object.entries(costs).map(([label, cost]) => `${label}: ${formatMod(-cost)}`).join(' | '),
     expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',
     stepButtons: ({ hash: { val, name, buttonClass = 'small char set-value', valueClass = '' } }) => {
