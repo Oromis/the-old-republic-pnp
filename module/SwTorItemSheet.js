@@ -64,7 +64,12 @@ export default class SwTorItemSheet extends ItemSheet {
       data.computed.projectileEnergy = analyzeExpression({ path: [data.data.projectileEnergy, 'formula'] })
     }
     if (data.flags.hasEffects) {
-      data.computed.effects = Object.entries(data.data.effects || {}).map(([key, value]) => ({ key, value }))
+      const effects = data.data.effects || []
+      if (Array.isArray(effects)) {
+        data.computed.effects = effects
+      } else {
+        data.computed.effects = Object.entries(effects).map(([key, value]) => ({ key, value, label: key }))
+      }
     }
     data.damageTypes = DamageTypes.list
     data.slotTypes = SlotTypes.list
@@ -113,7 +118,7 @@ export default class SwTorItemSheet extends ItemSheet {
       })
     })
     html.find('.delete-effect').click(e => {
-      const targetKey = e.currentTarget.getAttribute('data-key')
+      const targetKey = e.currentTarget.getAttribute('data-index')
       this.item.update({
         'data.effects': { [`-=${targetKey}`]: null }
       })

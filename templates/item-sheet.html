@@ -148,9 +148,9 @@
               <div class="multi-item">
                 {{#each computed.effects as |effect index|}}
                   <div class="flex-row multi-item">
-                    <input type="text" name="data.effects[{{index}}].key" value="{{effect.key}}" placeholder="Key" data-prev="{{effect.key}}" />
+                    <span title="{{effect.key}}">{{effect.label}}</span>
                     <input type="text" name="data.effects[{{index}}].value" value="{{effect.value}}" placeholder="Wert" />
-                    <a class="delete-effect" data-key="{{effect.key}}" title="{{effect.key}} löschen"><i class="fas fa-trash"></i></a>
+                    <a class="delete-effect" data-index="{{index}}" title="{{effect.label}} löschen"><i class="fas fa-trash"></i></a>
                   </div>
                 {{/each}}
                 <a class="new-effect" title="Neuen Effekt erzeugen"><i class="fas fa-plus"></i></a>
