@@ -48,6 +48,7 @@ Hooks.once("init", async function() {
     concat: (...args) => args.filter(arg => typeof arg === 'string').join(''),
     resolve: (object, ...path) => ObjectUtils.try(object, ...path),
     class: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(`class="${when ? then : otherwise}"`),
+    ite: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(when ? then : otherwise),
     embedClass: ({ hash: { name, ...rest } }) => conditionalClass(name, rest),
     errorClass: ({ hash }) => conditionalClass(ERROR_CLASS, hash),
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
@@ -80,6 +81,7 @@ Hooks.once("init", async function() {
     formatD20Result: result => new Handlebars.SafeString(`<span class="roll d20 ${categorizeD20Result(result)}">${result}</span>`),
     formatMod,
     formatExplanation: components => components.map(component => `${component.label}: ${formatMod(component.value)}`).join(' | '),
+    formatCosts: costs => Object.entries(costs).map(([label, cost]) => `${label}: ${formatMod(-cost)}`).join(' | '),
     expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',
     stepButtons: ({ hash: { val, name, buttonClass = 'small char set-value', valueClass = '' } }) => {
       return new Handlebars.SafeString(`

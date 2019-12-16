@@ -32,3 +32,5 @@
 .uppercase { text-transform: uppercase; }
 
 .hidden { display: none; }
+
+.border-top { border-top: 1px solid #aaa; }

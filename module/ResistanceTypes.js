@@ -15,7 +15,7 @@ function resistPercentage(damage) {
 }
 
 const list = [
-  { key: 'shield', label: 'Schild', icon: 'icons/svg/circle.svg', resists: ['physical', 'energy', 'ion'], resist: resistEnergy },
+  { key: 'shield', label: 'Schild', icon: 'icons/svg/circle.svg', resists: ['energy', 'ion'], resist: resistEnergy },
   { key: 'armor', label: 'Rüstung', icon: 'icons/svg/shield.svg', resists: ['physical', 'energy', 'ion'], resist: resistFlat },
   { key: 'fire', label: 'Feuerresistenz', icon: 'icons/svg/fire-shield.svg', resists: ['fire'], resist: resistPercentage },
   { key: 'poison', label: 'Giftresistenz', icon: 'icons/svg/poison.svg', resists: ['poison'], resist: resistPercentage },

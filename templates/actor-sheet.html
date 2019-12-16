@@ -198,9 +198,10 @@
                   <div class="flex-row multi-item">
                     <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
                     <span class="skill-key-col">{{formatAttrKey skill.data.key}}</span>
-                    <span class="flex-grow">{{skill.name}}</span>
-                    <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
-                    <a class="roll-check" title="Probe werfen" data-check='{{json skill.check}}'><i class="fas fa-dice-d20"></i></a>
+                    <a class="flex-grow item-control item-edit" title="{{skill.name}} bearbeiten">{{skill.name}}</a>
+                    <a class="roll-check" title="Probe werfen" data-check='{{json skill.check}}' data-label="{{skill.name}}">
+                      <i class="fas fa-dice-d20"></i>
+                    </a>
                   </div>
                 </td>
                 <td title="{{formatAttrLabel skill.data.attribute1}}">{{formatAttrKey skill.data.attribute1}}</td>
@@ -267,8 +268,7 @@
               <td>
                 <div class="flex-row multi-item">
                   <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
-                  <span class="flex-grow">{{skill.name}}</span>
-                  <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
+                  <a class="flex-grow item-control item-edit">{{skill.name}}</a>
                 </div>
               </td>
               <td>{{skill.range}}</td>
@@ -277,8 +277,10 @@
                 <div class="multi-item">
                   {{#each skill.cost as |entry|}}
                     <div class="flex-row multi-item {{errorClass when=entry.error}}">
-                      <span class="flex-grow">{{entry.value}} {{entry.postfix}}</span>
-                      <a class="use-force" title="Abziehen" data-amount="{{entry.value}}"><i class="fas fa-play"></i></a>
+                      <span>{{entry.value}} {{entry.postfix}}</span>
+                      <a class="modify-metrics" title="{{formatCosts entry.costStructure}}" data-deduct="{{json entry.costStructure}}">
+                        <i class="fas fa-minus-square"></i>
+                      </a>
                     </div>
                     {{#each entry.variables as |var|}}
                       <div class="flex-row multi-item">
@@ -458,8 +460,8 @@
               <h4><strong>Eingehender Schaden</strong></h4>
               <div class="line-view multi-item">
                 <div class="flex-row multi-item flex-end">
-                  <input type="text" name="data.combat.damageIncoming.amount" value="{{data.combat.damageIncoming.amount}}" placeholder="Schaden" class="formula" />
-                  <select name="data.combat.damageIncoming.type">
+                  <input type="text" name="data.combat.damageIncoming.amount" value="{{data.combat.damageIncoming.amount}}" placeholder="Schaden" />
+                  <select name="data.combat.damageIncoming.type" class="small">
                     {{#select data.combat.damageIncoming.type}}
                       {{#each damageTypes as |type|}}
                         <option value="{{type.key}}">
@@ -480,6 +482,17 @@
                     <span>{{res.damageAfter}}</span>
                   </div>
                 {{/each}}
+                {{#if computed.damageIncoming.cost}}
+                  <div class="flex-row multi-item flex-end border-top">
+                    <img src="icons/svg/degen.svg" alt="Effektivschaden" title="Effektivschaden" class="table-icon" />
+                    {{#each computed.damageIncoming.cost as |cost key|}}
+                      <span>-{{cost}} {{key}}</span>
+                    {{/each}}
+                    <a class="modify-metrics" data-deduct="{{json computed.damageIncoming.cost}}" title="Abziehen">
+                      <i class="fas fa-minus-square"></i>
+                    </a>
+                  </div>
+                {{/if}}
               </div>
             </div>
           </div>
@@ -526,8 +539,10 @@
               {{/if}}
               <th class="price-col" title="Preis"><i class="fas fa-coins"></i></th>
               <th class="weight-col" title="Gewicht"><i class="fas fa-weight-hanging"></i></th>
-              <th class="xp-col">
-                <a class="item-create" data-type="{{category.key}}"><i class="fas fa-plus"></i> Neu</a>
+              <th class="icon-col">
+                <a class="item-create" data-type="{{category.key}}" title="{{category.label}} hinzufügen">
+                  <i class="fas fa-plus"></i>
+                </a>
               </th>
             </tr>
           </thead>
@@ -538,12 +553,12 @@
                   <td>
                     <div class="flex-row multi-item">
                       <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
-                      <div title="{{item.data.description}}">
+                      <a class="item-control item-edit" title="{{item.data.description}}">
                         {{#if (isMultiple item.data.quantity)}}
                           {{item.data.quantity}}x
                         {{/if}}
                         {{item.name}}
-                      </div>
+                      </a>
                     </div>
                   </td>
                   {{#if category.isWeapon}}
@@ -559,8 +574,7 @@
                   <td title="Preis">{{item.data.price}}</td>
                   <td title="Gewicht">{{item.data.weight}}</td>
                   <td>
-                    <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
-                    <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+                    <a class="item-control item-delete" title="{{item.name}} löschen"><i class="fas fa-trash"></i></a>
                   </td>
                 </tr>
               {{/each}}

@@ -344,13 +344,13 @@ export default class SwTorActorSheet extends ActorSheet {
       if (durationType.hasOneTimeCost) {
         skill.cost.push({
           key: 'oneTime',
-          ...evalSkillExpression(ObjectUtils.try(skill.data.cost, 'oneTime', 'formula'), skill, { vars: ObjectUtils.try(skill.data.cost, 'oneTime', 'vars'), round: 0 }),
+          ...this._evalForceSkillCost(skill, ObjectUtils.try(skill.data.cost, 'oneTime')),
         })
       }
       if (durationType.hasPerTurnCost) {
         skill.cost.push({
           key: 'perTurn',
-          ...evalSkillExpression(ObjectUtils.try(skill.data.cost, 'perTurn', 'formula'), skill, { vars: ObjectUtils.try(skill.data.cost, 'perTurn', 'vars'), round: 0 }),
+          ...this._evalForceSkillCost(skill, ObjectUtils.try(skill.data.cost, 'perTurn')),
           postfix: 'pro Runde',
         })
       }
@@ -396,7 +396,9 @@ export default class SwTorActorSheet extends ActorSheet {
     let incomingDamage = ObjectUtils.try(data.data.combat, 'damageIncoming', 'amount')
     const incomingDamageType = DamageTypes.map[ObjectUtils.try(data.data.combat, 'damageIncoming', 'type')]
     let incomingDamageResistances = []
+    let incomingDamageCost = null
     if (incomingDamageType != null) {
+      incomingDamageCost = { LeP: 0 }
       incomingDamageResistances = resistances.filter(rt => rt.canResist(incomingDamageType))
       for (const res of incomingDamageResistances) {
         const { damage, cost } = res.resist(incomingDamage, computedActorData)
@@ -405,8 +407,17 @@ export default class SwTorActorSheet extends ActorSheet {
         res.damageAfter = damage
         incomingDamage = damage
 
-        // TODO deduct costs
+        if (cost != null && typeof cost === 'object') {
+          for (const [metricKey, amount] of Object.entries(cost)) {
+            if (amount !== 0) {
+              incomingDamageCost[metricKey] = (incomingDamageCost[metricKey] || 0) + amount
+            }
+          }
+        }
       }
+
+      // Resistances have reduced the incoming damage, the rest will be deducted from HP
+      incomingDamageCost.LeP += incomingDamage
     }
 
     data.computed = {
@@ -459,6 +470,7 @@ export default class SwTorActorSheet extends ActorSheet {
       damageIncoming: {
         type: incomingDamageType,
         resistances: incomingDamageResistances,
+        cost: incomingDamageCost,
       }
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
@@ -543,74 +555,8 @@ export default class SwTorActorSheet extends ActorSheet {
       this.actor.render()
     })
 
-    html.find('.equip-btn').click(event => {
-      const slots = { ...this.actor.data.data.slots }
-      const slotKey = event.currentTarget.getAttribute('data-slot')
-      const slot = Slots.map[slotKey]
-      if (slot == null) {
-        return ui.notifications.error(`Ungültiger Slot: ${slotKey}`)
-      }
-      function removeItem(id) {
-        for (const key of Object.keys(slots)) {
-          if (slots[key] === id) {
-            slots[key] = null
-          }
-        }
-      }
-
-      const rawItemId = event.currentTarget.getAttribute('data-item')
-      const itemId = +rawItemId
-      if (!rawItemId ? slots[slotKey] != null : slots[slotKey] !== itemId) {
-        // Item changed
-        const item = this.actor.getOwnedItem(itemId)
-        if (rawItemId && item != null) {
-          removeItem(itemId) // Remove item from any other slots
-          let found = false
-          const slotsToFill = [...item.data.data.slotTypes].filter(type => {
-            if (found || type !== slot.type) {
-              return true
-            } else {
-              found = true
-              return false
-            }
-          })
-          if (typeof slots[slotKey] === 'number') {
-            // Remove the item that has been in the slot previously
-            removeItem(slots[slotKey])
-          }
-          slots[slotKey] = itemId
-
-          for (const type of slotsToFill) {
-            // Find an empty slot to put this item into
-            let newSlot = Slots.list.find(s => s.type === type && slot.key !== s.key && !slots[s.key])
-            if (newSlot != null) {
-              // Empty slot found :)
-              slots[newSlot.key] = itemId
-            } else {
-              // No empty slot of the type we're looking for => just take any other slot and remove the currently
-              // equipped item
-              newSlot = Slots.list.find(s => s.type === type && slot.key !== s.key)
-              if (newSlot == null) {
-                // Cannot equip the item, don't have enough slots
-                return ui.notifications.error(`Kann ${item.name} nicht ausrüsten: Kein freier Slot vom Typ ${slot.type}`)
-              } else {
-                const oldId = slots[newSlot.key]
-                slots[newSlot.key] = itemId
-                // Remove the old item completely (from all slots)
-                removeItem(oldId)
-              }
-            }
-          }
-        } else {
-          // Set the slot to empty
-          const oldId = slots[slotKey]
-          if (oldId != null) {
-            removeItem(oldId)
-          }
-        }
-        this.actor.update({ 'data.slots': slots })
-      }
-    })
+    html.find('.modify-metrics').click(this._onModifyMetrics)
+    html.find('.equip-btn').click(this._onChangeEquipment)
   }
 
   /* -------------------------------------------- */
@@ -626,28 +572,92 @@ export default class SwTorActorSheet extends ActorSheet {
     return this.actor.createOwnedItem(itemData);
   }
 
-  async _onClickAttributeControl(event) {
-    event.preventDefault();
-    const a = event.currentTarget;
-    const action = a.dataset.action;
-    const attrs = this.object.data.data.attributes;
-    const form = this.form;
-
-    // Add new attribute
-    if ( action === "create" ) {
-      const nk = Object.keys(attrs).length + 1;
-      let newKey = document.createElement("div");
-      newKey.innerHTML = `<input type="text" name="data.attributes.attr${nk}.key" value="attr${nk}"/>`;
-      newKey = newKey.children[0];
-      form.appendChild(newKey);
-      await this._onSubmit(event);
+  _onModifyMetrics = event => {
+    const target = event.currentTarget
+    let diff, factor = 1
+    const raw = target.getAttribute('data-deduct')
+    if (raw != null) {
+      diff = JSON.parse(raw)
+      factor = -1
+    } else {
+      diff = JSON.parse(target.getAttribute('data-add'))
     }
 
-    // Remove existing attribute
-    else if ( action === "delete" ) {
-      const li = a.closest(".attribute");
-      li.parentElement.removeChild(li);
-      await this._onSubmit(event);
+    const metrics = {}
+    for (const [key, val] of Object.entries(diff)) {
+      if (this.actorData.metrics[key] != null && typeof this.actorData.metrics[key].value === 'number') {
+        metrics[key] = { value: this.actorData.metrics[key].value + (factor * val) }
+      }
+    }
+    this.actor.update({ data: { metrics } })
+  }
+
+  _onChangeEquipment = event => {
+    const slots = { ...this.actor.data.data.slots }
+    const slotKey = event.currentTarget.getAttribute('data-slot')
+    const slot = Slots.map[slotKey]
+    if (slot == null) {
+      return ui.notifications.error(`Ungültiger Slot: ${slotKey}`)
+    }
+    function removeItem(id) {
+      for (const key of Object.keys(slots)) {
+        if (slots[key] === id) {
+          slots[key] = null
+        }
+      }
+    }
+
+    const rawItemId = event.currentTarget.getAttribute('data-item')
+    const itemId = +rawItemId
+    if (!rawItemId ? slots[slotKey] != null : slots[slotKey] !== itemId) {
+      // Item changed
+      const item = this.actor.getOwnedItem(itemId)
+      if (rawItemId && item != null) {
+        removeItem(itemId) // Remove item from any other slots
+        let found = false
+        const slotsToFill = [...item.data.data.slotTypes].filter(type => {
+          if (found || type !== slot.type) {
+            return true
+          } else {
+            found = true
+            return false
+          }
+        })
+        if (typeof slots[slotKey] === 'number') {
+          // Remove the item that has been in the slot previously
+          removeItem(slots[slotKey])
+        }
+        slots[slotKey] = itemId
+
+        for (const type of slotsToFill) {
+          // Find an empty slot to put this item into
+          let newSlot = Slots.list.find(s => s.type === type && slot.key !== s.key && !slots[s.key])
+          if (newSlot != null) {
+            // Empty slot found :)
+            slots[newSlot.key] = itemId
+          } else {
+            // No empty slot of the type we're looking for => just take any other slot and remove the currently
+            // equipped item
+            newSlot = Slots.list.find(s => s.type === type && slot.key !== s.key)
+            if (newSlot == null) {
+              // Cannot equip the item, don't have enough slots
+              return ui.notifications.error(`Kann ${item.name} nicht ausrüsten: Kein freier Slot vom Typ ${slot.type}`)
+            } else {
+              const oldId = slots[newSlot.key]
+              slots[newSlot.key] = itemId
+              // Remove the old item completely (from all slots)
+              removeItem(oldId)
+            }
+          }
+        }
+      } else {
+        // Set the slot to empty
+        const oldId = slots[slotKey]
+        if (oldId != null) {
+          removeItem(oldId)
+        }
+      }
+      this.actor.update({ 'data.slots': slots })
     }
   }
 
@@ -793,6 +803,28 @@ export default class SwTorActorSheet extends ActorSheet {
       const old = ObjectUtils.try(this.actor.data, ...path.split('.'))
       formData[path] = Math.round(processDeltaValue(input, old))
     }
+  }
+
+  _evalForceSkillCost(skill, costData) {
+    const result = evalSkillExpression(
+      ObjectUtils.try(costData, 'formula'),
+      skill,
+      { vars: ObjectUtils.try(costData, 'vars'), round: 0 }
+    )
+    let amount = result.value
+    const options = [Metrics.map.MaP, Metrics.map.AuP, Metrics.map.LeP]
+    result.costStructure = {}
+    for (const option of options) {
+      if (amount <= 0) {
+        break
+      }
+      const delta = option === Metrics.map.LeP ? amount : Math.min(amount, this.actorData.metrics[option.key].value)
+      if (delta !== 0) {
+        amount -= delta
+        result.costStructure[option.key] = delta
+      }
+    }
+    return result
   }
 
   /* -------------------------------------------- */
