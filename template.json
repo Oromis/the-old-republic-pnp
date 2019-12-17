@@ -59,7 +59,7 @@
       "equippable": {
         "condition": 100,
         "slotTypes": [null],
-        "effects": {}
+        "effects": []
       },
       "skill-base": {
         "key": "",
@@ -135,7 +135,7 @@
     },
     "consumable": {
       "templates": ["described", "physical"],
-      "effects": {}
+      "effects": []
     },
     "other": {
       "templates": ["described", "physical"]
