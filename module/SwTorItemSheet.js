@@ -153,7 +153,7 @@ export default class SwTorItemSheet extends ItemSheet {
    */
   _updateObject(event, formData) {
     const slotTypes = []
-    const effects = this.item.data.data.effects || []
+    const effects = ObjectUtils.cloneDeep(this.item.data.data.effects || [])
     for (const key of Object.keys(formData)) {
       let match
       if ((match = key.match(/data\.slotTypes\[(\d+)]/))) {
