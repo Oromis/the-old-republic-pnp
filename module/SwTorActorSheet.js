@@ -14,7 +14,7 @@ import {
   calcSkillXp,
   calcTotalXp,
   calcUpgradeCost, explainArmor,
-  explainMod,
+  explainEffect,
   explainPropertyValue
 } from './CharacterFormulas.js'
 import Metrics from './Metrics.js'
@@ -25,7 +25,7 @@ import ForceDispositions from './ForceDispositions.js'
 import EffectModifiers from './EffectModifiers.js'
 import Slots from './Slots.js'
 import {describeTraining} from "./TrainingSheet.js"
-import {makeRoll, resolveModLabel} from './SheetUtils.js'
+import {makeRoll, resolveEffectLabel} from './SheetUtils.js'
 import DamageTypes from './DamageTypes.js'
 import ResistanceTypes from './ResistanceTypes.js'
 
@@ -231,7 +231,7 @@ export default class SwTorActorSheet extends ActorSheet {
         ...attr,
         gained: calcGained(computedActorData, attr, { freeXp }),
         value: explainPropertyValue(computedActorData, attr),
-        mod: explainMod(computedActorData, attr),
+        mod: explainEffect(computedActorData, attr),
       }
       if (result.value.total !== ObjectUtils.try(data.data.attributes, generalAttr.key, 'value')) {
         this._needsUpdate = true
@@ -374,7 +374,7 @@ export default class SwTorActorSheet extends ActorSheet {
         ...metric,
         gained: generalMetric.xpCategory ? calcGained(computedActorData, metric, { freeXp }) : null,
         max: explainPropertyValue(computedActorData, metric, { target: 'max' }),
-        mod: explainMod(computedActorData, metric),
+        mod: explainEffect(computedActorData, metric),
         missing: metric.max - metric.value,
       }
     })

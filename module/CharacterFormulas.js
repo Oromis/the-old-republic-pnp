@@ -66,7 +66,7 @@ export function calcTotalXp(actor) {
 
 export function calcSkillXp(actor, property) {
   let result = property.xp || 0
-  if (!property.isBasicSkill && calcPropertyTrainingsMod(actor, property) === 0) {
+  if (!property.isBasicSkill && calcPropertyTrainingsEffects(actor, property) === 0) {
     // Non-basic skills need to be activated
     result += XpTable.getActivationCost(property.xpCategory)
   }
@@ -76,18 +76,18 @@ export function calcSkillXp(actor, property) {
 function calcXpFromTrainingSkill(training, property, from) {
   const key = getKey(property)
   if(training.data.baseTraining) {
-    from += (+training.data.baseTraining.data.mods[key]) || 0
+    from += (+training.data.baseTraining.data.effects[key]) || 0
   }
   return XpTable.getUpgradeCost({
     category: property.xpCategory,
     from: from,
-    to: from + (+training.data.mods[key])
+    to: from + (+training.data.effects[key])
   })
 }
 
-export function calcPropertyTrainingsMod(actor, property) {
+export function calcPropertyTrainingsEffects(actor, property) {
   if(detectPropertyType(property) !== 'skill') {
-    return actor.trainings.map(t => ObjectUtils.try(t.data.mods, getKey(property), {default: 0})).reduce((acc, v) => acc + (+v), 0)
+    return actor.trainings.map(t => ObjectUtils.try(t.data.effects, getKey(property), {default: 0})).reduce((acc, v) => acc + (+v), 0)
   }
   const from = property.isBasicSkill ? 5 : 0
   const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, property, from)).reduce((acc, v) => acc + (+v), 0)
@@ -108,10 +108,10 @@ function calcPropertySpeciesMod(actor, property) {
   return explainSpeciesMod(actor, property).value
 }
 
-export function explainMod(actor, property) {
+export function explainEffect(actor, property) {
   const components = [
     explainSpeciesMod(actor, property),
-    { label: 'Ausbildungen', value: calcPropertyTrainingsMod(actor, property)}
+    { label: 'Ausbildungen', value: calcPropertyTrainingsEffects(actor, property)}
   ].filter(mod => mod.value !== 0)
   return {
     total: components.reduce((acc, cur) => acc + cur.value, 0),
@@ -120,7 +120,7 @@ export function explainMod(actor, property) {
 }
 
 export function explainPropertyBaseValue(actor, property, options) {
-  const result = explainMod(actor, property)
+  const result = explainEffect(actor, property)
   const gp = ObjectUtils.try(property, 'gp', { default: 0 })
   if (gp !== 0) {
     result.total += gp
@@ -129,7 +129,7 @@ export function explainPropertyBaseValue(actor, property, options) {
   let base = getBaseValue(actor, property, options)
   if(detectPropertyType(property) === 'skill'
       && !property.isBasicSkill
-      && calcPropertyTrainingsMod(actor, property) > 0) {
+      && calcPropertyTrainingsEffects(actor, property) > 0) {
     base = 0
   }
   if (base !== 0) {

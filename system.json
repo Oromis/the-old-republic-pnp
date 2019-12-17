@@ -2,7 +2,7 @@
   "name": "sw-tor",
   "title": "Star Wars: The old Republic PnP",
   "description": "A PnP game system set in the Star Wars Universe at around 4000 BBY",
-  "version": 0.1,
+  "version": 0.2,
   "minimumCoreVersion": "0.4.1",
   "templateVersion": 2,
   "author": "David Bauske",

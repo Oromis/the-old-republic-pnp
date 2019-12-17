@@ -1,4 +1,5 @@
 import {migrateItemEffects} from './v1/MigrateItemEffects.js'
+import {migrateTraining} from "./v2/MigrateTraining.js"
 
 export const migrateWorld = async function() {
   ui.notifications.info(`Applying Star Wars: The old Republic System Migration for version ${game.system.data.version}. Please stand by.`);
@@ -131,6 +132,9 @@ export const migrateItemData = function(item) {
   const updateData = {}
 
   migrateItemEffects(item, updateData)
+
+  if (item.type === 'training')
+    migrateTraining(item, updateData)
 
   // Return the migrated update data
   return updateData

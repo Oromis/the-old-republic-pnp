@@ -20,7 +20,7 @@ export function analyzeDamageFormula({ path, defaultExpr = '' }) {
   return { error: !text.match(/^\s*\d+\s*(\+\s*\d+[wd]\d+(\/\d+)?\s*)?$/g) }
 }
 
-export function resolveModLabel(key, { defaultLabel = key } = {}) {
+export function resolveEffectLabel(key, { defaultLabel = key } = {}) {
   let type = ''
   try {
     type = detectPropertyType({key})

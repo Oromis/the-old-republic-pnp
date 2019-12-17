@@ -1,16 +1,12 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import CharacterDispositions from './CharacterDispositions.js'
-import {detectPropertyType} from './CharacterFormulas.js'
-import Attributes from './Attributes.js'
-import Skills from './Skills.js'
 import ObjectUtils from './ObjectUtils.js'
-import Metrics from './Metrics.js'
-import {onDragOver, onDropItem, resolveModLabel} from './SheetUtils.js'
+import {onDragOver, onDropItem, resolveEffectLabel} from './SheetUtils.js'
 
 export function describeTraining(training) {
   let desc = 'GP: '.concat( training.data.gp)
-  for (const key of Object.keys(training.data.mods)) {
-    desc = desc.concat('\n', resolveModLabel(key), ': ', training.data.mods[key])
+  for (const effect of training.data.effects) {
+    desc = desc.concat('\n', effect.label || resolveEffectLabel(effect.key), ': ', effect.value)
   }
   return desc
 }
@@ -49,11 +45,6 @@ export default class TrainingSheet extends ItemSheet {
    */
   getData() {
     const data = super.getData()
-    data.modsList = Object.keys(data.data.mods).map(key => ({
-      key,
-      value: data.data.mods[key],
-      label: resolveModLabel(key)
-    }))
     data.dispositionList = CharacterDispositions.list.map(e => ({
       ...e,
       value: data.data.dispositions[e.key]
@@ -88,19 +79,19 @@ export default class TrainingSheet extends ItemSheet {
     this.form.ondragover = onDragOver()
     this.form.ondrop = onDropItem(this.handleDrop)
 
-    // Delete Mod Item
-    html.find('.mod-delete').click(ev => {
-      const li = $(ev.currentTarget).parents("[data-mod-key]")
-      this.deleteMod(li.data("modKey"))
+    // Delete Effect
+    html.find('.effect-delete').click(ev => {
+      const li = $(ev.currentTarget).parents("[data-effect-key]")
+      this.deleteEffect(li.data("effectKey"))
       li.slideUp(200, () => this.render(false))
     });
 
-    // Add New Mod Item
-    html.find('.mod-add').click(ev => {
-      const li = $(ev.currentTarget).parents("[data-mod-key]")
-      let key = html.find('.mod-new-key')[0].value
-      let value = html.find('.mod-new-value')[0].value
-      this.addMod(key, value)
+    // Add New Effect
+    html.find('.effect-add').click(ev => {
+      const li = $(ev.currentTarget).parents("[data-effect-key]")
+      let key = html.find('.effect-new-key')[0].value
+      let value = html.find('.effect-new-value')[0].value
+      this.addEffect({key, value})
       this.item.update({
         'data.newKey': '',
         'data.newValue': '',
@@ -108,9 +99,9 @@ export default class TrainingSheet extends ItemSheet {
       this.render(false)
     });
 
-    html.find('.mod-new').on('keypress', e => {
+    html.find('.effect-new').on('keypress', e => {
       if (e.key === 'Enter') {
-        html.find('.mod-add').click()
+        html.find('.effect-add').click()
       }
     })
 
@@ -131,18 +122,34 @@ export default class TrainingSheet extends ItemSheet {
    * @private
    */
   _updateObject(event, formData) {
+    const effects = ObjectUtils.cloneDeep(this.item.data.data.effects || [])
+    for (const key of Object.keys(formData)) {
+      let match
+      if ((match = key.match(/data\.effects\[(\d+)]\.value/))) {
+        const index = match[1]
+        if (effects.length >= index) {
+          effects[index].value = +formData[key]
+        }
+      }
+    }
+    formData['data.effects'] = effects
     return this.item.update(formData)
   }
 
-  addMod(key, value) {
-    if(key.length < 1)
+  addEffect(newEffect) {
+    if(!newEffect.key || newEffect.key.length < 1)
       return
-    this.item.update({ [`data.mods.${key}`]: (value || 0) })
+    if(!newEffect.value)
+      newEffect.value = 0
+    if(!newEffect.label)
+      newEffect.label = resolveEffectLabel(newEffect.key)
+    const itemData = this.item.data.data
+    this.item.update({ 'data.effects': [...(itemData.effects || []), ObjectUtils.pick(newEffect, ['key', 'label', 'value'])] })
   }
 
-  deleteMod(key) {
+  deleteEffect(key) {
     this.item.update({
-      [`data.mods.-=${key}`]: null,
+      'data.effects': ( this.item.data.data.effects || []).filter((v, i) => v.key !== key),
     })
   }
 
@@ -151,8 +158,8 @@ export default class TrainingSheet extends ItemSheet {
       this.item.update({
         'data.baseTraining': item
       })
-    } else if(item.data.key) {
-      this.addMod(item.data.key)
+    } else if(item.name && item.data.key) {
+      this.addEffect({label: item.name, key: item.data.key})
     }
   }
 }

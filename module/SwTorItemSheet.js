@@ -1,6 +1,6 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import DamageTypes from './DamageTypes.js'
-import {analyzeDamageFormula, analyzeExpression, onDragOver, onDropItem, resolveModLabel} from './SheetUtils.js'
+import {analyzeDamageFormula, analyzeExpression, onDragOver, onDropItem, resolveEffectLabel} from './SheetUtils.js'
 import SlotTypes from './SlotTypes.js'
 import ItemTypes from './ItemTypes.js'
 import ObjectUtils from './ObjectUtils.js'
@@ -59,7 +59,7 @@ export default class SwTorItemSheet extends ItemSheet {
       data.computed.damage = analyzeDamageFormula({ path: [data.data.damage, 'formula'], defaultExpr: '0' })
       data.computed.skill = {
         key: data.data.skill,
-        label: resolveModLabel(data.data.skill, { defaultLabel: '' }),
+        label: resolveEffectLabel(data.data.skill, { defaultLabel: '' }),
       }
     }
     if (data.flags.isRangedWeapon) {

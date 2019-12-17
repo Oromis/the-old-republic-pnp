@@ -36,7 +36,7 @@ Hooks.once("init", async function() {
 })
 
 Hooks.once("ready", function() {
-  const NEEDS_MIGRATION_VERSION = 0.1
+  const NEEDS_MIGRATION_VERSION = 0.2
   let needMigration = game.settings.get("sw-tor", "systemMigrationVersion") < NEEDS_MIGRATION_VERSION
   if ( needMigration && game.user.isGM ) return migrateWorld()
 })
