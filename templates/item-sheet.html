@@ -155,9 +155,19 @@
                     </a>
                   </div>
                 {{/each}}
-                <div class="">
-                  <input type="text" name="data.newEffect.key" value="{{data.newEffect.key}}" placeholder="Key" />
-                  <input type="text" name="data.newEffect.label" value="{{data.newEffect.label}}" placeholder="Name" class="formula" />
+                <div class="flex-row multi-item">
+                  <select name="data.newEffect.type" class="small">
+                    {{#select data.newEffect.type}}
+                      <option value="">[Manuell]</option>
+                      {{#each effects as |effect|}}
+                        <option value="{{effect.key}}">{{effect.label}}</option>
+                      {{/each}}
+                    {{/select}}
+                  </select>
+                  {{#if computed.newEffect.isCustom}}
+                    <input type="text" name="data.newEffect.key" value="{{data.newEffect.key}}" placeholder="Key" />
+                    <input type="text" name="data.newEffect.label" value="{{data.newEffect.label}}" placeholder="Name" class="formula" />
+                  {{/if}}
                   <input type="text" name="data.newEffect.value" value="{{data.newEffect.value}}" placeholder="Wert" data-dtype="Number" />
                   <a class="new-effect" title="Effekt anlegen"><i class="fas fa-plus"></i></a>
                 </div>

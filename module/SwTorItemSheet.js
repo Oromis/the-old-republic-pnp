@@ -4,6 +4,8 @@ import {analyzeDamageFormula, analyzeExpression, onDragOver, onDropItem, resolve
 import SlotTypes from './SlotTypes.js'
 import ItemTypes from './ItemTypes.js'
 import ObjectUtils from './ObjectUtils.js'
+import Metrics from './Metrics.js'
+import ResistanceTypes from './ResistanceTypes.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -29,7 +31,7 @@ export default class SwTorItemSheet extends ItemSheet {
 	  return mergeObject(super.defaultOptions, {
 			classes: ["sw-tor", "sheet", "item"],
 			template: "systems/sw-tor/templates/item-sheet.html",
-			width: 520,
+			width: 570,
 			height: 480,
 		})
   }
@@ -66,10 +68,19 @@ export default class SwTorItemSheet extends ItemSheet {
     }
     if (data.flags.hasEffects) {
       data.computed.effects = data.data.effects || []
+      data.computed.newEffect = { isCustom: !ObjectUtils.try(data.data.newEffect, 'type', { default: '' }) }
+      data.effects = this._getEffects()
     }
     data.damageTypes = DamageTypes.list
     data.slotTypes = SlotTypes.list
     return data
+  }
+
+  _getEffects() {
+    return [
+      ...Metrics.list,
+      ...ResistanceTypes.list.map(r => ({ key: `r_${r.key}`, label: r.label })),
+    ]
   }
 
   /* -------------------------------------------- */
@@ -111,14 +122,21 @@ export default class SwTorItemSheet extends ItemSheet {
     html.find('.new-effect').click(() => {
       const itemData = this.item.data.data
       const newEffect = itemData.newEffect
-      if (newEffect != null && newEffect.key && typeof newEffect.value === 'number') {
-        if (!newEffect.label) {
-          newEffect.label = newEffect.key
+      if (newEffect != null) {
+        if (newEffect.type) {
+          // Predefined type
+          newEffect.key = newEffect.type
+          newEffect.label = this._getEffects().find(e => e.key === newEffect.type).label
         }
-        this.item.update({
-          'data.effects': [...(itemData.effects || []), ObjectUtils.pick(newEffect, ['key', 'label', 'value'])],
-          'data.newEffect': { key: '', label: '', value: '' }
-        })
+        if (newEffect.key && typeof newEffect.value === 'number') {
+          if (!newEffect.label) {
+            newEffect.label = newEffect.key
+          }
+          this.item.update({
+            'data.effects': [...(itemData.effects || []), ObjectUtils.pick(newEffect, ['key', 'label', 'value'])],
+            'data.newEffect': { key: '', label: '', value: '' }
+          })
+        }
       }
     })
     html.find('.delete-effect').click(e => {
@@ -138,6 +156,7 @@ export default class SwTorItemSheet extends ItemSheet {
       })
     } else if (item.data.key && typeof item.data.key === 'string') {
       this.item.update({
+        'data.newEffect.type': '',
         'data.newEffect.key': item.data.key,
         'data.newEffect.label': item.name,
       })

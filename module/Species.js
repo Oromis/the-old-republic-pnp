@@ -182,7 +182,7 @@ const list = [
     mods: {
       ch: 10,
       wk: -10,
-      r_gif: 0.5,
+      r_poison: 0.5,
     },
   },
   {
