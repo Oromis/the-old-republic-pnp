@@ -65,7 +65,10 @@
         "key": "",
         "attribute1": null,
         "attribute2": null,
-        "xpCategory": null
+        "xpCategory": null,
+        "gained": [],
+        "xp": 0,
+        "buff": 0
       }
     },
     "skill": {
