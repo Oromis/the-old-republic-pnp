@@ -199,6 +199,10 @@
     width: 22px;
 }
 
+.effect-table-key {
+    min-width: 50px;
+}
+
 .attribute-gained {
     width: 20px;
     display: inline-block;

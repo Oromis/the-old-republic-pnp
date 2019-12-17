@@ -157,8 +157,8 @@ export function explainPropertyValue(actor, property, options) {
   }
   const items = actor.equippedItems || []
   for (const item of items) {
-    const effects = item.data.effects || {}
-    const value = +(effects[property.key] || 0)
+    const effects = item.data.effects || []
+    const value = effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0)
     if (value !== 0 && !isNaN(value)) {
       result.total += value
       result.components.push({ label: item.name, value })

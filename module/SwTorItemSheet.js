@@ -3,6 +3,7 @@ import DamageTypes from './DamageTypes.js'
 import {analyzeDamageFormula, analyzeExpression, onDragOver, onDropItem, resolveModLabel} from './SheetUtils.js'
 import SlotTypes from './SlotTypes.js'
 import ItemTypes from './ItemTypes.js'
+import ObjectUtils from './ObjectUtils.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
@@ -64,12 +65,7 @@ export default class SwTorItemSheet extends ItemSheet {
       data.computed.projectileEnergy = analyzeExpression({ path: [data.data.projectileEnergy, 'formula'] })
     }
     if (data.flags.hasEffects) {
-      const effects = data.data.effects || []
-      if (Array.isArray(effects)) {
-        data.computed.effects = effects
-      } else {
-        data.computed.effects = Object.entries(effects).map(([key, value]) => ({ key, value, label: key }))
-      }
+      data.computed.effects = data.data.effects || []
     }
     data.damageTypes = DamageTypes.list
     data.slotTypes = SlotTypes.list
@@ -113,14 +109,22 @@ export default class SwTorItemSheet extends ItemSheet {
     })
 
     html.find('.new-effect').click(() => {
-      this.item.update({
-        'data.effects': { ...this.item.data.data.effects, '': null }
-      })
+      const itemData = this.item.data.data
+      const newEffect = itemData.newEffect
+      if (newEffect != null && newEffect.key && typeof newEffect.value === 'number') {
+        if (!newEffect.label) {
+          newEffect.label = newEffect.key
+        }
+        this.item.update({
+          'data.effects': [...(itemData.effects || []), ObjectUtils.pick(newEffect, ['key', 'label', 'value'])],
+          'data.newEffect': { key: '', label: '', value: '' }
+        })
+      }
     })
     html.find('.delete-effect').click(e => {
-      const targetKey = e.currentTarget.getAttribute('data-index')
+      const targetKey = +e.currentTarget.getAttribute('data-index')
       this.item.update({
-        'data.effects': { [`-=${targetKey}`]: null }
+        'data.effects': (this.item.data.data.effects || []).filter((v, i) => i !== targetKey),
       })
     })
   }
@@ -131,6 +135,11 @@ export default class SwTorItemSheet extends ItemSheet {
       // Weapon skill
       this.item.update({
         'data.skill': item.data.key,
+      })
+    } else if (item.data.key && typeof item.data.key === 'string') {
+      this.item.update({
+        'data.newEffect.key': item.data.key,
+        'data.newEffect.label': item.name,
       })
     }
   }
@@ -144,22 +153,17 @@ export default class SwTorItemSheet extends ItemSheet {
    */
   _updateObject(event, formData) {
     const slotTypes = []
-    const effects = {}
+    const effects = this.item.data.data.effects || []
     for (const key of Object.keys(formData)) {
       let match
       if ((match = key.match(/data\.slotTypes\[(\d+)]/))) {
         slotTypes[match[1]] = formData[key]
         delete formData[key]
-      } else if ((match = key.match(/data\.effects\[(\d+)]\.key/))) {
-        const valueKey = `data.effects[${match[1]}].value`
-        effects[formData[key]] = formData[valueKey]
-        delete formData[key]
-        delete formData[valueKey]
-      }
-    }
-    for (const key of Object.keys(this.item.data.data.effects || {})) {
-      if (!Object.keys(effects).includes(key)) {
-        effects[`-=${key}`] = null
+      } else if ((match = key.match(/data\.effects\[(\d+)]\.value/))) {
+        const index = match[1]
+        if (effects.length >= index) {
+          effects[index].value = +formData[key]
+        }
       }
     }
     formData['data.slotTypes'] = slotTypes
