@@ -32,6 +32,9 @@ export default {
   getUpgradeCost({ category, from = 0, to = from + 1 }) {
     const costTable = getCostTable(category)
 
+    if (from >= to)
+      return 0
+
     if (from < baseLevel - 1) {
       from = baseLevel - 1
     }
