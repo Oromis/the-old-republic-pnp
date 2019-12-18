@@ -22,7 +22,10 @@ export default class SkillSheet extends ItemSheet {
      */
     this._sheetTab = "description"
 
-    new AutoSubmitSheet(this)
+    const autoSubmit = new AutoSubmitSheet(this)
+    autoSubmit.addFilter('data.key', (obj, { name }) => {
+      return { [name]: obj[name].toLowerCase() }
+    })
   }
 
   /**
@@ -109,12 +112,7 @@ export default class SkillSheet extends ItemSheet {
    * @private
    */
   _updateObject(event, formData) {
-    const key = formData['data.key']
-    if (key != null) {
-      formData['data.key'] = key.toLowerCase()
-    }
-
-    return this.object.update(formData)
+    return Promise.resolve()
   }
 
   get skill() {

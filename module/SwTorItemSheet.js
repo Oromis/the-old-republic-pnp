@@ -20,7 +20,23 @@ export default class SwTorItemSheet extends ItemSheet {
      */
     this._sheetTab = "description"
 
-    new AutoSubmitSheet(this)
+    const autoSubmit = new AutoSubmitSheet(this)
+
+    autoSubmit.addFilter('data.slotTypes.*', (obj, { name, path }) => {
+      const slotTypes = ObjectUtils.cloneDeep(this.item.data.data.slotTypes || [])
+      slotTypes[path[2]] = obj[name]
+      return { 'data.slotTypes': slotTypes }
+    })
+    autoSubmit.addFilter('data.effects.*.value', (obj, { name, path }) => {
+      const effects = ObjectUtils.cloneDeep(this.item.data.data.effects || [])
+      const index = +path[2]
+      if (effects.length >= index) {
+        effects[index].value = +obj[name]
+        return { 'data.effects': effects }
+      } else {
+        return {}
+      }
+    })
   }
 
   /**
@@ -171,23 +187,6 @@ export default class SwTorItemSheet extends ItemSheet {
    * @private
    */
   _updateObject(event, formData) {
-    const slotTypes = []
-    const effects = ObjectUtils.cloneDeep(this.item.data.data.effects || [])
-    for (const key of Object.keys(formData)) {
-      let match
-      if ((match = key.match(/data\.slotTypes\[(\d+)]/))) {
-        slotTypes[match[1]] = formData[key]
-        delete formData[key]
-      } else if ((match = key.match(/data\.effects\[(\d+)]\.value/))) {
-        const index = match[1]
-        if (effects.length >= index) {
-          effects[index].value = +formData[key]
-        }
-      }
-    }
-    formData['data.slotTypes'] = slotTypes
-    formData['data.effects'] = effects
-
-    return this.item.update(formData)
+    return Promise.resolve()
   }
 }

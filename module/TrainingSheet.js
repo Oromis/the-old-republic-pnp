@@ -21,7 +21,17 @@ export default class TrainingSheet extends ItemSheet {
      */
     this._sheetTab = "description"
 
-    new AutoSubmitSheet(this)
+    const autoSubmit = new AutoSubmitSheet(this)
+    autoSubmit.addFilter('data.effects.*.value', (obj, { name, path }) => {
+      const effects = ObjectUtils.cloneDeep(this.item.data.data.effects || [])
+      const index = +path[2]
+      if (effects.length >= index) {
+        effects[index].value = +obj[name]
+        return { 'data.effects': effects }
+      } else {
+        return {}
+      }
+    })
   }
 
   /**
@@ -122,18 +132,7 @@ export default class TrainingSheet extends ItemSheet {
    * @private
    */
   _updateObject(event, formData) {
-    const effects = ObjectUtils.cloneDeep(this.item.data.data.effects || [])
-    for (const key of Object.keys(formData)) {
-      let match
-      if ((match = key.match(/data\.effects\[(\d+)]\.value/))) {
-        const index = match[1]
-        if (effects.length >= index) {
-          effects[index].value = +formData[key]
-        }
-      }
-    }
-    formData['data.effects'] = effects
-    return this.item.update(formData)
+    return Promise.resolve()
   }
 
   addEffect(newEffect) {

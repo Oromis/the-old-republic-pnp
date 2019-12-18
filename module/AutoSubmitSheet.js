@@ -13,6 +13,8 @@ export default class AutoSubmitSheet {
     // Disable default submit logic (it doesn't update the entity immediately when jumping between inputs)
     this.parent._onUnfocus = () => {}
 
+    // TODO disable _onSubmit
+
     this._filters = []
   }
 
@@ -23,6 +25,9 @@ export default class AutoSubmitSheet {
         .on('change', this._onChangeInput)
         .on('keypress', this._onEnter)
     }
+
+    // Support Image updates
+    html.find('img[data-editable]').click(this._onEditImage)
   }
 
   addFilter(path, callback) {
@@ -30,6 +35,20 @@ export default class AutoSubmitSheet {
       path = path.split('.')
     }
     this._filters.push({ path, callback })
+  }
+
+  _onEditImage = (event) => {
+    const oldImage = this.parent.entity.data.img
+    new FilePicker({
+      type: "image",
+      current: oldImage,
+      callback: path => {
+        event.currentTarget.src = path
+        this.parent.entity.update({ img: path })
+      },
+      top: this.parent.position.top + 40,
+      left: this.parent.position.left + 10
+    }).browse(oldImage)
   }
 
   _onChangeInput = async e => {
@@ -63,7 +82,14 @@ export default class AutoSubmitSheet {
     const name = event.target.getAttribute('data-link') || event.target.getAttribute('name')
     if (name != null) {
       const namePath = name.split('.')
-      let updateData = { [name]: event.target.value }
+      let value = event.target.value
+      const dtype = event.target.getAttribute('data-dtype')
+      if (dtype === 'Number') {
+        value = +value
+      } else if (dtype === 'Boolean') {
+        value = value === 'true'
+      }
+      let updateData = { [name]: value }
       for (const filter of this._filters) {
         let matches = true
         for (let i = 0; i < filter.path.length; ++i) {
@@ -81,7 +107,7 @@ export default class AutoSubmitSheet {
       }
 
       if (Object.keys(updateData).length > 0) {
-        await this.parent.actor.update(updateData)
+        await this.parent.entity.update(updateData)
       }
     }
 
