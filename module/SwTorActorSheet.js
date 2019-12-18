@@ -402,7 +402,7 @@ export default class SwTorActorSheet extends ActorSheet {
       incomingDamageCost = { LeP: 0 }
       incomingDamageResistances = resistances.filter(rt => rt.canResist(incomingDamageType))
       for (const res of incomingDamageResistances) {
-        const { damage, cost } = res.resist(incomingDamage, computedActorData)
+        const { damage, cost } = res.resist(incomingDamage, incomingDamageType, computedActorData)
         res.damageBefore = incomingDamage
         res.damageReduction = incomingDamage - damage
         res.damageAfter = damage
