@@ -478,7 +478,7 @@ export default class SwTorActorSheet extends ActorSheet {
       },
       regeneration: {
         turn: this._prepareRegen('turn', {
-          EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'missing', { default: 0 }),
+          EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'max', 'total', { default: 0 }) / 25,
           MaP: 2,
         }, computedActorData, { label: 'Nächste Runde', className: 'next-turn', icon: 'fa-redo' }),
         day: this._prepareRegen('day', {
