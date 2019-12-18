@@ -69,13 +69,13 @@ function processDeltaValue(text, oldValue) {
   if (matches) {
     switch (matches[1]) {
       case '+':
-        return oldValue + (+matches[2])
+        return (+oldValue) + (+matches[2])
       case '-':
-        return oldValue - (+matches[2])
+        return (+oldValue) - (+matches[2])
       case '*':
-        return oldValue * (+matches[2])
+        return (+oldValue) * (+matches[2])
       case '/':
-        return oldValue / (+matches[2])
+        return (+oldValue) / (+matches[2])
     }
   }
 
@@ -139,9 +139,44 @@ export default class SwTorActorSheet extends ActorSheet {
      */
     this._sheetTab = "attributes"
     this._inventoryHidden = {}
-    this._needsUpdate = false
 
-    new AutoSubmitSheet(this)
+    const autoSubmit = new AutoSubmitSheet(this)
+
+    autoSubmit.addFilter('data.attributes.*.gp', this._processDeltaProperty)
+    autoSubmit.addFilter('data.attributes.*.buff', this._processDeltaProperty)
+    autoSubmit.addFilter('data.metrics.*.value', this._processDeltaProperty)
+    autoSubmit.addFilter('data.metrics.*.buff', this._processDeltaProperty)
+    autoSubmit.addFilter('data.combat.enemyDistance', this._processDeltaProperty)
+
+    autoSubmit.addFilter('skills.*', (obj, { name, path }) => {
+      const [_unused, key, ...rest] = path
+      const skill = this.getSkill(key)
+      if (skill != null) {
+        const skillEntity = this.actor.getOwnedItem(skill.id)
+        if (skillEntity != null) {
+          let value = obj[name]
+          if (path.indexOf('buff') !== -1) {
+            value = processDeltaValue(value, skill.data.buff || 0)
+          } else if (path.indexOf('vars') !== -1) {
+            value = value === '' || isNaN(value) ? '' : +value
+          }
+          const payload = { [rest.join('.')]: value }
+          const oldValue = ObjectUtils.try(skill, ...rest)
+          if (value !== oldValue) {
+            skillEntity.update(payload)
+          }
+        }
+      }
+      // No actor update
+      return {}
+    })
+
+    autoSubmit.addFilter('input.totalXp', (obj, { name }) => {
+      const newVal = Math.round(processDeltaValue(obj[name], calcTotalXp(this.computeActorData(this.actor.data))))
+      return {
+        'data.xp.gained': newVal - (ObjectUtils.try(this.actorData, 'xp', 'gp', { default: 0 }) * Config.character.gpToXpRate)
+      }
+    })
   }
 
   /* -------------------------------------------- */
@@ -234,7 +269,7 @@ export default class SwTorActorSheet extends ActorSheet {
         mod: explainEffect(computedActorData, attr),
       }
       if (result.value.total !== ObjectUtils.try(data.data.attributes, generalAttr.key, 'value')) {
-        this._needsUpdate = true
+        // TODO migrate to actor class
       }
       return result
     })
@@ -542,17 +577,6 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('.roll-check').click(this._onRollCheck)
     html.find('.item-create').click(this._onCreateItem)
 
-    if (this._needsUpdate) {
-      if (timeout != null) {
-        clearTimeout(timeout)
-      }
-      timeout = setTimeout(() => {
-        timeout = null
-        this._needsUpdate = false
-        this._onSubmit(new Event('click'))
-      }, 100)
-    }
-
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
       const li = $(ev.currentTarget).parents("[data-item-id]");
@@ -810,11 +834,11 @@ export default class SwTorActorSheet extends ActorSheet {
     ChatMessage.create(chatData)
   }
 
-  _processDeltaProperty(formData, path) {
-    const input = formData[path]
+  _processDeltaProperty = (formData, { name }) => {
+    const input = formData[name]
     if (input != null) {
-      const old = ObjectUtils.try(this.actor.data, ...path.split('.'))
-      formData[path] = Math.round(processDeltaValue(input, old))
+      const old = ObjectUtils.try(this.actor.data, ...name.split('.'))
+      formData[name] = Math.round(processDeltaValue(input, old))
     }
   }
 
@@ -848,56 +872,8 @@ export default class SwTorActorSheet extends ActorSheet {
    * @private
    */
   _updateObject(event, formData) {
-    // Handle the free-form attributes list
-    const parsed = expandObject(formData)
-
-    // Take care of attributes.
-    Attributes.list.forEach(attr => {
-      this._processDeltaProperty(formData, `data.attributes.${attr.key}.gp`)
-      this._processDeltaProperty(formData, `data.attributes.${attr.key}.buff`)
-    })
-
-    // Skills
-    for (const key of Object.keys(formData)) {
-      const match = /skills\.([\wüäö\-_]+)\.(.*)/.exec(key)
-      if (match) {
-        const skill = this.getSkill(match[1])
-        if (skill != null) {
-          const skillEntity = this.actor.getOwnedItem(skill.id)
-          if (skillEntity != null) {
-            let value = formData[key]
-            if (match[2] === 'data.buff') {
-              value = processDeltaValue(value, skill.data.buff || 0)
-            } else if (match[2].indexOf('.vars.') !== -1) {
-              value = value === '' || isNaN(value) ? '' : +value
-            }
-
-            const payload = { [match[2]]: value }
-            const oldValue = ObjectUtils.try(skill, ...match[2].split('.'))
-            if (value !== oldValue) {
-              skillEntity.update(payload)
-            }
-          }
-        }
-        delete formData[key]
-      }
-    }
-
-    Metrics.list.forEach(metric => {
-      this._processDeltaProperty(formData, `data.metrics.${metric.key}.value`)
-      this._processDeltaProperty(formData, `data.metrics.${metric.key}.buff`)
-    })
-
-    this._processDeltaProperty(formData, `data.combat.enemyDistance`)
-
-    if (parsed.input.totalXp != null) {
-      const newVal = Math.round(processDeltaValue(parsed.input.totalXp, calcTotalXp(this.computeActorData(this.actor.data))))
-      formData['data.xp.gained'] = newVal -
-        (ObjectUtils.try(this.actorData, 'xp', 'gp', { default: 0 }) * Config.character.gpToXpRate)
-    }
-
-    // Update the Actor
-    return this.actor.update(formData)
+    // Disable regular form submissions (we submit individual fields)
+    return Promise.resolve()
   }
 
   get actorData() {
