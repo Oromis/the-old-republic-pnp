@@ -385,7 +385,7 @@ export default class SwTorActorSheet extends ActorSheet {
     const resistances = ResistanceTypes.list.map(rt => {
       let value
       if (rt.key === 'armor') {
-        value = explainArmor(computedActorData.equippedItems)
+        value = explainArmor(computedActorData)
       } else {
         value = explainPropertyValue(computedActorData, { key: `r_${rt.key}` })
       }

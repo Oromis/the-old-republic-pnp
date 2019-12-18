@@ -185,10 +185,13 @@ export function calcMaxInventoryWeight(actor) {
   return (attrValue(actor, 'kk') + attrValue(actor, 'ko')) / 2
 }
 
-export function explainArmor(equippedItems) {
-  const relevantItems = equippedItems.filter(item => item.data.armor != null && item.data.armor !== 0)
+export function explainArmor(actor) {
+  const components = [
+    ...actor.equippedItems.filter(item => item.data.armor != null && item.data.armor !== 0).map(item => ({ label: item.name, value: item.data.armor })),
+    explainSpeciesMod(actor, 'rtg')
+  ].filter(mod => mod.value !== 0)
   return {
-    total: relevantItems.reduce((acc, cur) => acc + cur.data.armor, 0),
-    components: relevantItems.map(item => ({ label: item.name, value: item.data.armor }))
+    total: components.reduce((acc, cur) => acc + (+cur.value), 0),
+    components
   }
 }
