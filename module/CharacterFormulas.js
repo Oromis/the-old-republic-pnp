@@ -76,18 +76,18 @@ export function calcSkillXp(actor, property) {
 function calcXpFromTrainingSkill(training, property, from) {
   const key = getKey(property)
   if(training.data.baseTraining) {
-    from += (+training.data.baseTraining.data.effects[key]) || 0
+    from += (+training.data.baseTraining.data.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0))
   }
   return XpTable.getUpgradeCost({
     category: property.xpCategory,
     from: from,
-    to: from + (+training.data.effects[key])
+    to: from + (+training.data.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0))
   })
 }
 
 export function calcPropertyTrainingsEffects(actor, property) {
   if(detectPropertyType(property) !== 'skill') {
-    return actor.trainings.map(t => ObjectUtils.try(t.data.effects, getKey(property), {default: 0})).reduce((acc, v) => acc + (+v), 0)
+    return actor.trainings.map(t => t.data.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0)).reduce((acc, v) => acc + (+v), 0)
   }
   const from = property.isBasicSkill ? 5 : 0
   const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, property, from)).reduce((acc, v) => acc + (+v), 0)
@@ -185,10 +185,13 @@ export function calcMaxInventoryWeight(actor) {
   return (attrValue(actor, 'kk') + attrValue(actor, 'ko')) / 2
 }
 
-export function explainArmor(equippedItems) {
-  const relevantItems = equippedItems.filter(item => item.data.armor != null && item.data.armor !== 0)
+export function explainArmor(actor) {
+  const components = [
+    ...actor.equippedItems.filter(item => item.data.armor != null && item.data.armor !== 0).map(item => ({ label: item.name, value: item.data.armor })),
+    explainSpeciesMod(actor, 'rtg')
+  ].filter(mod => mod.value !== 0)
   return {
-    total: relevantItems.reduce((acc, cur) => acc + cur.data.armor, 0),
-    components: relevantItems.map(item => ({ label: item.name, value: item.data.armor }))
+    total: components.reduce((acc, cur) => acc + (+cur.value), 0),
+    components
   }
 }

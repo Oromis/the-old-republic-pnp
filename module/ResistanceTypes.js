@@ -4,10 +4,14 @@ function resistFlat(damage) {
   return { damage: Math.max(0, damage - this.value.total) }
 }
 
-function resistEnergy(damage, actor) {
+function resistEnergy(damage, type, actor) {
   const EnP = actor.metrics.EnP.value
-  const reduced = Math.min(EnP, damage, this.value.total)
-  return { damage: damage - reduced, cost: { EnP: reduced }}
+  let damageMulti = 1
+  if (type.key === 'ion')
+    damageMulti = 10
+
+  const reduced = Math.min(EnP, damage * damageMulti, this.value.total)
+  return { damage: damage - (reduced / damageMulti), cost: { EnP: reduced }}
 }
 
 function resistPercentage(damage) {

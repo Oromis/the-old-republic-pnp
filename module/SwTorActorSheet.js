@@ -385,7 +385,7 @@ export default class SwTorActorSheet extends ActorSheet {
     const resistances = ResistanceTypes.list.map(rt => {
       let value
       if (rt.key === 'armor') {
-        value = explainArmor(computedActorData.equippedItems)
+        value = explainArmor(computedActorData)
       } else {
         value = explainPropertyValue(computedActorData, { key: `r_${rt.key}` })
       }
@@ -402,7 +402,7 @@ export default class SwTorActorSheet extends ActorSheet {
       incomingDamageCost = { LeP: 0 }
       incomingDamageResistances = resistances.filter(rt => rt.canResist(incomingDamageType))
       for (const res of incomingDamageResistances) {
-        const { damage, cost } = res.resist(incomingDamage, computedActorData)
+        const { damage, cost } = res.resist(incomingDamage, incomingDamageType, computedActorData)
         res.damageBefore = incomingDamage
         res.damageReduction = incomingDamage - damage
         res.damageAfter = damage
@@ -478,7 +478,7 @@ export default class SwTorActorSheet extends ActorSheet {
       },
       regeneration: {
         turn: this._prepareRegen('turn', {
-          EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'missing', { default: 0 }),
+          EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'max', 'total', { default: 0 }) / 25,
           MaP: 2,
         }, computedActorData, { label: 'Nächste Runde', className: 'next-turn', icon: 'fa-redo' }),
         day: this._prepareRegen('day', {
