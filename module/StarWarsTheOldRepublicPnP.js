@@ -8,6 +8,8 @@ import {registerHelpers} from './templating/Helpers.js'
 import {measureDistance} from './overrides/DistanceMeasurement.js'
 import {registerSystemSettings} from './Settings.js'
 import {migrateWorld} from './migration/Migrations.js'
+import SwTorActor from './actor/SwTorActor.js'
+import SwTorItem from './SwTorItem.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -23,6 +25,8 @@ Hooks.once("init", async function() {
 	 * @type {String}
 	 */
 	CONFIG.initiative.formula = "1d6 + (@attributes.in.value + @attributes.sc.value) / 10"
+  CONFIG.Actor.entityClass = SwTorActor
+  CONFIG.Item.entityClass = SwTorItem
 
   registerSystemSettings()
 
@@ -30,9 +34,9 @@ Hooks.once("init", async function() {
   Actors.unregisterSheet("core", ActorSheet)
   Actors.registerSheet("sw-tor", SwTorActorSheet, { makeDefault: true })
   Items.unregisterSheet("core", ItemSheet)
-  Items.registerSheet("sw-tor", SwTorItemSheet, {makeDefault: true})
-  Items.registerSheet("sw-tor", SkillSheet)
-  Items.registerSheet("sw-tor", TrainingSheet)
+  Items.registerSheet("sw-tor", SwTorItemSheet, { makeDefault: true })
+  Items.registerSheet("sw-tor", SkillSheet, { types: ['skill', 'force-skill'], makeDefault: true })
+  Items.registerSheet("sw-tor", TrainingSheet, { types: ['training'], makeDefault: true })
 })
 
 Hooks.once("ready", function() {

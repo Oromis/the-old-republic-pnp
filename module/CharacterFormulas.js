@@ -1,9 +1,9 @@
 import Config from './Config.js'
 import ObjectUtils from './ObjectUtils.js'
 import Species from './Species.js'
-import Attributes, {attrValue} from './Attributes.js'
+import Attributes, {attrValue} from './datasets/HumanoidAttributes.js'
 import XpTable from './XpTable.js'
-import Metrics from './Metrics.js'
+import Metrics from './datasets/HumanoidMetrics.js'
 
 export function detectPropertyType(property) {
   const key = property.key

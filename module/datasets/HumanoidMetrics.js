@@ -1,6 +1,6 @@
-import Config from './Config.js'
-import ObjectUtils from './ObjectUtils.js'
-import {attrValue} from './Attributes.js'
+import Config from '../Config.js'
+import ObjectUtils from '../ObjectUtils.js'
+import {attrValue} from './HumanoidAttributes.js'
 
 const list = [
   {
@@ -43,8 +43,6 @@ const list = [
     }
   },
 ]
-
-// list.forEach(attr => {})
 
 const map = ObjectUtils.asObject(list, 'key')
 

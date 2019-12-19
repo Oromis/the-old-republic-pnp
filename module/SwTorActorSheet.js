@@ -1,4 +1,4 @@
-import Attributes from './Attributes.js'
+import Attributes from './datasets/HumanoidAttributes.js'
 import ObjectUtils from './ObjectUtils.js'
 import Config from './Config.js'
 import XpTable from './XpTable.js'
@@ -17,7 +17,7 @@ import {
   explainEffect,
   explainPropertyValue
 } from './CharacterFormulas.js'
-import Metrics from './Metrics.js'
+import Metrics from './datasets/HumanoidMetrics.js'
 import RangeTypes from './RangeTypes.js'
 import DurationTypes from './DurationTypes.js'
 import {Parser} from './vendor/expr-eval/expr-eval.js'
@@ -197,55 +197,6 @@ export default class SwTorActorSheet extends ActorSheet {
 
   /* -------------------------------------------- */
 
-  computeActorData(data) {
-    let inventory = [], skills = [], freeItems = [], equippedItems = [], trainings = []
-
-    const actorSlots = data.data.slots || {}
-    let weaponSlots = [
-      { ...Slots.map['right-hand'], skill: { key: 'fau' }, ...ObjectUtils.try(data.data.weaponSlots, 'right-hand') },
-      { ...Slots.map['left-hand'], skill: { key: 'fau' }, ...ObjectUtils.try(data.data.weaponSlots, 'left-hand') },
-    ]
-
-    data.items.forEach(item => {
-      if (item.type === 'skill' || item.type === 'force-skill') {
-        skills.push(item)
-      } else if(item.type === 'training') {
-        trainings.push(item)
-      } else {
-        inventory.push(item)
-        const slotEntries = Object.entries(actorSlots).filter(([_, v]) => v === item.id)
-        if (slotEntries.length > 0) {
-          equippedItems.push(item)
-          for (const weaponSlot of weaponSlots) {
-            if (slotEntries.some(([key]) => key === weaponSlot.key)) {
-              if (weaponSlots.some(slot => slot.item === item)) {
-                // Item has been covered by a previous slot => remove the entire slot
-                weaponSlots = weaponSlots.filter(slot => slot !== weaponSlot)
-              } else {
-                weaponSlot.item = item
-                if (item.data.skill != null) {
-                  weaponSlot.skill = { key: item.data.skill }
-                }
-              }
-            }
-          }
-        } else {
-          freeItems.push(item)
-        }
-      }
-    })
-
-    return {
-      ...this.actorData,
-      equippedItems,
-      freeItems,
-      trainings,
-      skills,
-      inventory,
-      weaponSlots,
-    }
-  }
-
   /**
    * Prepare data for rendering the Actor sheet
    * The prepared data object contains both the actor data as well as additional sheet options
@@ -255,7 +206,7 @@ export default class SwTorActorSheet extends ActorSheet {
 
     const actorSlots = data.data.slots || {}
 
-    const computedActorData = this.computeActorData(data)
+    const computedActorData = this.actor
 
     let gp = calcGp(computedActorData)
     const freeXp = calcFreeXp(computedActorData)
@@ -267,9 +218,6 @@ export default class SwTorActorSheet extends ActorSheet {
         gained: calcGained(computedActorData, attr, { freeXp }),
         value: explainPropertyValue(computedActorData, attr),
         mod: explainEffect(computedActorData, attr),
-      }
-      if (result.value.total !== ObjectUtils.try(data.data.attributes, generalAttr.key, 'value')) {
-        // TODO migrate to actor class
       }
       return result
     })

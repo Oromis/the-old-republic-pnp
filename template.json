@@ -19,21 +19,21 @@
           }
         },
         "weaponSlots": {},
-        "species": ""
+        "species": "",
+        "xp": {
+          "gained": 0,
+          "gp": 0
+        },
+        "gp": {
+          "initial": 500
+        },
+        "creationMode": {
+          "enabled": true
+        }
       }
     },
     "pc": {
-      "templates": ["common"],
-      "xp": {
-        "gained": 0,
-        "gp": 0
-      },
-      "gp": {
-        "initial": 500
-      },
-      "creationMode": {
-        "enabled": true
-      }
+      "templates": ["common"]
     },
     "npc": {
       "templates": ["common"]
@@ -60,7 +60,8 @@
       "equippable": {
         "condition": 100,
         "slotTypes": [null],
-        "effects": []
+        "effects": [],
+        "slots": null
       },
       "skill-base": {
         "key": "",

@@ -1,5 +1,5 @@
 import ObjectUtils from '../ObjectUtils.js'
-import Attributes from '../Attributes.js'
+import Attributes from '../datasets/HumanoidAttributes.js'
 
 function formatMod(val) {
   return val > 0 ? `+${val}` : val

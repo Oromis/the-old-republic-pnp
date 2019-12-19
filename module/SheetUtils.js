@@ -2,8 +2,8 @@ import ObjectUtils from './ObjectUtils.js'
 import { Parser } from './vendor/expr-eval/expr-eval.js'
 import {detectPropertyType} from './CharacterFormulas.js'
 import Skills from './Skills.js'
-import Attributes from './Attributes.js'
-import Metrics from './Metrics.js'
+import Attributes from './datasets/HumanoidAttributes.js'
+import Metrics from './datasets/HumanoidMetrics.js'
 
 export function analyzeExpression({ path, defaultExpr = '' }) {
   try {

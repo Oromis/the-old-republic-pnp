@@ -4,7 +4,7 @@ import {analyzeDamageFormula, analyzeExpression, onDragOver, onDropItem, resolve
 import SlotTypes from './SlotTypes.js'
 import ItemTypes from './ItemTypes.js'
 import ObjectUtils from './ObjectUtils.js'
-import Metrics from './Metrics.js'
+import Metrics from './datasets/HumanoidMetrics.js'
 import ResistanceTypes from './ResistanceTypes.js'
 
 /**

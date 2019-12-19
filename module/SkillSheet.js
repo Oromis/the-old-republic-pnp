@@ -2,7 +2,7 @@
  * Extend the basic ItemSheet with some very simple modifications
  */
 import AutoSubmitSheet from './AutoSubmitSheet.js'
-import Attributes from './Attributes.js'
+import Attributes from './datasets/HumanoidAttributes.js' // TODO make dynamic
 import SkillCategories from './SkillCategories.js'
 import XpTable from './XpTable.js'
 import RangeTypes from './RangeTypes.js'

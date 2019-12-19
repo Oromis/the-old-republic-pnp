@@ -1,60 +1,67 @@
-import Config from './Config.js'
-import ObjectUtils from './ObjectUtils.js'
+import Config from '../Config.js'
+import ObjectUtils from '../ObjectUtils.js'
+import PropertyPrototype from '../properties/PropertyPrototype.js'
+import {explainEffect, explainPropertyValue} from '../CharacterFormulas.js'
 
 export function attrValue(actor, attr) {
   return ObjectUtils.try(actor.attributes[attr], 'value', 'total', { default: 0 })
 }
 
+class HumanoidAttributePrototype extends PropertyPrototype {
+  constructor(key, staticData) {
+    super(key, {
+      staticData,
+      template: {
+        xpCategory: Config.character.attributes.xpCategory,
+        xp: 0,
+        gp: 0,
+        gained: [],
+        buff: 0,
+      },
+      updaters: [
+        (data, { entity, property }) => {
+          data.mod = explainEffect(entity, property)
+          data.value = explainPropertyValue(entity, property)
+        }
+      ]
+    })
+  }
+}
+
 const list = [
-  {
-    key: 'ch',
+  new HumanoidAttributePrototype('ch', {
     label: 'Charisma',
     desc: 'Repräsentiert die persönliche Ausstrahlung, Redegewandtheit und Führungsqualitäten, die Fähigkeit, die eigene Stimme, Gestik und Mimik überzeugend einzusetzen; auch die Stärke der Verbindung zur Macht',
-  },
-  {
-    key: 'ge',
+  }),
+  new HumanoidAttributePrototype('ge', {
     label: 'Geschicklichkeit',
     desc: 'Allgemeine körperliche Beweglichkeit und Koordination, schnelle Reaktionen und Reflexe, eine gute Einschätzung der eigenen Armreichweite, Sprungkraft, geschmeidige und kontrollierte Bewegungen',
-  },
-  {
-    key: 'in',
+  }),
+  new HumanoidAttributePrototype('in', {
     label: 'Intuition',
     desc: 'Die Fähigkeit, richtige Entscheidungen zu treffen, ohne lange zu überlegen. Schnelle Einschätzung von Personen und Situationen, gutes Einfühlvermögen.',
-  },
-  {
-    key: 'kk',
+  }),
+  new HumanoidAttributePrototype('kk', {
     label: 'Körperkraft',
     desc: 'Steht für das Vorhandensein von schierer Muskelkraft, vor allem aber die Fähigkeit, sie planvoll einzusetzen, zusammen mit der Konstitution auch ein Maß für die allgemeine Gesundheit',
-  },
-  {
-    key: 'kl',
+  }),
+  new HumanoidAttributePrototype('kl', {
     label: 'Klugheit',
     desc: 'Intelligenz und logisches Denkvermögen, die Fähigkeit, eine Situation Stück für Stück zu analysieren und daraus Schlüsse zu ziehen sowie das schnelle Erkennen von Zusammenhängen. Auch angesammeltes Wissen und gutes Gedächtnis',
-  },
-  {
-    key: 'ko',
+  }),
+  new HumanoidAttributePrototype('ko', {
     label: 'Konstitution',
     desc: 'Steht für die körperliche Verfassung, Ausdauer und Standfestigkeit. Auch beim Wiederstand gegen Drogen und Gifte hilfreich',
-  },
-  {
-    key: 'sc',
+  }),
+  new HumanoidAttributePrototype('sc', {
     label: 'Schnelligkeit',
     desc: 'Die körperliche Bewegungsgeschwindigkeit und Reaktionszeit',
-  },
-  {
-    key: 'wk',
+  }),
+  new HumanoidAttributePrototype('wk', {
     label: 'Willenskraft',
     desc: 'Maß für die geistige Stärke und Wiederstandsfähigkeit. Beeinflusst Konzentration und ist daher für Machtbenutzer wichtig',
-  }
+  })
 ]
-
-list.forEach(attr => {
-  attr.xpCategory = Config.character.attributes.xpCategory
-  attr.xp = 0
-  attr.gp = 0
-  attr.gained = []
-  attr.buff = 0
-})
 
 const map = ObjectUtils.asObject(list, 'key')
 
