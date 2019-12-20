@@ -50,11 +50,11 @@ export function calcGp(actor) {
 }
 
 export function calcFreeXp(actor) {
-  return calcTotalXp(actor) -
+  return actor.xp.total -
     Attributes.list.reduce((acc, cur) => {
       return acc + ObjectUtils.try(actor.attributes, cur.key, 'xp', { default: 0 })
     }, 0) -
-      actor.skills.reduce((acc, skill) => acc + calcSkillXp(actor, skill.data), 0) -
+    actor.skills.reduce((acc, skill) => acc + calcSkillXp(actor, skill.data), 0) -
     Metrics.list.reduce((acc, cur) => {
       return acc + ObjectUtils.try(actor.metrics, cur.key, 'xp', { default: 0 })
     }, 0)

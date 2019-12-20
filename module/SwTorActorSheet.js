@@ -27,7 +27,7 @@ import Slots from './Slots.js'
 import {describeTraining} from "./TrainingSheet.js"
 import {makeRoll, resolveEffectLabel} from './SheetUtils.js'
 import DamageTypes from './DamageTypes.js'
-import ResistanceTypes from './ResistanceTypes.js'
+import ResistanceTypes from './datasets/ResistanceTypes.js'
 
 let timeout = null
 
@@ -208,28 +208,13 @@ export default class SwTorActorSheet extends ActorSheet {
 
     const computedActorData = this.actor
 
-    let gp = calcGp(computedActorData)
-    const freeXp = calcFreeXp(computedActorData)
-
-    const attributes = Attributes.list.map(generalAttr => {
-      const attr = { ...generalAttr, ...data.data.attributes[generalAttr.key] }
-      const result = {
-        ...attr,
-        gained: calcGained(computedActorData, attr, { freeXp }),
-        value: explainPropertyValue(computedActorData, attr),
-        mod: explainEffect(computedActorData, attr),
-      }
-      return result
-    })
-
-    const attributesMap = ObjectUtils.asObject(attributes, 'key')
-    computedActorData.attributes = ObjectUtils.asObject(attributes, 'key')
-
+    // TODO Skills mixin
     const skills = computedActorData.skills.map(skill => {
       const value = explainPropertyValue(computedActorData, skill.data)
       return {
         ...skill,
         key: skill.data.key,
+        // TODO put in Skill mixin
         xp: calcSkillXp(computedActorData, skill.data),
         xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
         gained: calcGained(computedActorData, skill.data, { freeXp }),
@@ -314,6 +299,7 @@ export default class SwTorActorSheet extends ActorSheet {
       }
     }
 
+    // TODO force skill mixin
     const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
       skill.range = RangeTypes.map[skill.data.range.type].format(skill.data.range)
       const durationType = ObjectUtils.try(DurationTypes.map[skill.data.duration.type], { default: DurationTypes.map.instant })
@@ -346,24 +332,6 @@ export default class SwTorActorSheet extends ActorSheet {
       skill.disposition = ObjectUtils.try(ForceDispositions.map, skill.data.disposition, { default: ForceDispositions.map.neutral })
       return skill
     })
-
-    const metrics = Metrics.list.map(generalMetric => {
-      const metric = {
-        ...generalMetric,
-        ...ObjectUtils.try(data.data, 'metrics', generalMetric.key),
-      }
-
-      return {
-        ...metric,
-        gained: generalMetric.xpCategory ? calcGained(computedActorData, metric, { freeXp }) : null,
-        max: explainPropertyValue(computedActorData, metric, { target: 'max' }),
-        mod: explainEffect(computedActorData, metric),
-        missing: metric.max - metric.value,
-      }
-    })
-    computedActorData.metrics = ObjectUtils.asObject(metrics, 'key')
-
-    const evasion = computedActorData.skills.aus
 
     const resistances = ResistanceTypes.list.map(rt => {
       let value

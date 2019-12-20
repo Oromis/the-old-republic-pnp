@@ -2,13 +2,13 @@ import Property from './Property.js'
 import {keyMissing} from '../util/ProxyUtils.js'
 
 export default class PropertyPrototype {
-  constructor(key, { staticData, template, updaters = [] }) {
+  constructor(key, { staticData, template, updaters = [], PropertyClass = Property }) {
     this.key = key
     this._staticData = staticData
     this._template = template
     this._updaters = updaters
 
-    this.PropertyClass = Property
+    this.PropertyClass = PropertyClass
   }
 
   instantiate(entity, data) {

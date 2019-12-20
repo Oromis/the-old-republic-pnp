@@ -5,7 +5,7 @@ import SlotTypes from './SlotTypes.js'
 import ItemTypes from './ItemTypes.js'
 import ObjectUtils from './ObjectUtils.js'
 import Metrics from './datasets/HumanoidMetrics.js'
-import ResistanceTypes from './ResistanceTypes.js'
+import ResistanceTypes from './datasets/ResistanceTypes.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
