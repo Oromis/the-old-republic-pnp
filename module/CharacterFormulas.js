@@ -89,12 +89,12 @@ export function calcPropertyTrainingsEffects(actor, property) {
   if(detectPropertyType(property) !== 'skill') {
     return actor.trainings.map(t => t.data.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0)).reduce((acc, v) => acc + (+v), 0)
   }
-  const from = property.isBasicSkill ? 5 : 0
+  const from = (property.isBasicSkill ? 5 : 0)
   const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, property, from)).reduce((acc, v) => acc + (+v), 0)
   return XpTable.getPointsFromXp({
     category: property.xpCategory,
     xp,
-    from
+    from: from + calcPropertySpeciesMod(actor, property)
   })
 }
 
