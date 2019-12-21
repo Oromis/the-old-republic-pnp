@@ -12,23 +12,32 @@ export default class AutoSubmitSheet {
 
     // Disable default submit logic (it doesn't update the entity immediately when jumping between inputs)
     this.parent._onUnfocus = () => {}
+
+    this._filters = []
   }
 
   activateListeners(html) {
     if (this.parent.options.submitOnUnfocus) {
       // Enable auto-submit
-      html.find('input')
+      html.find('input, select')
         .on('change', this._onChangeInput)
         .on('keypress', this._onEnter)
     }
   }
 
+  addFilter(path, callback) {
+    if (!Array.isArray(path)) {
+      path = path.split('.')
+    }
+    this._filters.push({ path, callback })
+  }
+
   _onChangeInput = async e => {
     const link = e.target.getAttribute('data-link')
     if (link) {
-      const related = document.querySelector(`[name="${link}"]`)
-      if (related) {
-        related.value = e.target.value
+      const related = $(this.parent.form).find(`[name="${link}"]`)
+      if (related.length) {
+        related.val(e.target.value)
       }
     }
     await this._onSubmit(e)
@@ -50,10 +59,34 @@ export default class AutoSubmitSheet {
       focusKey = activeElement.getAttribute('name')
     }
 
-    await this.parent._onSubmit(event)
+    // Do not perform a general submit, only update one single field
+    const name = event.target.getAttribute('data-link') || event.target.getAttribute('name')
+    if (name != null) {
+      const namePath = name.split('.')
+      let updateData = { [name]: event.target.value }
+      for (const filter of this._filters) {
+        let matches = true
+        for (let i = 0; i < filter.path.length; ++i) {
+          if (filter.path[i] !== '*' && namePath[i] !== filter.path[i]) {
+            matches = false
+            break
+          }
+        }
+        if (matches) {
+          const res = filter.callback(updateData, { name, path: namePath })
+          if (typeof res !== 'undefined') {
+            updateData = res
+          }
+        }
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        await this.parent.actor.update(updateData)
+      }
+    }
 
     if (focusKey != null) {
-      $(`[name="${focusKey}"]`).focus().select()
+      $(this.parent.form).find(`[name="${focusKey}"]`).focus().select()
     }
   }
 }
