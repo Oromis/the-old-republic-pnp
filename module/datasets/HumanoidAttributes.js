@@ -1,10 +1,17 @@
 import Config from '../Config.js'
 import ObjectUtils from '../ObjectUtils.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
-import {explainEffect, explainPropertyValue} from '../CharacterFormulas.js'
+import { calcUpgradeCost, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
+import Property from '../properties/Property.js'
 
 export function attrValue(actor, attr) {
   return ObjectUtils.try(actor.attributes[attr], 'value', 'total', { default: 0 })
+}
+
+class HumanoidAttribute extends Property {
+  get upgradeCost() {
+    return calcUpgradeCost(this._entity, this, { max: this._entity.xp.free })
+  }
 }
 
 class HumanoidAttributePrototype extends PropertyPrototype {
@@ -23,7 +30,8 @@ class HumanoidAttributePrototype extends PropertyPrototype {
           data.mod = explainEffect(entity, property)
           data.value = explainPropertyValue(entity, property)
         }
-      ]
+      ],
+      PropertyClass: HumanoidAttribute,
     })
   }
 }

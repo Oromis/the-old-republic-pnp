@@ -102,7 +102,7 @@
       </div>
       <div class="flex-row multi-item">
         {{#each actor.metrics.list as |metric|}}
-          {{#if metric.max.total}}
+          {{#if metric.max}}
             {{metricView metric=metric}}
           {{/if}}
         {{/each}}
@@ -139,7 +139,7 @@
           </tr>
         </thead>
         <tbody>
-          {{#each computed.attributes as |attr|}}
+          {{#each actor.attributes.list as |attr|}}
             <tr>
               <td>{{formatAttrKey attr.key}}</td>
               <td title="{{attr.desc}}">{{attr.label}}</td>
@@ -154,7 +154,7 @@
               <td>
                 <select name="data.attributes.{{attr.key}}.xpCategory" data-dtype="String">
                   {{#select attr.xpCategory}}
-                    {{#each ../computed.xpCategories as |category|}}
+                    {{#each ../actor.dataSet.xpTable.categoryNames as |category|}}
                       <option value="{{category}}">{{category}}</option>
                     {{/each}}
                   {{/select}}
@@ -164,15 +164,15 @@
               <td>
                 <div class="flex-row multi-item">
                   {{#if ../data.creationMode.enabled}}
-                    {{#if attr.gained.canDowngrade}}
+                    {{#if attr.gained.length}}
                       <button type="button" class="small char change-attr-gained" data-attr="{{attr.key}}" data-action="-">-</button>
                     {{else}}
                       <span class="char-button-placeholder"></span>
                     {{/if}}
                   {{/if}}
-                  <span class="attribute-gained">{{attr.gained.value}}</span>
-                  {{#if attr.gained.upgradeCost}}
-                    <button type="button" class="small char change-attr-gained" title="{{attr.gained.upgradeCost}} XP" data-attr="{{attr.key}}" data-action="+">+</button>
+                  <span class="attribute-gained">{{attr.gained.length}}</span>
+                  {{#if attr.upgradeCost}}
+                    <button type="button" class="small char change-attr-gained" title="{{attr.upgradeCost}} XP" data-attr="{{attr.key}}" data-action="+">+</button>
                   {{else}}
                     <span class="char-button-placeholder"></span>
                   {{/if}}

@@ -67,7 +67,7 @@ export function calcSkillXp(actor, property) {
   let result = property.xp || 0
   if (!property.isBasicSkill && calcPropertyTrainingsEffects(actor, property) === 0) {
     // Non-basic skills need to be activated
-    result += XpTable.getActivationCost(property.xpCategory)
+    result += actor.dataSet.xpTable.getActivationCost(property.xpCategory)
   }
   return result
 }
@@ -90,7 +90,7 @@ export function calcPropertyTrainingsEffects(actor, property) {
   }
   const from = property.isBasicSkill ? 5 : 0
   const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, property, from)).reduce((acc, v) => acc + (+v), 0)
-  return XpTable.getPointsFromXp({
+  return actor.dataSet.xpTable.getPointsFromXp({
     category: property.xpCategory,
     xp,
     from
@@ -168,7 +168,7 @@ export function explainPropertyValue(actor, property, options) {
 export function calcUpgradeCost(actor, property, { max } = {}) {
   const baseVal = calcPropertyBaseValue(actor, property)
   const gainLog = ObjectUtils.try(property, 'gained', { default: [] })
-  const result = XpTable.getUpgradeCost({
+  const result = actor.dataSet.xpTable.getUpgradeCost({
     category: property.tmpXpCategory || property.xpCategory,
     from: baseVal + gainLog.length,
     to: baseVal + gainLog.length + 1,

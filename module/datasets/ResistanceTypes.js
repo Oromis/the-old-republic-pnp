@@ -22,12 +22,6 @@ function resistPercentage(damage) {
 }
 
 class ResistanceTypeInstance extends Property {
-  constructor(...args) {
-    super(...args)
-
-    this.resist = this._staticData.resist
-  }
-
   canResist(damageType) {
     return this._staticData.resists.indexOf(damageType.key) !== -1
   }

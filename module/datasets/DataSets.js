@@ -3,6 +3,7 @@ import HumanoidMetrics from './HumanoidMetrics.js'
 import HumanoidActor from '../actor/HumanoidActor.js'
 import ResistanceTypes from './ResistanceTypes.js'
 import HumanoidSpecies from './HumanoidSpecies.js'
+import XpTable from '../XpTable.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -13,6 +14,7 @@ export default Object.freeze({
       metrics: HumanoidMetrics,
       species: HumanoidSpecies,
       resistances: ResistanceTypes,
+      xpTable: XpTable,
     }
   }
 })

@@ -19,22 +19,12 @@ import Slots from './Slots.js'
 import {describeTraining} from "./TrainingSheet.js"
 import DamageTypes from './DamageTypes.js'
 
-function calcGained(actor, property, { freeXp }) {
-  const gainLog = ObjectUtils.try(property, 'gained', { default: [] }).length
-  return {
-    canDowngrade: gainLog > 0,
-    value: gainLog,
-    upgradeCost: calcUpgradeCost(actor, property, { max: freeXp }),
-  }
-}
-
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
-  const prevXp = ObjectUtils.try(property, 'xp', { default: 0 })
-  const gainLog = ObjectUtils.try(property, 'gained', { default: [] })
+  const prevXp = property.xp || 0
+  const gainLog = property.gained || []
   let newGainLog, newXp
   if (action === '+') {
-    const xpCategory = ObjectUtils.try(property, 'tmpXpCategory') ||
-      ObjectUtils.try(property, 'xpCategory', { default: defaultXpCategory })
+    const xpCategory = property.tmpXpCategory || property.xpCategory || defaultXpCategory
     const xpCost = calcUpgradeCost(actor, property)
     newXp = prevXp + xpCost
     newGainLog = [...gainLog, { xpCategory, xp: xpCost }]
@@ -42,7 +32,7 @@ function calcGainChange(actor, property, { action, defaultXpCategory }) {
     const baseVal = calcPropertyBaseValue(actor, property)
     newGainLog = gainLog.slice(0, gainLog.length - 1)
     const removed = gainLog[gainLog.length - 1]
-    const xpCost = removed.xp || XpTable.getUpgradeCost({
+    const xpCost = removed.xp || actor.dataSet.xpTable.getUpgradeCost({
       category: removed.xpCategory,
       from: baseVal + newGainLog.length,
       to: baseVal + gainLog.length
@@ -350,8 +340,6 @@ export default class SwTorActorSheet extends ActorSheet {
     // }
 
     data.computed = {
-      xpCategories: XpTable.getCategories(),
-      attributes: this.actor.attributes.list,
       skillCategories: [
         ...SkillCategories.list.map(cat => ({
           label: cat.label,
@@ -635,13 +623,10 @@ export default class SwTorActorSheet extends ActorSheet {
   _onChangeAttrGained = event => {
     const action = event.currentTarget.getAttribute('data-action')
     const key = event.currentTarget.getAttribute('data-attr')
-    const defaultXpCategory = Attributes.map[key].xpCategory
-    const attribute = {
-      ...Attributes.map[key],
-      ...this.actorData.attributes[key],
-    }
+    const defaultXpCategory = this.actor.dataSet.attributes.map[key].xpCategory
+    const attribute = this.actor.attributes[key]
 
-    const { xp, gainLog } = calcGainChange(this.computeActorData(this.actor.data), attribute, { action, defaultXpCategory })
+    const { xp, gainLog } = calcGainChange(this.actor, attribute, { action, defaultXpCategory })
     this.actor.update({
       [`data.attributes.${key}.gained`]: gainLog,
       [`data.attributes.${key}.xp`]: xp,

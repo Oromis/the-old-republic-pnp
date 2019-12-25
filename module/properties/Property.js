@@ -5,6 +5,14 @@ export default class Property {
     this._data = data
     this._staticData = staticData
     this._updaters = updaters
+
+    for (const [key, value] of Object.entries(this.full)) {
+      if (!(key in this)) {
+        Object.defineProperty(this, key, {
+          get() { return this.full[key] }
+        })
+      }
+    }
   }
 
   update() {

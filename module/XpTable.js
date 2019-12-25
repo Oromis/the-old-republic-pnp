@@ -87,7 +87,14 @@ export default {
     return points
   },
 
+  /**
+   * @deprecated
+   */
   getCategories() {
+    return categoryList.map(cat => cat.name)
+  },
+
+  get categoryNames() {
     return categoryList.map(cat => cat.name)
   }
 }
