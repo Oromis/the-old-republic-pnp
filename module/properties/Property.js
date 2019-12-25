@@ -15,6 +15,13 @@ export default class Property {
   }
 
   /**
+   * @returns {number} The base value (before any modifications / XP / GP put into it)
+   */
+  calcBaseValue() {
+    return 0
+  }
+
+  /**
    * @return The database representation of this property, only including persistent fields
    */
   get db() {

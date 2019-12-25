@@ -3,21 +3,26 @@
     "types": ["pc", "npc"],
     "templates": {
       "common": {
-        "attributes": [],
+        "attributes": {},
         "metrics": {
           "LeP": {
-            "value": 0
+            "value": 0,
+            "max": 0
           },
           "AuP": {
-            "value": 0
+            "value": 0,
+            "max":  0
           },
           "MaP": {
-            "value": 0
+            "value": 0,
+            "max":  0
           },
           "EnP": {
-            "value": 0
+            "value": 0,
+            "max":  0
           }
         },
+        "resistances": {},
         "weaponSlots": {},
         "species": "",
         "xp": {

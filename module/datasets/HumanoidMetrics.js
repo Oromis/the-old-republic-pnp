@@ -3,6 +3,13 @@ import ObjectUtils from '../ObjectUtils.js'
 import {attrValue} from './HumanoidAttributes.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import { explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
+import Property from '../properties/Property.js'
+
+class HumanoidMetric extends Property {
+  calcBaseValue({ target = 'value' } = {}) {
+    return target === 'value' ? 5 : this._staticData.calcBaseValue(this._entity)
+  }
+}
 
 class HumanoidMetricsPrototype extends PropertyPrototype {
   constructor(key, staticData) {
@@ -17,10 +24,13 @@ class HumanoidMetricsPrototype extends PropertyPrototype {
       updaters: [
         (data, { entity, property }) => {
           data.mod = explainEffect(entity, property)
-          data.max = explainPropertyValue(entity, property, { target: 'max' })
+          const maxExplanation = explainPropertyValue(entity, property, { target: 'max' })
+          data.max = maxExplanation.total
+          data.maxComponents = maxExplanation.components
           data.missing = data.max - data.value
         }
-      ]
+      ],
+      PropertyClass: HumanoidMetric,
     })
   }
 }
@@ -41,7 +51,7 @@ const list = [
     xpCategory: Config.character.AuP.xpCategory,
     backgroundColor: '#aaffaa',
     calcBaseValue(actor) {
-      return Math.round((attrValue(actor, 'ko') + attrValue(actor, 'kk') + attrValue(actor, 'wi')) * 0.66)
+      return Math.round((attrValue(actor, 'ko') + attrValue(actor, 'kk') + attrValue(actor, 'wk')) * 0.66)
     }
   }),
   new HumanoidMetricsPrototype('MaP', {
@@ -58,7 +68,7 @@ const list = [
     desc: 'Steht für den Ladezustand der Akkus',
     backgroundColor: '#c7d6ff',
     calcBaseValue() {
-      return 0 // Energy is only governed by equipment
+      return 0 // Energy pool is governed by equipment alone
     }
   }),
 ]

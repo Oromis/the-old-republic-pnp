@@ -10,7 +10,7 @@
             <input name="name" class="full-width" type="text" value="{{actor.name}}" placeholder="Name" />
           </h1>
           <div class="flex-row multi-item flex-wrap">
-            {{#each computed.attributes as |attr index|}}
+            {{#each actor.attributes.list as |attr index|}}
               <div class="attribute">
                 <strong class="attribute-label" title="{{attr.label}} - {{attr.desc}}">{{formatAttrKey attr.key}}</strong>
                 <span title="{{formatExplanation attr.value.components}}">{{attr.value.total}}</span>
@@ -19,20 +19,22 @@
             <div class="flex-grow"></div>
           </div>
           <div class="flex-row multi-item">
-            <div class="species-info flex-row multi-item">
-              <span>Spezies:</span>
-              {{#if data.creationMode.enabled}}
-                <select name="data.species" data-dtype="String">
-                  {{#select actor.data.species}}
-                    {{#each speciesList as |sp|}}
-                      <option value="{{sp.key}}">{{sp.name}}</option>
-                    {{/each}}
-                  {{/select}}
-                </select>
-              {{else}}
-                <span>{{computed.speciesName}}</span>
-              {{/if}}
-            </div>
+            {{#if actor.species}}
+              <div class="species-info flex-row multi-item">
+                <span>Spezies:</span>
+                {{#if data.creationMode.enabled}}
+                  <select name="data.species" data-dtype="String">
+                    {{#select actor.species.key}}
+                      {{#each actor.dataSet.species.list as |sp|}}
+                        <option value="{{sp.key}}">{{sp.name}}</option>
+                      {{/each}}
+                    {{/select}}
+                  </select>
+                {{else}}
+                  <span>{{computed.speciesName}}</span>
+                {{/if}}
+              </div>
+            {{/if}}
             <div class="vertical-divider"></div>
             <div class="training-info flex-row multi-item">
               <span>Ausbildungen:</span>
@@ -56,7 +58,7 @@
         <div class="multi-item">
           <div class="flex-row multi-item">
             <span title="Generierungspunkte">GP</span>
-            <span class="flex-grow">{{computed.gp}}</span>
+            <span class="flex-grow">{{actor.gp.value}}</span>
             {{#if data.creationMode.enabled}}
               {{#if computed.flags.hasGp}}
                 <button type="button" class="small gp-to-xp">GP → XP</button>
@@ -68,14 +70,14 @@
           </div>
           <label class="flex-row multi-item">
             <span title="Erfahrungspunkte">XP</span>
-            <span>{{computed.freeXp}}</span>
+            <span>{{actor.xp.free}}</span>
             <span>/</span>
             <input
                 name="input.totalXp"
                 type="text"
-                value="{{computed.totalXp}}"
+                value="{{actor.xp.total}}"
                 placeholder="Total XP"
-                title="Ab Start: {{computed.xpFromGp}} | Hinzugewonnen: {{actor.data.xp.gained}}"
+                title="Ab Start: {{actor.xpFromGp}} | Hinzugewonnen: {{actor.xp.gained}}"
                 class="flex-grow"
             />
           </label>
@@ -99,7 +101,7 @@
         </div>
       </div>
       <div class="flex-row multi-item">
-        {{#each computed.metrics as |metric|}}
+        {{#each actor.metrics.list as |metric|}}
           {{#if metric.max.total}}
             {{metricView metric=metric}}
           {{/if}}
@@ -658,7 +660,7 @@
               <td>
                 <input type="text" name="data.metrics.{{metric.key}}.buff" value="{{metric.buff}}" />
               </td>
-              <td title="{{formatExplanation metric.max.components}}">
+              <td title="{{formatExplanation metric.maxComponents}}">
                 {{metric.max.total}}
                 <input type="hidden" name="data.metrics.{{metric.key}}.max" value="{{metric.max.total}}" data-dtype="Number" />
               </td>

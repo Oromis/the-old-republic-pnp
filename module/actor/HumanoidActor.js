@@ -1,4 +1,5 @@
 import { calcFreeXp, calcGp, calcTotalXp } from '../CharacterFormulas.js'
+import Config from '../Config.js'
 
 /**
  * Functionality for humanoid characters. "humanoid" refers to intelligent life forms, it has
@@ -12,9 +13,22 @@ import { calcFreeXp, calcGp, calcTotalXp } from '../CharacterFormulas.js'
  * actor classes for different actor types (yet).
  */
 export default {
-  afterConstruct() {
+  beforeConstruct() {
     this._defineDataAccessor('xp')
     this._defineDataAccessor('gp')
+
+    Object.defineProperty(this, 'xpFromGp', {
+      get() {
+        return this.xp.gp * Config.character.gpToXpRate
+      }
+    })
+
+    Object.defineProperty(this, 'species', {
+      get() {
+        const result = this.dataSet.species.map[this.data.data.species]
+        return result || this.dataSet.species.map[this.dataSet.species.default]
+      }
+    })
   },
 
   afterPrepareData(actorData) {

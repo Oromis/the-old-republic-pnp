@@ -1,4 +1,5 @@
 import DataSets from '../datasets/DataSets.js'
+import ObjectUtils from '../ObjectUtils.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
@@ -10,23 +11,23 @@ export default class SwTorActor extends Actor {
   }
 
   prepareData(actorData) {
-    actorData = super.prepareData(actorData)
+    actorData = super.prepareData(actorData) || this.data
     const data = actorData.data
-    const thisInitialized = this.data != null
-    if (thisInitialized) {
-      // Some of our calculations just don't make any sense before the actor is initialized.
-      // E.g. when there aren't any items it's impossible to determine the correct amount of LeP
-      // Because of missing buffs
-      this._callDelegate('beforePrepareData', actorData)
+    if (!Array.isArray(this.items)) {
+      if (typeof this._getItems === 'function') {
+        this.items = this._getItems()
+      }
+      this._callDelegate('beforeConstruct')
     }
+
+    this._callDelegate('beforePrepareData', actorData)
 
     // Make sure that all attributes exist and that their values are up to date
-    this._updateCollection('attributes', { useThis: thisInitialized })
-    this._updateCollection('metrics', { useThis: thisInitialized })
+    this._updateCollection(data, 'attributes')
+    this._updateCollection(data, 'metrics')
+    this._updateCollection(data, 'resistances')
 
-    if (thisInitialized) {
-      this._callDelegate('afterPrepareData', actorData)
-    }
+    this._callDelegate('afterPrepareData', actorData)
     return actorData
   }
 
@@ -41,11 +42,15 @@ export default class SwTorActor extends Actor {
   }
 
   get attributes() {
-    return this._getCollectionProxy('attributes')
+    return this._getPropertyCollectionProxy('attributes')
   }
 
   get metrics() {
-    return this._getCollectionProxy('metrics')
+    return this._getPropertyCollectionProxy('metrics')
+  }
+
+  get resistances() {
+    return this._getPropertyCollectionProxy('resistances')
   }
 
   // ---------------------------------------------------------------------
@@ -53,7 +58,11 @@ export default class SwTorActor extends Actor {
   // ---------------------------------------------------------------------
 
   get skills() {
-    return this._categorizedItems.skills
+    return this._getItemCollectionProxy(this._categorizedItems.skills)
+  }
+
+  get forceSkills() {
+    return this._getItemCollectionProxy(this._categorizedItems.forceSkills)
   }
 
   get trainings() {
@@ -77,6 +86,7 @@ export default class SwTorActor extends Actor {
       // Re-calculate cached lists
       const store = this._categorizedItemStore = {
         skills: [],
+        forceSkills: [],
         trainings: [],
         inventory: [],
         freeItems: [],
@@ -85,6 +95,9 @@ export default class SwTorActor extends Actor {
       this.data.items.forEach(item => {
         if (item.type === 'skill' || item.type === 'force-skill') {
           store.skills.push(item)
+          if (item.type === 'force-skill') {
+            store.forceSkills.push(item)
+          }
         } else if(item.type === 'training') {
           store.trainings.push(item)
         } else {
@@ -104,7 +117,7 @@ export default class SwTorActor extends Actor {
   // Private stuff
   // ---------------------------------------------------------------------
 
-  get _dataSet() {
+  get dataSet() {
     if (this._dataSetStore == null) {
       this._dataSetStore = DataSets.fromActorType(this.type)
     }
@@ -112,7 +125,7 @@ export default class SwTorActor extends Actor {
   }
 
   _callDelegate(callbackName, ...args) {
-    const delegate = this._dataSet.delegate
+    const delegate = this.dataSet.delegate
     if (typeof delegate[callbackName] === 'function') {
       return delegate[callbackName].apply(this, args)
     }
@@ -121,30 +134,51 @@ export default class SwTorActor extends Actor {
   _defineDataAccessor(key) {
     Object.defineProperty(this, key, {
       get() {
-        return this.data[key]
+        return this.data.data[key]
       }
     })
   }
 
-  _getCollectionProxy(key) {
-    return new Proxy(this, (obj, prop) => {
-      if (prop === 'list') {
-        // Array-based access
-        return this._dataSet[key].list.map(a => a.instantiate(this, this.data[key][a.key]))
-      } else {
-        // Map-based access
-        const prototype = this._dataSet[key].map[prop]
-        if (prototype != null) {
-          return prototype.instantiate(this, this.data[key][prop])
+  _getItemCollectionProxy(items) {
+    return new Proxy(items, {
+      get(list, prop) {
+        if (prop === 'list') {
+          return list
         } else {
-          throw new Error(`Unknown attribute key: ${prop}`)
+          // Map-based access
+          return list.find(item => item.key === prop)
         }
       }
     })
   }
 
+  _getPropertyCollectionProxy(key) {
+    return new Proxy(this, {
+      get(actor, prop) {
+        if (prop === 'list') {
+          // Array-based access
+          return actor.dataSet[key].list.map(a => a.instantiate(actor, actor.data.data[key][a.key]))
+        } else {
+          // Map-based access
+          const prototype = actor.dataSet[key].map[prop]
+          if (prototype != null) {
+            return prototype.instantiate(actor, actor.data.data[key][prop])
+          } else {
+            throw new Error(`Unknown attribute key: ${prop}`)
+          }
+        }
+      },
+      has(obj, prop) {
+        return prop === 'list' || prop in actor.dataSet[key].map
+      },
+    })
+  }
+
   _updateCollection(data, key, { useThis = true } = {}) {
-    for (const thing of this._dataSet[key].list) {
+    if (data[key] == null) {
+      data[key] = {}
+    }
+    for (const thing of this.dataSet[key].list) {
       let propertyInstance = thing
         .instantiate(this, data[key][thing.key])
       if (useThis) {

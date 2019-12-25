@@ -1,21 +1,13 @@
 import Attributes from './datasets/HumanoidAttributes.js'
 import ObjectUtils from './ObjectUtils.js'
-import Config from './Config.js'
 import XpTable from './XpTable.js'
-import Species from './Species.js'
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import ItemTypes from './ItemTypes.js'
 import SkillCategories from './SkillCategories.js'
 import {
-  calcFreeXp,
-  calcGp,
   calcMaxInventoryWeight,
   calcPropertyBaseValue,
-  calcSkillXp,
-  calcTotalXp,
-  calcUpgradeCost, explainArmor,
-  explainEffect,
-  explainPropertyValue
+  calcUpgradeCost,
 } from './CharacterFormulas.js'
 import Metrics from './datasets/HumanoidMetrics.js'
 import RangeTypes from './RangeTypes.js'
@@ -25,11 +17,7 @@ import ForceDispositions from './ForceDispositions.js'
 import EffectModifiers from './EffectModifiers.js'
 import Slots from './Slots.js'
 import {describeTraining} from "./TrainingSheet.js"
-import {makeRoll, resolveEffectLabel} from './SheetUtils.js'
 import DamageTypes from './DamageTypes.js'
-import ResistanceTypes from './datasets/ResistanceTypes.js'
-
-let timeout = null
 
 function calcGained(actor, property, { freeXp }) {
   const gainLog = ObjectUtils.try(property, 'gained', { default: [] }).length
@@ -172,9 +160,9 @@ export default class SwTorActorSheet extends ActorSheet {
     })
 
     autoSubmit.addFilter('input.totalXp', (obj, { name }) => {
-      const newVal = Math.round(processDeltaValue(obj[name], calcTotalXp(this.computeActorData(this.actor.data))))
+      const newVal = Math.round(processDeltaValue(obj[name], this.actor.xp.total))
       return {
-        'data.xp.gained': newVal - (ObjectUtils.try(this.actorData, 'xp', 'gp', { default: 0 }) * Config.character.gpToXpRate)
+        'data.xp.gained': newVal - this.actor.xpFromGp
       }
     })
   }
@@ -209,95 +197,95 @@ export default class SwTorActorSheet extends ActorSheet {
     const computedActorData = this.actor
 
     // TODO Skills mixin
-    const skills = computedActorData.skills.map(skill => {
-      const value = explainPropertyValue(computedActorData, skill.data)
-      return {
-        ...skill,
-        key: skill.data.key,
-        // TODO put in Skill mixin
-        xp: calcSkillXp(computedActorData, skill.data),
-        xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
-        gained: calcGained(computedActorData, skill.data, { freeXp }),
-        value,
-        check: {
-          rolls: [
-            makeRoll({
-              key: skill.data.attribute1,
-              label: attributesMap[skill.data.attribute1].label,
-              value: attributesMap[skill.data.attribute1].value.total
-            }),
-            makeRoll({
-              key: skill.data.attribute2,
-              label: attributesMap[skill.data.attribute2].label,
-              value: attributesMap[skill.data.attribute2].value.total
-            }),
-            makeRoll({ key: skill.data.key, label: skill.name, value: value.total }),
-          ],
-          AgP: Math.floor(value.total / 5),
-        },
-      }
-    })
+    const skills = []
+    // skills = computedActorData.skills.map(skill => {
+    //   const value = explainPropertyValue(computedActorData, skill.data)
+    //   return {
+    //     ...skill,
+    //     key: skill.data.key,
+    //     // TODO put in Skill mixin
+    //     xp: calcSkillXp(computedActorData, skill.data),
+    //     xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
+    //     gained: calcGained(computedActorData, skill.data, { freeXp }),
+    //     value,
+    //     check: {
+    //       rolls: [
+    //         makeRoll({
+    //           key: skill.data.attribute1,
+    //           label: attributesMap[skill.data.attribute1].label,
+    //           value: attributesMap[skill.data.attribute1].value.total
+    //         }),
+    //         makeRoll({
+    //           key: skill.data.attribute2,
+    //           label: attributesMap[skill.data.attribute2].label,
+    //           value: attributesMap[skill.data.attribute2].value.total
+    //         }),
+    //         makeRoll({ key: skill.data.key, label: skill.name, value: value.total }),
+    //       ],
+    //       AgP: Math.floor(value.total / 5),
+    //     },
+    //   }
+    // })
 
-    computedActorData.skills = ObjectUtils.asObject(skills, 'key')
-
-    for (const weaponSlot of computedActorData.weaponSlots) {
-      if (weaponSlot.skill && computedActorData.skills[weaponSlot.skill.key]) {
-        weaponSlot.skill = computedActorData.skills[weaponSlot.skill.key]
-        if (weaponSlot.item != null) {
-          if (weaponSlot.skill.data.category === 'ranged') {
-            weaponSlot.isRanged = true
-            const enemyDistance = ObjectUtils.try(data.data.combat, 'enemyDistance')
-            if (enemyDistance != null) {
-              weaponSlot.precision = -evalSkillExpression(
-                ObjectUtils.try(weaponSlot.item.data.precision, 'formula'),
-                weaponSlot.skill,
-                { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance'), round: 0 }
-              ).value
-              weaponSlot.projectileEnergy = Math.max(roundDecimal(evalSkillExpression(
-                ObjectUtils.try(weaponSlot.item.data.projectileEnergy, 'formula'),
-                weaponSlot.skill,
-                { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance') }
-              ).value, 3), 0)
-            }
-          }
-
-          if (weaponSlot.item.data.hasStrengthModifier) {
-            weaponSlot.strengthModifier = roundDecimal((computedActorData.attributes.kk.value.total + 50) / 100, 2)
-          }
-        }
-
-        // Defense
-        if (weaponSlot.skill.data.category === 'melee') {
-          weaponSlot.canDefend = true
-          const paradeAdvantage = (weaponSlot.coordination || 0) +
-            ObjectUtils.try(data.data.weaponSlots, weaponSlot.key, 'paradeAdvantage', { default: 0 })
-          weaponSlot.paradeCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
-          for (const roll of weaponSlot.paradeCheck.rolls) {
-            roll.advantage = paradeAdvantage
-          }
-        }
-
-        // Offense
-        const attackAdvantage = (weaponSlot.precision || 0) +
-          (weaponSlot.coordination || 0) +
-          ObjectUtils.try(data.data.weaponSlots, weaponSlot.key, 'advantage', { default: 0 })
-        weaponSlot.attackCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
-        for (const roll of weaponSlot.attackCheck.rolls) {
-          roll.advantage = attackAdvantage
-        }
-        if (weaponSlot.item != null) {
-          weaponSlot.damage = weaponSlot.item.data.damage.formula
-          if (weaponSlot.projectileEnergy != null && weaponSlot.projectileEnergy !== 1) {
-            weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.projectileEnergy}`
-          }
-          if (weaponSlot.strengthModifier != null && weaponSlot.strengthModifier !== 1) {
-            weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.strengthModifier}`
-          }
-        }
-      } else {
-        weaponSlot.skill = null
-      }
-    }
+    // TODO
+    // for (const weaponSlot of computedActorData.weaponSlots) {
+    //   if (weaponSlot.skill && computedActorData.skills[weaponSlot.skill.key]) {
+    //     weaponSlot.skill = computedActorData.skills[weaponSlot.skill.key]
+    //     if (weaponSlot.item != null) {
+    //       if (weaponSlot.skill.data.category === 'ranged') {
+    //         weaponSlot.isRanged = true
+    //         const enemyDistance = ObjectUtils.try(data.data.combat, 'enemyDistance')
+    //         if (enemyDistance != null) {
+    //           weaponSlot.precision = -evalSkillExpression(
+    //             ObjectUtils.try(weaponSlot.item.data.precision, 'formula'),
+    //             weaponSlot.skill,
+    //             { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance'), round: 0 }
+    //           ).value
+    //           weaponSlot.projectileEnergy = Math.max(roundDecimal(evalSkillExpression(
+    //             ObjectUtils.try(weaponSlot.item.data.projectileEnergy, 'formula'),
+    //             weaponSlot.skill,
+    //             { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance') }
+    //           ).value, 3), 0)
+    //         }
+    //       }
+    //
+    //       if (weaponSlot.item.data.hasStrengthModifier) {
+    //         weaponSlot.strengthModifier = roundDecimal((computedActorData.attributes.kk.value.total + 50) / 100, 2)
+    //       }
+    //     }
+    //
+    //     // Defense
+    //     if (weaponSlot.skill.data.category === 'melee') {
+    //       weaponSlot.canDefend = true
+    //       const paradeAdvantage = (weaponSlot.coordination || 0) +
+    //         ObjectUtils.try(data.data.weaponSlots, weaponSlot.key, 'paradeAdvantage', { default: 0 })
+    //       weaponSlot.paradeCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
+    //       for (const roll of weaponSlot.paradeCheck.rolls) {
+    //         roll.advantage = paradeAdvantage
+    //       }
+    //     }
+    //
+    //     // Offense
+    //     const attackAdvantage = (weaponSlot.precision || 0) +
+    //       (weaponSlot.coordination || 0) +
+    //       ObjectUtils.try(data.data.weaponSlots, weaponSlot.key, 'advantage', { default: 0 })
+    //     weaponSlot.attackCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
+    //     for (const roll of weaponSlot.attackCheck.rolls) {
+    //       roll.advantage = attackAdvantage
+    //     }
+    //     if (weaponSlot.item != null) {
+    //       weaponSlot.damage = weaponSlot.item.data.damage.formula
+    //       if (weaponSlot.projectileEnergy != null && weaponSlot.projectileEnergy !== 1) {
+    //         weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.projectileEnergy}`
+    //       }
+    //       if (weaponSlot.strengthModifier != null && weaponSlot.strengthModifier !== 1) {
+    //         weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.strengthModifier}`
+    //       }
+    //     }
+    //   } else {
+    //     weaponSlot.skill = null
+    //   }
+    // }
 
     // TODO force skill mixin
     const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
@@ -333,53 +321,37 @@ export default class SwTorActorSheet extends ActorSheet {
       return skill
     })
 
-    const resistances = ResistanceTypes.list.map(rt => {
-      let value
-      if (rt.key === 'armor') {
-        value = explainArmor(computedActorData)
-      } else {
-        value = explainPropertyValue(computedActorData, { key: `r_${rt.key}` })
-      }
-      return {
-        ...rt,
-        value,
-      }
-    })
-    let incomingDamage = ObjectUtils.try(data.data.combat, 'damageIncoming', 'amount')
-    const incomingDamageType = DamageTypes.map[ObjectUtils.try(data.data.combat, 'damageIncoming', 'type')]
-    let incomingDamageResistances = []
-    let incomingDamageCost = null
-    if (incomingDamageType != null) {
-      incomingDamageCost = { LeP: 0 }
-      incomingDamageResistances = resistances.filter(rt => rt.canResist(incomingDamageType))
-      for (const res of incomingDamageResistances) {
-        const { damage, cost } = res.resist(incomingDamage, incomingDamageType, computedActorData)
-        res.damageBefore = incomingDamage
-        res.damageReduction = incomingDamage - damage
-        res.damageAfter = damage
-        incomingDamage = damage
-
-        if (cost != null && typeof cost === 'object') {
-          for (const [metricKey, amount] of Object.entries(cost)) {
-            if (amount !== 0) {
-              incomingDamageCost[metricKey] = (incomingDamageCost[metricKey] || 0) + amount
-            }
-          }
-        }
-      }
-
-      // Resistances have reduced the incoming damage, the rest will be deducted from HP
-      incomingDamageCost.LeP += incomingDamage
-    }
+    // TODO
+    // let incomingDamage = ObjectUtils.try(data.data.combat, 'damageIncoming', 'amount')
+    // const incomingDamageType = DamageTypes.map[ObjectUtils.try(data.data.combat, 'damageIncoming', 'type')]
+    // let incomingDamageResistances = []
+    // let incomingDamageCost = null
+    // if (incomingDamageType != null) {
+    //   incomingDamageCost = { LeP: 0 }
+    //   incomingDamageResistances = resistances.filter(rt => rt.canResist(incomingDamageType))
+    //   for (const res of incomingDamageResistances) {
+    //     const { damage, cost } = res.resist(incomingDamage, incomingDamageType, computedActorData)
+    //     res.damageBefore = incomingDamage
+    //     res.damageReduction = incomingDamage - damage
+    //     res.damageAfter = damage
+    //     incomingDamage = damage
+    //
+    //     if (cost != null && typeof cost === 'object') {
+    //       for (const [metricKey, amount] of Object.entries(cost)) {
+    //         if (amount !== 0) {
+    //           incomingDamageCost[metricKey] = (incomingDamageCost[metricKey] || 0) + amount
+    //         }
+    //       }
+    //     }
+    //   }
+    //
+    //   // Resistances have reduced the incoming damage, the rest will be deducted from HP
+    //   incomingDamageCost.LeP += incomingDamage
+    // }
 
     data.computed = {
-      gp,
-      freeXp,
-      totalXp: calcTotalXp(computedActorData),
-      xpFromGp: data.data.xp.gp * Config.character.gpToXpRate,
       xpCategories: XpTable.getCategories(),
-      speciesName: ObjectUtils.try(Species.map[data.data.species], 'name', { default: 'None' }),
-      attributes: computedActorData.attributes,
+      attributes: this.actor.attributes.list,
       skillCategories: [
         ...SkillCategories.list.map(cat => ({
           label: cat.label,
@@ -388,7 +360,7 @@ export default class SwTorActorSheet extends ActorSheet {
         { label: 'Mächte', skills: forceSkills }
       ],
       forceSkills: forceSkills.length > 0 ? forceSkills : null,
-      metrics,
+      metrics: this.actor.metrics.list,
       slots: Slots.layout.map(row => row.map(slot => {
         if (slot == null) {
           return null
@@ -410,7 +382,7 @@ export default class SwTorActorSheet extends ActorSheet {
         items: computedActorData.inventory.filter(item => item.type === type.key)
       })),
       weaponSlots: computedActorData.weaponSlots,
-      evasion,
+      evasion: this.actor.skills.aus,
       weight: {
         value: roundDecimal(
           computedActorData.inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
@@ -419,29 +391,30 @@ export default class SwTorActorSheet extends ActorSheet {
         max: calcMaxInventoryWeight(computedActorData),
       },
       flags: {
-        hasGp: gp > 0,
-        canRefundXpToGp: data.data.xp.gp > 0,
+        hasGp: this.actor.gp.value > 0,
+        canRefundXpToGp: this.actor.xp.gp > 0,
       },
-      damageIncoming: {
-        type: incomingDamageType,
-        resistances: incomingDamageResistances,
-        cost: incomingDamageCost,
-      },
-      regeneration: {
-        turn: this._prepareRegen('turn', {
-          EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'max', 'total', { default: 0 }) / 25,
-          MaP: 2,
-        }, computedActorData, { label: 'Nächste Runde', className: 'next-turn', icon: 'fa-redo' }),
-        day: this._prepareRegen('day', {
-          EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'missing', { default: 0 }),
-          MaP: ObjectUtils.try(computedActorData.metrics.MaP, 'missing', { default: 0 }),
-          AuP: ObjectUtils.try(computedActorData.metrics.AuP, 'missing', { default: 0 }),
-          LeP: ObjectUtils.try(computedActorData.metrics.LeP, 'missing', { default: 0 }),
-        }, computedActorData, { label: 'Nächster Tag', className: 'next-day', icon: 'fa-sun' })
-      }
+      // TODO
+      // damageIncoming: {
+      //   type: incomingDamageType,
+      //   resistances: incomingDamageResistances,
+      //   cost: incomingDamageCost,
+      // },
+      // TODO
+      // regeneration: {
+      //   turn: this._prepareRegen('turn', {
+      //     EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'max', 'total', { default: 0 }) / 25,
+      //     MaP: 2,
+      //   }, computedActorData, { label: 'Nächste Runde', className: 'next-turn', icon: 'fa-redo' }),
+      //   day: this._prepareRegen('day', {
+      //     EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'missing', { default: 0 }),
+      //     MaP: ObjectUtils.try(computedActorData.metrics.MaP, 'missing', { default: 0 }),
+      //     AuP: ObjectUtils.try(computedActorData.metrics.AuP, 'missing', { default: 0 }),
+      //     LeP: ObjectUtils.try(computedActorData.metrics.LeP, 'missing', { default: 0 }),
+      //   }, computedActorData, { label: 'Nächster Tag', className: 'next-day', icon: 'fa-sun' })
+      // }
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
-    data.speciesList = Species.list
     data.damageTypes = DamageTypes.list
     data.trainings = computedActorData.trainings.map(t => ({
       ...t,
@@ -451,6 +424,7 @@ export default class SwTorActorSheet extends ActorSheet {
     data.ui = {
       inventoryHidden: this._inventoryHidden,
     }
+    data.actor = this.actor
     return data
   }
 
@@ -636,14 +610,13 @@ export default class SwTorActorSheet extends ActorSheet {
   }
 
   _onGpToXp = () => {
-    const gp = calcGp(this.computeActorData(this.actor.data))
-    if (gp > 0) {
-      this.actor.update({ 'data.xp.gp': ObjectUtils.try(this.actor.data.data, 'xp', 'gp', { default: 0 }) + 1 })
+    if (this.actor.gp.value > 0) {
+      this.actor.update({ 'data.xp.gp': (this.actor.xp.gp || 0) + 1 })
     }
   }
 
   _onXpToGp = () => {
-    const gp = ObjectUtils.try(this.actor.data.data, 'xp', 'gp', { default: 0 })
+    const gp = this.actor.gp.value
     if (gp > 0) {
       this.actor.update({ 'data.xp.gp': gp - 1 })
     }

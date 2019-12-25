@@ -68,7 +68,13 @@ export function registerHelpers() {
     ),
     formatD20Result: result => new Handlebars.SafeString(`<span class="roll d20 ${categorizeD20Result(result)}">${result}</span>`),
     formatMod,
-    formatExplanation: components => components.map(component => `${component.label}: ${formatMod(component.value)}`).join(' | '),
+    formatExplanation: components => {
+      if (!Array.isArray(components)) {
+        return `Explanation missing!`
+      } else {
+        return components.map(component => `${component.label}: ${formatMod(component.value)}`).join(' | ')
+      }
+    },
     formatRegen: regen => Object.entries(regen).map(([label, cost]) => `${label}: ${formatMod(cost)}`).join(' | '),
     formatCosts: costs => Object.entries(costs).map(([label, cost]) => `${label}: ${formatMod(-cost)}`).join(' | '),
     expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',
@@ -80,12 +86,12 @@ export function registerHelpers() {
       `)
     },
     metricView: ({ hash: { metric, linked } }) => new Handlebars.SafeString(`
-      <div class="metric" title="${metric.key} | ${metric.label}">
-        <div class="metric-bar" style="width: ${(metric.value / metric.max.total) * 100}%; background-color: ${metric.backgroundColor};"></div>
+      <div class="metric" title="${metric.key} | ${metric.label}m">
+        <div class="metric-bar" style="width: ${(metric.value / metric.max) * 100}%; background-color: ${metric.backgroundColor};"></div>
         <label class="metric-value flex-row multi-item flex-center">
           <input type="text" ${linked ? 'data-link' : 'name'}="data.metrics.${metric.key}.value" value="${metric.value}" class="align-right transparent flex-grow" />
           <span>/</span>
-          <span class="input-width flex-grow">${metric.max.total}</span>
+          <span class="input-width flex-grow">${metric.max}</span>
         </label>
       </div>
     `),

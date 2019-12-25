@@ -1,4 +1,4 @@
-import ObjectUtils from './ObjectUtils.js'
+import ObjectUtils from '../ObjectUtils.js'
 
 const list = [
   {
@@ -79,7 +79,7 @@ const list = [
       sc: -10,
       wk: 20,
       lep: 50,
-      rtg: 3,
+      r_armor: 3,
     },
   },
   {
@@ -150,7 +150,7 @@ const list = [
     mods: {
       ge: -10,
       kk: 10,
-      rtg: 1,
+      r_armor: 1,
     },
   },
   {
@@ -191,7 +191,7 @@ const list = [
     gp: 18,
     mods: {
       kl: 10,
-      rtg: 1,
+      r_armor: 1,
       mec: 15,
       waf: 15,
     },

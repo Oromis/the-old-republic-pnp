@@ -1,5 +1,6 @@
 import ObjectUtils from '../ObjectUtils.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
+import Property from '../properties/Property.js'
 import { explainArmor, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
 
 function resistFlat(damage) {

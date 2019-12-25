@@ -1,6 +1,6 @@
 import Config from './Config.js'
 import ObjectUtils from './ObjectUtils.js'
-import Species from './Species.js'
+import Species from './datasets/HumanoidSpecies.js'
 import Attributes, {attrValue} from './datasets/HumanoidAttributes.js'
 import XpTable from './XpTable.js'
 import Metrics from './datasets/HumanoidMetrics.js'
@@ -26,14 +26,13 @@ function getKey(property) {
   return typeof property === 'string' ? property : property.key
 }
 
-function getBaseValue(actor, property, { target = 'value' } = {}) {
+function getBaseValue(property, { target = 'value' } = {}) {
+  if (typeof property.calcBaseValue === 'function') {
+    return property.calcBaseValue({ target })
+  }
   switch (detectPropertyType(property)) {
-    case 'attribute':
-      return 0
     case 'skill':
       return 5
-    case 'metric':
-      return target === 'value' ? 5 : property.calcBaseValue(actor)
     case 'resistance':
       return 0
     default:
@@ -45,17 +44,17 @@ export function calcGp(actor) {
   return (actor.gp.initial || Config.character.initialGp)
     - (actor.xp.gp || 0)
     - ObjectUtils.try(Species.map[actor.species], 'gp', { default: 0 })
-    - Object.values(actor.attributes).reduce((acc, cur) => acc + (cur.gp || 0), 0)
+    - actor.attributes.list.reduce((acc, cur) => acc + (cur.gp || 0), 0)
     - actor.trainings.reduce((acc, cur) => acc + (+cur.data.gp), 0)
 }
 
 export function calcFreeXp(actor) {
   return actor.xp.total -
-    Attributes.list.reduce((acc, cur) => {
+    actor.attributes.list.reduce((acc, cur) => {
       return acc + ObjectUtils.try(actor.attributes, cur.key, 'xp', { default: 0 })
     }, 0) -
-    actor.skills.reduce((acc, skill) => acc + calcSkillXp(actor, skill.data), 0) -
-    Metrics.list.reduce((acc, cur) => {
+    actor.skills.list.reduce((acc, skill) => acc + calcSkillXp(actor, skill.data), 0) -
+    actor.metrics.list.reduce((acc, cur) => {
       return acc + ObjectUtils.try(actor.metrics, cur.key, 'xp', { default: 0 })
     }, 0)
 }
@@ -100,8 +99,7 @@ export function calcPropertyTrainingsEffects(actor, property) {
 
 function explainSpeciesMod(actor, property) {
   const key = typeof property === 'string' ? property : property.key
-  const species = Species.map[(actor.species || Species.default)]
-  return { label: species.name, value: ObjectUtils.try(species, 'mods', key, { default: 0 })}
+  return { label: actor.species.name, value: ObjectUtils.try(actor.species, 'mods', key, { default: 0 })}
 }
 
 function calcPropertySpeciesMod(actor, property) {
@@ -126,7 +124,7 @@ export function explainPropertyBaseValue(actor, property, options) {
     result.total += gp
     result.components.unshift({ label: 'GP', value: gp })
   }
-  let base = getBaseValue(actor, property, options)
+  let base = getBaseValue(property, options)
   if(detectPropertyType(property) === 'skill'
       && !property.isBasicSkill
       && calcPropertyTrainingsEffects(actor, property) > 0) {
@@ -188,7 +186,7 @@ export function calcMaxInventoryWeight(actor) {
 export function explainArmor(actor) {
   const components = [
     ...actor.equippedItems.filter(item => item.data.armor != null && item.data.armor !== 0).map(item => ({ label: item.name, value: item.data.armor })),
-    explainSpeciesMod(actor, 'rtg')
+    explainSpeciesMod(actor, 'r_armor')
   ].filter(mod => mod.value !== 0)
   return {
     total: components.reduce((acc, cur) => acc + (+cur.value), 0),

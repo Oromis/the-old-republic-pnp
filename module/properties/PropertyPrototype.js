@@ -17,7 +17,9 @@ export default class PropertyPrototype {
       updaters: this._updaters,
     })
     // Enable access to all data members of the property without any further effort
-    return new Proxy(property, keyMissing((p, key) => p.full[key]))
+    return new Proxy(property, {
+      get: keyMissing((p, key) => p.full[key])
+    })
   }
 
   applyTemplate(data) {
