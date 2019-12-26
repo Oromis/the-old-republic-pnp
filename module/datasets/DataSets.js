@@ -4,6 +4,8 @@ import HumanoidActor from '../actor/HumanoidActor.js'
 import ResistanceTypes from './ResistanceTypes.js'
 import HumanoidSpecies from './HumanoidSpecies.js'
 import XpTable from '../XpTable.js'
+import RegularSkill from '../item/RegularSkill.js'
+import SkillCategories from './SkillCategories.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -15,6 +17,20 @@ export default Object.freeze({
       species: HumanoidSpecies,
       resistances: ResistanceTypes,
       xpTable: XpTable,
+    }
+  },
+
+  fromItemType(type) {
+    switch (type) {
+      case 'skill':
+        return {
+          delegate: RegularSkill,
+          categories: SkillCategories,
+        }
+
+      default:
+        // Regular inventory item
+        return {}
     }
   }
 })

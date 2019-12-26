@@ -78,11 +78,15 @@ export default class AutoSubmitSheet {
     }
 
     // Do not perform a general submit, only update one single field
-    const name = event.target.getAttribute('data-link') || event.target.getAttribute('name')
+    const target = event.target
+    const name = target.getAttribute('data-link') || target.getAttribute('name')
     if (name != null) {
       const namePath = name.split('.')
-      let value = event.target.value
-      const dtype = event.target.getAttribute('data-dtype')
+      let value = target.value
+      if (['checkbox', 'radio'].indexOf(target.getAttribute('type')) !== -1) {
+        value = target.checked
+      }
+      const dtype = target.getAttribute('data-dtype')
       if (dtype === 'Number') {
         value = +value
       } else if (dtype === 'Boolean') {

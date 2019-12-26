@@ -8,6 +8,14 @@ export default class PropertyPrototype {
     this._updaters = updaters
 
     this.PropertyClass = PropertyClass
+
+    for (const [key] of Object.entries(this._staticData)) {
+      if (!(key in this)) {
+        Object.defineProperty(this, key, {
+          get() { return this._staticData[key] }
+        })
+      }
+    }
   }
 
   instantiate(entity, data) {

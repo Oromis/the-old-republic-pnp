@@ -41,6 +41,13 @@ export default class SwTorActor extends Actor {
     return res
   }
 
+  _getItems(...args) {
+    // _getItems() re-generates the array of owned items. Reset the cache in this case.
+    const res = super._getItems(...args)
+    this._categorizedItemStore = null
+    return res
+  }
+
   get attributes() {
     return this._getPropertyCollectionProxy('attributes')
   }
@@ -81,6 +88,17 @@ export default class SwTorActor extends Actor {
     return this._categorizedItems.equippedItems
   }
 
+  get dataSet() {
+    if (this._dataSetStore == null) {
+      this._dataSetStore = DataSets.fromActorType(this.type)
+    }
+    return this._dataSetStore
+  }
+
+  // ---------------------------------------------------------------------
+  // Private stuff
+  // ---------------------------------------------------------------------
+
   get _categorizedItems() {
     if (this._categorizedItemStore == null) {
       // Re-calculate cached lists
@@ -111,17 +129,6 @@ export default class SwTorActor extends Actor {
       })
     }
     return this._categorizedItemStore
-  }
-
-  // ---------------------------------------------------------------------
-  // Private stuff
-  // ---------------------------------------------------------------------
-
-  get dataSet() {
-    if (this._dataSetStore == null) {
-      this._dataSetStore = DataSets.fromActorType(this.type)
-    }
-    return this._dataSetStore
   }
 
   _callDelegate(callbackName, ...args) {
@@ -174,17 +181,53 @@ export default class SwTorActor extends Actor {
     })
   }
 
-  _updateCollection(data, key, { useThis = true } = {}) {
+  _updateCollection(data, key) {
     if (data[key] == null) {
       data[key] = {}
     }
     for (const thing of this.dataSet[key].list) {
-      let propertyInstance = thing
+      data[key][thing.key] = thing
         .instantiate(this, data[key][thing.key])
-      if (useThis) {
-        propertyInstance.update()
-      }
-      data[key][thing.key] = propertyInstance.db
+        .update()
+        .db
     }
+  }
+
+  // ----------------------------------------------------------------------------
+  // Install some item hooks to make sure that item invariants are kept
+  // ----------------------------------------------------------------------------
+
+  createOwnedItem(data, ...rest) {
+    return this._checkValidItem(data, () => super.createOwnedItem(data, ...rest))
+  }
+
+  updateOwnedItem(data, ...rest) {
+    return this._checkValidItem(data, () => super.updateOwnedItem(data, ...rest))
+  }
+
+  _checkValidItem(data, cb) {
+    // Check if actor type matches
+    const newActorType = data.data.actorType
+    if (newActorType != null && newActorType !== this.type) {
+      const msg = `Bad actor type: ${newActorType}`
+      ui.notification.error(msg)
+      return Promise.reject(msg)
+    }
+
+    // Check that there are no duplicate keys
+    const newKey = data.data.key
+    if (typeof newKey === 'string' && newKey.length > 0) {
+      for (const item of this.items) {
+        const key = item.data.data.key
+        if (key === newKey) {
+          // Duplicate found => reject to add the item
+          const msg = `Found duplicate Item key: ${newKey}`
+          ui.notification.error(msg)
+          return Promise.reject(msg)
+        }
+      }
+    }
+
+    return cb()
   }
 }

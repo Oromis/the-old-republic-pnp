@@ -22,13 +22,13 @@
           <td><input type="text" class="uppercase" name="data.key" value="{{data.key}}" minlength="3" maxlength="3"/>
           </td>
         </tr>
-        {{#if computed.isRegularSkill}}
+        {{#if skill.isRegularSkill}}
           <tr>
             <td class="align-right">Kategorie</td>
             <td>
               <select name="data.category" title="Kategorie">
                 {{#select data.category}}
-                  {{#each skillCategories as |category|}}
+                  {{#each skill.dataSet.categories.list as |category|}}
                     <option value="{{category.key}}">{{category.label}}</option>
                   {{/each}}
                 {{/select}}
@@ -41,7 +41,7 @@
           <td>
             <select name="data.attribute1" title="Primärattribut">
               {{#select data.attribute1}}
-                {{#each attributes as |attr|}}
+                {{#each skill.actorDataSet.attributes.list as |attr|}}
                   <option value="{{attr.key}}">{{attr.label}}</option>
                 {{/each}}
               {{/select}}
@@ -53,7 +53,7 @@
           <td>
             <select name="data.attribute2" title="Sekundärattribut">
               {{#select data.attribute2}}
-                {{#each attributes as |attr|}}
+                {{#each skill.actorDataSet.attributes.list as |attr|}}
                   <option value="{{attr.key}}">{{attr.label}}</option>
                 {{/each}}
               {{/select}}
@@ -65,14 +65,14 @@
           <td>
             <select name="data.xpCategory">
               {{#select data.xpCategory}}
-                {{#each xpCategories as |category|}}
+                {{#each skill.actorDataSet.xpTable.categoryNames as |category|}}
                   <option value="{{category}}">{{category}}</option>
                 {{/each}}
               {{/select}}
             </select>
           </td>
         </tr>
-        {{#if computed.isRegularSkill}}
+        {{#if skill.isRegularSkill}}
           <tr>
             <td class="align-right">Grundfähigkeit</td>
             <td>
@@ -80,7 +80,7 @@
             </td>
           </tr>
         {{/if}}
-        {{#if computed.isForceSkill}}
+        {{#if skill.isForceSkill}}
           <tr>
             <td class="align-right">Reichweite</td>
             <td>

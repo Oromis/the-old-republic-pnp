@@ -3,7 +3,7 @@
  */
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import Attributes from './datasets/HumanoidAttributes.js' // TODO make dynamic
-import SkillCategories from './SkillCategories.js'
+import SkillCategories from './datasets/SkillCategories.js'
 import XpTable from './XpTable.js'
 import RangeTypes from './RangeTypes.js'
 import DurationTypes from './DurationTypes.js'
@@ -15,12 +15,6 @@ import {analyzeExpression} from './SheetUtils.js'
 export default class SkillSheet extends ItemSheet {
   constructor(...args) {
     super(...args);
-
-    /**
-     * Keep track of the currently active sheet tab
-     * @type {string}
-     */
-    this._sheetTab = "description"
 
     const autoSubmit = new AutoSubmitSheet(this)
     autoSubmit.addFilter('data.key', (obj, { name }) => {
@@ -34,7 +28,7 @@ export default class SkillSheet extends ItemSheet {
    */
 	static get defaultOptions() {
 	  return mergeObject(super.defaultOptions, {
-			classes: ["sw-tor", "sheet", "item"],
+			classes: ["sw-tor", "sheet", "item", 'skill'],
 			template: "systems/sw-tor/templates/skill-sheet.html",
 			width: 520,
 			height: 360,
@@ -49,17 +43,10 @@ export default class SkillSheet extends ItemSheet {
    */
   getData() {
     const data = super.getData()
-    const isForceSkill = this.skill.type === 'force-skill'
 
-    data.attributes = Attributes.list
-    data.skillCategories = SkillCategories.list
-    data.xpCategories = XpTable.getCategories()
-    data.computed = {
-      isRegularSkill: this.skill.type === 'skill',
-      isForceSkill,
-    }
+    data.computed = {}
 
-    if (isForceSkill) {
+    if (this.skill.isForceSkill) {
       data.rangeTypes = RangeTypes.list
       data.durationTypes = DurationTypes.list
       data.effectModifiers = EffectModifiers.list
@@ -80,28 +67,9 @@ export default class SkillSheet extends ItemSheet {
       }
       data.computed.effect = analyzeExpression({ path: [data.data.effect, 'formula'], defaultExpr: '0' })
     }
+    data.item = this.item
+    data.skill = this.item
     return data
-  }
-
-  /* -------------------------------------------- */
-
-  /**
-   * Activate event listeners using the prepared sheet HTML
-   * @param html {object}   The prepared HTML object ready to be rendered into the DOM
-   */
-	activateListeners(html) {
-    super.activateListeners(html);
-
-    // Activate tabs
-    let tabs = html.find('.tabs');
-    let initial = this._sheetTab;
-    new Tabs(tabs, {
-      initial: initial,
-      callback: clicked => this._sheetTab = clicked.data("tab")
-    });
-
-    // Everything below here is only needed if the sheet is editable
-    if (!this.options.editable) return
   }
 
   /* -------------------------------------------- */

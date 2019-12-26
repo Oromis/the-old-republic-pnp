@@ -9,7 +9,7 @@ import {measureDistance} from './overrides/DistanceMeasurement.js'
 import {registerSystemSettings} from './Settings.js'
 import {migrateWorld} from './migration/Migrations.js'
 import SwTorActor from './actor/SwTorActor.js'
-import SwTorItem from './SwTorItem.js'
+import SwTorItem from './item/SwTorItem.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);

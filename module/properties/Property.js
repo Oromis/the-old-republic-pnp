@@ -6,7 +6,8 @@ export default class Property {
     this._staticData = staticData
     this._updaters = updaters
 
-    for (const [key, value] of Object.entries(this.full)) {
+    // Make data available directly (without doing .data.foo, but directly .foo)
+    for (const [key,] of Object.entries(this.full)) {
       if (!(key in this)) {
         Object.defineProperty(this, key, {
           get() { return this.full[key] }

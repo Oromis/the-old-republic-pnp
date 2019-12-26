@@ -1,4 +1,4 @@
-import ObjectUtils from './ObjectUtils.js'
+import ObjectUtils from '../ObjectUtils.js'
 
 const list = [
   { key: 'melee', label: 'Nahkampf' },

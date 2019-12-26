@@ -3,7 +3,7 @@ import ObjectUtils from './ObjectUtils.js'
 import XpTable from './XpTable.js'
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import ItemTypes from './ItemTypes.js'
-import SkillCategories from './SkillCategories.js'
+import SkillCategories from './datasets/SkillCategories.js'
 import {
   calcMaxInventoryWeight,
   calcPropertyBaseValue,
@@ -187,7 +187,7 @@ export default class SwTorActorSheet extends ActorSheet {
     const computedActorData = this.actor
 
     // TODO Skills mixin
-    const skills = []
+    const skills = this.actor.skills.list
     // skills = computedActorData.skills.map(skill => {
     //   const value = explainPropertyValue(computedActorData, skill.data)
     //   return {
@@ -278,38 +278,39 @@ export default class SwTorActorSheet extends ActorSheet {
     // }
 
     // TODO force skill mixin
-    const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
-      skill.range = RangeTypes.map[skill.data.range.type].format(skill.data.range)
-      const durationType = ObjectUtils.try(DurationTypes.map[skill.data.duration.type], { default: DurationTypes.map.instant })
-      if (durationType.hasFormula) {
-        const expressionResult = evalSkillExpression(skill.data.duration.formula, skill, { round: 0 })
-        skill.duration = { ...expressionResult, value: `${expressionResult.value} ${durationType.label}` }
-      } else {
-        skill.duration = { value: durationType.label }
-      }
-      skill.cost = []
-      if (durationType.hasOneTimeCost) {
-        skill.cost.push({
-          key: 'oneTime',
-          ...this._evalForceSkillCost(skill, ObjectUtils.try(skill.data.cost, 'oneTime')),
-        })
-      }
-      if (durationType.hasPerTurnCost) {
-        skill.cost.push({
-          key: 'perTurn',
-          ...this._evalForceSkillCost(skill, ObjectUtils.try(skill.data.cost, 'perTurn')),
-          postfix: 'pro Runde',
-        })
-      }
-      const effectModifier = ObjectUtils.try(skill.data.effect, 'modifier')
-      skill.effect = {
-        prefix: effectModifier ? EffectModifiers.map[effectModifier].label : null,
-        ...evalSkillExpression(ObjectUtils.try(skill.data.effect, 'formula'), skill, { round: 0 }),
-        d6: +ObjectUtils.try(skill.data.effect, 'd6', { default: 0 }),
-      }
-      skill.disposition = ObjectUtils.try(ForceDispositions.map, skill.data.disposition, { default: ForceDispositions.map.neutral })
-      return skill
-    })
+    const forceSkills = []
+    // const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
+    //   skill.range = RangeTypes.map[skill.data.range.type].format(skill.data.range)
+    //   const durationType = ObjectUtils.try(DurationTypes.map[skill.data.duration.type], { default: DurationTypes.map.instant })
+    //   if (durationType.hasFormula) {
+    //     const expressionResult = evalSkillExpression(skill.data.duration.formula, skill, { round: 0 })
+    //     skill.duration = { ...expressionResult, value: `${expressionResult.value} ${durationType.label}` }
+    //   } else {
+    //     skill.duration = { value: durationType.label }
+    //   }
+    //   skill.cost = []
+    //   if (durationType.hasOneTimeCost) {
+    //     skill.cost.push({
+    //       key: 'oneTime',
+    //       ...this._evalForceSkillCost(skill, ObjectUtils.try(skill.data.cost, 'oneTime')),
+    //     })
+    //   }
+    //   if (durationType.hasPerTurnCost) {
+    //     skill.cost.push({
+    //       key: 'perTurn',
+    //       ...this._evalForceSkillCost(skill, ObjectUtils.try(skill.data.cost, 'perTurn')),
+    //       postfix: 'pro Runde',
+    //     })
+    //   }
+    //   const effectModifier = ObjectUtils.try(skill.data.effect, 'modifier')
+    //   skill.effect = {
+    //     prefix: effectModifier ? EffectModifiers.map[effectModifier].label : null,
+    //     ...evalSkillExpression(ObjectUtils.try(skill.data.effect, 'formula'), skill, { round: 0 }),
+    //     d6: +ObjectUtils.try(skill.data.effect, 'd6', { default: 0 }),
+    //   }
+    //   skill.disposition = ObjectUtils.try(ForceDispositions.map, skill.data.disposition, { default: ForceDispositions.map.neutral })
+    //   return skill
+    // })
 
     // TODO
     // let incomingDamage = ObjectUtils.try(data.data.combat, 'damageIncoming', 'amount')
@@ -457,9 +458,9 @@ export default class SwTorActorSheet extends ActorSheet {
 
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
-      const li = $(ev.currentTarget).parents("[data-item-id]");
-      const item = this.actor.getOwnedItem(li.data("itemId"));
-      item.sheet.render(true);
+      const li = $(ev.currentTarget).parents("[data-item-id]")
+      const item = this.actor.getOwnedItem(li.data("itemId"))
+      item.sheet.render(true)
     });
 
     // Delete Inventory Item

@@ -70,6 +70,7 @@
       },
       "skill-base": {
         "key": "",
+        "actorType": null,
         "attribute1": null,
         "attribute2": null,
         "xpCategory": null,
