@@ -1,5 +1,5 @@
 import Property from './Property.js'
-import ObjectUtils from '../ObjectUtils.js'
+import ObjectUtils from '../util/ObjectUtils.js'
 
 export default class PropertyPrototype {
   constructor(key, { staticData, template, updaters = [], PropertyClass = Property }) {

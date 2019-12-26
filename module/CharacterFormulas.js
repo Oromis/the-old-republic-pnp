@@ -1,8 +1,8 @@
 import Config from './Config.js'
-import ObjectUtils from './ObjectUtils.js'
+import ObjectUtils from './util/ObjectUtils.js'
 import Species from './datasets/HumanoidSpecies.js'
 import Attributes, {attrValue} from './datasets/HumanoidAttributes.js'
-import XpTable from './XpTable.js'
+import XpTable from './datasets/XpTable.js'
 import Metrics from './datasets/HumanoidMetrics.js'
 
 export function detectPropertyType(property) {
@@ -53,7 +53,7 @@ export function calcFreeXp(actor) {
     actor.attributes.list.reduce((acc, cur) => {
       return acc + ObjectUtils.try(actor.attributes, cur.key, 'xp', { default: 0 })
     }, 0) -
-    actor.skills.list.reduce((acc, skill) => acc + calcSkillXp(actor, skill.data), 0) -
+    actor.skills.list.reduce((acc, skill) => acc + calcSkillXp(actor, skill), 0) -
     actor.metrics.list.reduce((acc, cur) => {
       return acc + ObjectUtils.try(actor.metrics, cur.key, 'xp', { default: 0 })
     }, 0)
@@ -64,7 +64,7 @@ export function calcTotalXp(actor) {
 }
 
 export function calcSkillXp(actor, property) {
-  let result = property.xp || 0
+  let result = (property.gained || []).reduce((acc, cur) => acc + (isNaN(cur.xp) ? 0 : cur.xp), 0)
   if (!property.isBasicSkill && calcPropertyTrainingsEffects(actor, property) === 0) {
     // Non-basic skills need to be activated
     result += actor.dataSet.xpTable.getActivationCost(property.xpCategory)
@@ -73,7 +73,6 @@ export function calcSkillXp(actor, property) {
 }
 
 function calcXpFromTrainingSkill(training, property, from) {
-  const key = getKey(property)
   if(training.data.baseTraining) {
     from += (+training.data.baseTraining.data.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0))
   }
@@ -169,7 +168,7 @@ export function calcUpgradeCost(actor, property, { max } = {}) {
   const baseVal = calcPropertyBaseValue(actor, property)
   const gainLog = ObjectUtils.try(property, 'gained', { default: [] })
   const result = actor.dataSet.xpTable.getUpgradeCost({
-    category: property.tmpXpCategory || property.xpCategory,
+    category: property.currentXpCategory || property.tmpXpCategory || property.xpCategory,
     from: baseVal + gainLog.length,
     to: baseVal + gainLog.length + 1,
   })

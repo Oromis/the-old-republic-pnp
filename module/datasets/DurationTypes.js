@@ -1,22 +1,12 @@
-import ObjectUtils from '../ObjectUtils.js'
+import ObjectUtils from '../util/ObjectUtils.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import Config from '../Config.js'
 import { explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
-import { analyzeExpression } from '../SheetUtils.js'
+import { analyzeExpression } from '../util/SheetUtils.js'
 
 class DurationTypePrototype extends PropertyPrototype {
   constructor(key, staticData) {
-    super(key, {
-      staticData,
-      updaters: [
-        (data, { property }) => {
-          if (property.hasFormula) {
-            console.log(`Updating duration formula: ${data.formula}`)
-            Object.assign(data, analyzeExpression({ expression: data.formula }))
-          }
-        }
-      ],
-    })
+    super(key, { staticData })
   }
 }
 

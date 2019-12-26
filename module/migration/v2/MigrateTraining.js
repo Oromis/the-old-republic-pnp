@@ -1,4 +1,4 @@
-import {resolveEffectLabel} from "../../SheetUtils.js"
+import {resolveEffectLabel} from "../../util/SheetUtils.js"
 
 export function migrateTraining(item, updateData) {
   const mods = item.data.mods

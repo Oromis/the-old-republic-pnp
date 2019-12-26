@@ -1,5 +1,4 @@
 import DataSets from '../datasets/DataSets.js'
-import ObjectUtils from '../ObjectUtils.js'
 import DataCache from '../util/DataCache.js'
 
 export default class SwTorActor extends Actor {
@@ -35,9 +34,8 @@ export default class SwTorActor extends Actor {
   // ---------------------------------------------------------------------
 
   _onUpdate(...args) {
-    const res = super._onUpdate(...args)
     this._cache.clear()
-    return res
+    return super._onUpdate(...args)
   }
 
   _getItems(...args) {
@@ -113,7 +111,7 @@ export default class SwTorActor extends Actor {
         freeItems: [],
         equippedItems: [],
       }
-      this.data.items.forEach(item => {
+      this.items.forEach(item => {
         if (item.type === 'skill' || item.type === 'force-skill') {
           categories.skills.push(item)
           if (item.type === 'force-skill') {
@@ -198,7 +196,24 @@ export default class SwTorActor extends Actor {
   }
 
   updateOwnedItem(data, ...rest) {
-    return this._checkValidItem(data, () => super.updateOwnedItem(data, ...rest))
+    const item = this.getOwnedItem(data.id)
+    if (item != null) {
+      data = item._filterUpdateData(data)
+    } else {
+      console.warn(`Updating item that does not exist: `, data)
+    }
+    let promise = this._checkValidItem(data, () => super.updateOwnedItem(data, ...rest))
+
+    // This is done to work around a FoundryVTT-bug that causes token actors to miss an item update. I.e.
+    // updates are always delayed by one change
+    if (this.isToken) {
+      promise = promise.then(res => {
+        this._cache.clearKey('categorizedItems')
+        this.render(false)
+        return res
+      })
+    }
+    return promise
   }
 
   _checkValidItem(data, cb) {
@@ -206,7 +221,6 @@ export default class SwTorActor extends Actor {
     const newActorType = data.data.actorType
     if (newActorType != null && newActorType !== this.type) {
       const msg = `Bad actor type: ${newActorType}`
-      ui.notification.error(msg)
       return Promise.reject(msg)
     }
 
@@ -218,7 +232,6 @@ export default class SwTorActor extends Actor {
         if (key === newKey) {
           // Duplicate found => reject to add the item
           const msg = `Found duplicate Item key: ${newKey}`
-          ui.notification.error(msg)
           return Promise.reject(msg)
         }
       }

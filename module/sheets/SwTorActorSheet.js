@@ -1,23 +1,23 @@
-import Attributes from './datasets/HumanoidAttributes.js'
-import ObjectUtils from './ObjectUtils.js'
-import XpTable from './XpTable.js'
+import Attributes from '../datasets/HumanoidAttributes.js'
+import ObjectUtils from '../util/ObjectUtils.js'
+import XpTable from '../datasets/XpTable.js'
 import AutoSubmitSheet from './AutoSubmitSheet.js'
-import ItemTypes from './ItemTypes.js'
-import SkillCategories from './datasets/SkillCategories.js'
+import ItemTypes from '../ItemTypes.js'
+import SkillCategories from '../datasets/SkillCategories.js'
 import {
   calcMaxInventoryWeight,
   calcPropertyBaseValue,
   calcUpgradeCost,
-} from './CharacterFormulas.js'
-import Metrics from './datasets/HumanoidMetrics.js'
-import RangeTypes from './RangeTypes.js'
-import DurationTypes from './datasets/DurationTypes.js'
-import {Parser} from './vendor/expr-eval/expr-eval.js'
-import ForceDispositions from './ForceDispositions.js'
-import EffectModifiers from './EffectModifiers.js'
-import Slots from './Slots.js'
+} from '../CharacterFormulas.js'
+import Metrics from '../datasets/HumanoidMetrics.js'
+import RangeTypes from '../datasets/RangeTypes.js'
+import DurationTypes from '../datasets/DurationTypes.js'
+import {Parser} from '../vendor/expr-eval/expr-eval.js'
+import ForceDispositions from '../datasets/ForceDispositions.js'
+import EffectModifiers from '../datasets/EffectModifiers.js'
+import Slots from '../Slots.js'
 import {describeTraining} from "./TrainingSheet.js"
-import DamageTypes from './DamageTypes.js'
+import DamageTypes from '../DamageTypes.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -186,37 +186,6 @@ export default class SwTorActorSheet extends ActorSheet {
 
     const computedActorData = this.actor
 
-    // TODO Skills mixin
-    const skills = this.actor.skills.list
-    // skills = computedActorData.skills.map(skill => {
-    //   const value = explainPropertyValue(computedActorData, skill.data)
-    //   return {
-    //     ...skill,
-    //     key: skill.data.key,
-    //     // TODO put in Skill mixin
-    //     xp: calcSkillXp(computedActorData, skill.data),
-    //     xpCategory: skill.data.tmpXpCategory || skill.data.xpCategory,
-    //     gained: calcGained(computedActorData, skill.data, { freeXp }),
-    //     value,
-    //     check: {
-    //       rolls: [
-    //         makeRoll({
-    //           key: skill.data.attribute1,
-    //           label: attributesMap[skill.data.attribute1].label,
-    //           value: attributesMap[skill.data.attribute1].value.total
-    //         }),
-    //         makeRoll({
-    //           key: skill.data.attribute2,
-    //           label: attributesMap[skill.data.attribute2].label,
-    //           value: attributesMap[skill.data.attribute2].value.total
-    //         }),
-    //         makeRoll({ key: skill.data.key, label: skill.name, value: value.total }),
-    //       ],
-    //       AgP: Math.floor(value.total / 5),
-    //     },
-    //   }
-    // })
-
     // TODO
     // for (const weaponSlot of computedActorData.weaponSlots) {
     //   if (weaponSlot.skill && computedActorData.skills[weaponSlot.skill.key]) {
@@ -278,7 +247,6 @@ export default class SwTorActorSheet extends ActorSheet {
     // }
 
     // TODO force skill mixin
-    const forceSkills = []
     // const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
     //   skill.range = RangeTypes.map[skill.data.range.type].format(skill.data.range)
     //   const durationType = ObjectUtils.try(DurationTypes.map[skill.data.duration.type], { default: DurationTypes.map.instant })
@@ -340,11 +308,13 @@ export default class SwTorActorSheet extends ActorSheet {
     //   incomingDamageCost.LeP += incomingDamage
     // }
 
+    const skills = this.actor.skills.list
+    const forceSkills = this.actor.forceSkills.list
     data.computed = {
       skillCategories: [
-        ...SkillCategories.list.map(cat => ({
+        ...this.actor.dataSet.skillCategories.list.map(cat => ({
           label: cat.label,
-          skills: skills.filter(skill => skill.data.category === cat.key)
+          skills: skills.filter(skill => skill.category === cat.key)
         })),
         { label: 'Mächte', skills: forceSkills }
       ],
@@ -371,7 +341,6 @@ export default class SwTorActorSheet extends ActorSheet {
         items: computedActorData.inventory.filter(item => item.type === type.key)
       })),
       weaponSlots: computedActorData.weaponSlots,
-      evasion: this.actor.skills.aus,
       weight: {
         value: roundDecimal(
           computedActorData.inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
@@ -638,20 +607,14 @@ export default class SwTorActorSheet extends ActorSheet {
   _onChangeSkillGained = event => {
     const action = event.currentTarget.getAttribute('data-action')
     const key = event.currentTarget.getAttribute('data-skill')
-    const skill = this.getSkill(key)
+    const skill = this.actor.skills[key]
 
-    const { xp, gainLog } = calcGainChange(this.computeActorData(this.actor.data), skill.data, { action })
+    const { gainLog } = calcGainChange(this.actor, skill, { action })
 
-    const skillEntity = this.actor.getOwnedItem(skill.id)
-    if (skillEntity != null) {
-      skillEntity.update({
-        'data.gained': gainLog,
-        'data.xp': xp,
-        'data.tmpXpCategory': ObjectUtils.try(skill.data, 'xpCategory'), // Reset after every skill point
-      })
-    } else {
-      throw new Error(`Skill entity does not exist: ${key}, ${skill.id}`)
-    }
+    skill.update({
+      'data.gained': gainLog,
+      'data.tmpXpCategory': skill.xpCategory, // Reset after every skill point
+    })
   }
 
   _onChangeMetricGained = event => {
@@ -746,8 +709,8 @@ export default class SwTorActorSheet extends ActorSheet {
    * This defines how to update the subject of the form when the form is submitted
    * @private
    */
-  _updateObject(event, formData) {
-    // Disable regular form submissions (we submit individual fields)
+  _updateObject() {
+    // Disable regular form submissions (we use AutoSubmitForm)
     return Promise.resolve()
   }
 

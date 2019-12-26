@@ -1,7 +1,7 @@
-import SwTorItemSheet from "./SwTorItemSheet.js"
-import SwTorActorSheet from "./SwTorActorSheet.js"
-import SkillSheet from "./SkillSheet.js"
-import TrainingSheet from "./TrainingSheet.js"
+import SwTorItemSheet from "./sheets/SwTorItemSheet.js"
+import SwTorActorSheet from "./sheets/SwTorActorSheet.js"
+import SkillSheet from "./sheets/SkillSheet.js"
+import TrainingSheet from "./sheets/TrainingSheet.js"
 
 import Config from './Config.js'
 import {registerHelpers} from './templating/Helpers.js'

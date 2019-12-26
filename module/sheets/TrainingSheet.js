@@ -1,7 +1,7 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
-import CharacterDispositions from './CharacterDispositions.js'
-import ObjectUtils from './ObjectUtils.js'
-import {onDragOver, onDropItem, resolveEffectLabel} from './SheetUtils.js'
+import CharacterDispositions from '../datasets/CharacterDispositions.js'
+import ObjectUtils from '../util/ObjectUtils.js'
+import {onDragOver, onDropItem, resolveEffectLabel} from '../util/SheetUtils.js'
 
 export function describeTraining(training) {
   let desc = 'GP: '.concat( training.data.gp)

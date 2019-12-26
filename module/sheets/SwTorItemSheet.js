@@ -1,11 +1,11 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
-import DamageTypes from './DamageTypes.js'
-import {analyzeDamageFormula, analyzeExpression, onDragOver, onDropItem, resolveEffectLabel} from './SheetUtils.js'
-import SlotTypes from './SlotTypes.js'
-import ItemTypes from './ItemTypes.js'
-import ObjectUtils from './ObjectUtils.js'
-import Metrics from './datasets/HumanoidMetrics.js'
-import ResistanceTypes from './datasets/ResistanceTypes.js'
+import DamageTypes from '../DamageTypes.js'
+import {analyzeDamageFormula, analyzeExpression, onDragOver, onDropItem, resolveEffectLabel} from '../util/SheetUtils.js'
+import SlotTypes from '../SlotTypes.js'
+import ItemTypes from '../ItemTypes.js'
+import ObjectUtils from '../util/ObjectUtils.js'
+import Metrics from '../datasets/HumanoidMetrics.js'
+import ResistanceTypes from '../datasets/ResistanceTypes.js'
 
 /**
  * Extend the basic ItemSheet with some very simple modifications

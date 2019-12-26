@@ -1,5 +1,4 @@
-import ObjectUtils from '../ObjectUtils.js'
-import Attributes from '../datasets/HumanoidAttributes.js'
+import ObjectUtils from '../util/ObjectUtils.js'
 
 function formatMod(val) {
   return val > 0 ? `+${val}` : val
@@ -34,6 +33,17 @@ export function registerHelpers() {
   Handlebars.registerHelper({
     json: obj => JSON.stringify(obj),
     concat: (...args) => args.filter(arg => typeof arg === 'string').join(''),
+    fallback: (...args) => {
+      // Last argument is Handlebars-specific. Don't use it.
+      let result
+      for (let i = 0; i < args.length - 1; ++i) {
+        result = args[i]
+        if (result) {
+          break
+        }
+      }
+      return result
+    },
     resolve: (object, ...path) => ObjectUtils.try(object, ...path),
     class: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(`class="${when ? then : otherwise}"`),
     ite: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(when ? then : otherwise),
@@ -43,7 +53,6 @@ export function registerHelpers() {
     isMultiple: arg => arg > 1,
     isRelevantFactor: num => typeof num === 'number' && num !== 1,
     formatAttrKey,
-    formatAttrLabel: key => ObjectUtils.try(Attributes.map[key], 'label'),
     formatPercentage: val => `${Math.round(val)}%`,
     formatCheckView: ({ hash: { check, label } }) => new Handlebars.SafeString(
       check.rolls.map(roll => `
@@ -76,7 +85,7 @@ export function registerHelpers() {
       }
     },
     formatRegen: regen => Object.entries(regen).map(([label, cost]) => `${label}: ${formatMod(cost)}`).join(' | '),
-    formatCosts: costs => Object.entries(costs).map(([label, cost]) => `${label}: ${formatMod(-cost)}`).join(' | '),
+    formatCosts: costs => Object.entries(costs || {}).map(([label, cost]) => `${label}: ${formatMod(-cost)}`).join(' | '),
     expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',
     stepButtons: ({ hash: { val, name, buttonClass = 'small char set-value', valueClass = '' } }) => {
       return new Handlebars.SafeString(`

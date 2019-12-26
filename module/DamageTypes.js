@@ -1,4 +1,4 @@
-import ObjectUtils from './ObjectUtils.js'
+import ObjectUtils from './util/ObjectUtils.js'
 
 const list = [
   { key: 'physical', label: 'Physisch', icon: 'icons/svg/combat.svg' },

@@ -1,5 +1,5 @@
 import Config from '../Config.js'
-import ObjectUtils from '../ObjectUtils.js'
+import ObjectUtils from '../util/ObjectUtils.js'
 import {attrValue} from './HumanoidAttributes.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import { explainEffect, explainPropertyValue } from '../CharacterFormulas.js'

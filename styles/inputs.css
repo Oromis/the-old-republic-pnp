@@ -12,6 +12,10 @@
   border: 0;
 }
 
+.sw-tor.sheet input.small {
+  width: 24px;
+}
+
 .sw-tor.sheet input.formula {
   width: 100px;
 }

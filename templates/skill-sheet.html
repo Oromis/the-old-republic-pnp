@@ -1,10 +1,10 @@
 <form class="{{cssClass}} multi-item" autocomplete="off">
   <header class="sheet-header flex-row multi-item">
-    <img class="profile-img" src="{{item.img}}" data-editable title="{{item.name}}"/>
+    <img class="profile-img" src="{{skill.img}}" data-editable title="{{skill.name}}"/>
     <div class="header-fields flex-grow multi-item">
       <div class="flex-row multi-item flex-cross-start">
         <h1 class="char-name flex-grow">
-          <input name="name" class="full-width" type="text" value="{{item.name}}" placeholder="Name"/>
+          <input name="name" class="full-width" type="text" value="{{skill.name}}" placeholder="Name"/>
         </h1>
       </div>
       <div class="flex-row">
@@ -22,13 +22,27 @@
           <td><input type="text" class="uppercase" name="data.key" value="{{data.key}}" minlength="3" maxlength="3"/>
           </td>
         </tr>
+        <tr>
+          <td class="align-right" title="Legt fest, welchem Actor-Typ diese Fähigkeit zugeornet werden kann">
+            Actor-Typ
+          </td>
+          <td>
+            <select name="data.actorType" title="Actor Typ">
+              {{#select data.actorType}}
+                {{#each skill.dataSet.actorTypes.list as |type|}}
+                  <option value="{{type.key}}">{{type.label}}</option>
+                {{/each}}
+              {{/select}}
+            </select>
+          </td>
+        </tr>
         {{#if skill.isRegularSkill}}
           <tr>
             <td class="align-right">Kategorie</td>
             <td>
               <select name="data.category" title="Kategorie">
                 {{#select data.category}}
-                  {{#each skill.dataSet.categories.list as |category|}}
+                  {{#each skill.actorDataSet.skillCategories.list as |category|}}
                     <option value="{{category.key}}">{{category.label}}</option>
                   {{/each}}
                 {{/select}}
@@ -85,7 +99,7 @@
             <td class="align-right">Reichweite</td>
             <td>
               <div class="flex-row multi-item">
-                {{#if computed.hasRangeField}}
+                {{#if skill.range.isNumeric}}
                   <input type="text" name="data.range.number" value="{{data.range.number}}" placeholder="[m]" />
                 {{/if}}
                 <select name="data.range.type">
@@ -116,30 +130,36 @@
               </div>
             </td>
           </tr>
-          <tr class="{{hiddenClass unless=computed.hasOneTimeCost}}">
-            <td class="align-right">Aktivierungskosten</td>
-            <td>
-              <div class="flex-row multi-item {{errorClass when=computed.oneTimeCost.error}}">
-                <input type="text" name="data.cost.oneTime.formula" value="{{data.cost.oneTime.formula}}" class="formula" />
-                {{expressionVariables computed.oneTimeCost.variables}}
-              </div>
-            </td>
-          </tr>
-          <tr class="{{hiddenClass unless=computed.hasPerTurnCost}}">
-            <td class="align-right">Kosten pro Runde</td>
-            <td>
-              <div class="flex-row multi-item {{errorClass when=computed.perTurnCost.error}}">
-                <input type="text" name="data.cost.perTurn.formula" value="{{data.cost.perTurn.formula}}" class="formula" />
-                {{expressionVariables computed.perTurnCost.variables}}
-              </div>
-            </td>
-          </tr>
+          {{#if skill.duration.hasOneTimeCost}}
+            <tr>
+              <td class="align-right">Aktivierungskosten</td>
+              <td>
+                <div class="flex-row multi-item {{errorClass when=skill.cost.oneTime.error}}">
+                  <input type="text" name="data.cost.oneTime.formula" value="{{data.cost.oneTime.formula}}" class="formula" />
+                  {{expressionVariables skill.cost.oneTime.variables}}
+                </div>
+              </td>
+            </tr>
+          {{/if}}
+          {{#if skill.duration.hasPerTurnCost}}
+            <tr>
+              <td class="align-right">Kosten pro Runde</td>
+              <td>
+                <div class="flex-row multi-item {{errorClass when=skill.cost.perTurn.error}}">
+                  <input type="text" name="data.cost.perTurn.formula" value="{{data.cost.perTurn.formula}}" class="formula" />
+                  {{expressionVariables skill.cost.perTurn.variables}}
+                </div>
+              </td>
+            </tr>
+          {{/if}}
           <tr>
             <td class="align-right">Effekt</td>
             <td>
-              <div class="flex-row multi-item {{errorClass when=computed.effect.error}}">
+              <div class="flex-row multi-item {{errorClass when=skill.effect.error}}">
                 <input type="text" name="data.effect.formula" value="{{data.effect.formula}}" class="formula" placeholder="Formula" />
-                <input type="text" name="data.effect.d6" value="{{data.effect.d6}}" placeholder="w6" title="w6" />
+                <span>
+                  +<input type="text" name="data.effect.d6" value="{{data.effect.d6}}" placeholder="w6" title="w6" class="small" />w6
+                </span>
                 <select name="data.effect.modifier" title="Modifier">
                   {{#select data.effect.modifier}}
                     {{#each skill.dataSet.effectModifiers.list as |modifier|}}
@@ -147,7 +167,7 @@
                     {{/each}}
                   {{/select}}
                 </select>
-                {{expressionVariables computed.effect.variables}}
+                {{expressionVariables skill.effect.variables}}
               </div>
             </td>
           </tr>

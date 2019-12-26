@@ -1,14 +1,14 @@
 import ObjectUtils from './ObjectUtils.js'
-import { Parser } from './vendor/expr-eval/expr-eval.js'
-import {detectPropertyType} from './CharacterFormulas.js'
-import Skills from './Skills.js'
-import Attributes from './datasets/HumanoidAttributes.js'
-import Metrics from './datasets/HumanoidMetrics.js'
+import { Parser } from '../vendor/expr-eval/expr-eval.js'
+import {detectPropertyType} from '../CharacterFormulas.js'
+import Skills from '../Skills.js'
+import Attributes from '../datasets/HumanoidAttributes.js'
+import Metrics from '../datasets/HumanoidMetrics.js'
 
 export function analyzeExpression({ expression, path, defaultExpr = '' }) {
-  const result = { error: false, variables: [] }
+  const text = expression || ObjectUtils.try(...path) || defaultExpr
+  const result = { formula: text, error: false, variables: [] }
   try {
-    const text = expression || ObjectUtils.try(...path) || defaultExpr
     const expr = Parser.parse(text)
     result.variables = expr.variables()
   } catch (e) {
@@ -28,6 +28,7 @@ export function resolveEffectLabel(key, { defaultLabel = key } = {}) {
     type = detectPropertyType({key})
   } catch(e) {}
   if(type === 'skill') {
+    // TODO do this differently. The Skills object needs to go
     return ObjectUtils.try(Skills.getMap()[key.toLowerCase()], 'label', { default: defaultLabel })
   } else if(type === 'attribute') {
     return ObjectUtils.try(Attributes.map[key.toLowerCase()], 'label', { default: defaultLabel })
@@ -80,11 +81,4 @@ export function onDropItem(callback) {
     }
     return false;
   }
-}
-
-export function makeRoll(data) {
-  if (data.target == null && typeof data.value === 'number') {
-    data.target = Math.floor(data.value / 5)
-  }
-  return data
 }

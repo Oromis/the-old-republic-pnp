@@ -1,4 +1,4 @@
-import ObjectUtils from '../ObjectUtils.js'
+import ObjectUtils from '../util/ObjectUtils.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import Property from '../properties/Property.js'
 import { explainArmor, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'

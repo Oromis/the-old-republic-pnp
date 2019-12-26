@@ -1,4 +1,4 @@
-import { timeout } from './Timing.js'
+import { timeout } from '../util/Timing.js'
 
 export default class AutoSubmitSheet {
   constructor(parent) {
@@ -12,7 +12,7 @@ export default class AutoSubmitSheet {
 
     // Disable default submit logic (it doesn't update the entity immediately when jumping between inputs)
     this.parent._onUnfocus = () => {}
-    // TODO disable _onSubmit
+    this.parent._onSubmit = () => Promise.resolve({})
 
     this._filters = []
   }

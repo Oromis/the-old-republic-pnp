@@ -216,19 +216,19 @@
                 <td>
                   <div class="flex-row multi-item">
                     <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
-                    <span class="skill-key-col">{{formatAttrKey skill.data.key}}</span>
+                    <span class="skill-key-col">{{formatAttrKey skill.key}}</span>
                     <a class="flex-grow item-control item-edit" title="{{skill.name}} bearbeiten">{{skill.name}}</a>
                     <a class="roll-check" title="Probe werfen" data-check='{{json skill.check}}' data-label="{{skill.name}}">
                       <i class="fas fa-dice-d20"></i>
                     </a>
                   </div>
                 </td>
-                <td title="{{formatAttrLabel skill.data.attribute1}}">{{formatAttrKey skill.data.attribute1}}</td>
-                <td title="{{formatAttrLabel skill.data.attribute2}}">{{formatAttrKey skill.data.attribute2}}</td>
+                <td title="{{skill.attribute1.label}}">{{formatAttrKey skill.attribute1.key}}</td>
+                <td title="{{skill.attribute2.label}}">{{formatAttrKey skill.attribute2.key}}</td>
                 <td>
-                  <select name="skills.{{skill.data.key}}.data.tmpXpCategory">
-                    {{#select skill.xpCategory}}
-                      {{#each ../../computed.xpCategories as |category|}}
+                  <select name="skills.{{skill.key}}.data.tmpXpCategory">
+                    {{#select skill.currentXpCategory}}
+                      {{#each actor.dataSet.xpTable.categoryNames as |category|}}
                         <option value="{{category}}">{{category}}</option>
                       {{/each}}
                     {{/select}}
@@ -238,22 +238,22 @@
                 <td>
                   <div class="flex-row multi-item">
                     {{#if ../../data.creationMode.enabled}}
-                      {{#if skill.gained.canDowngrade}}
-                        <button type="button" class="small char change-skill-gained" data-skill="{{skill.data.key}}" data-action="-">-</button>
+                      {{#if skill.gained.length}}
+                        <button type="button" class="small char change-skill-gained" data-skill="{{skill.key}}" data-action="-">-</button>
                       {{else}}
                         <span class="char-button-placeholder"></span>
                       {{/if}}
                     {{/if}}
-                    <span class="skill-gained">{{skill.gained.value}}</span>
-                    {{#if skill.gained.upgradeCost}}
-                      <button type="button" class="small char change-skill-gained" title="{{skill.gained.upgradeCost}} XP" data-skill="{{skill.data.key}}" data-action="+">+</button>
+                    <span class="skill-gained">{{fallback skill.gained.length 0}}</span>
+                    {{#if skill.upgradeCost}}
+                      <button type="button" class="small char change-skill-gained" title="{{skill.upgradeCost}} XP" data-skill="{{skill.key}}" data-action="+">+</button>
                     {{else}}
                       <span class="char-button-placeholder"></span>
                     {{/if}}
                   </div>
                 </td>
                 <td>
-                  <input type="text" name="skills.{{skill.data.key}}.data.buff" value="{{skill.data.buff}}" />
+                  <input type="text" name="skills.{{skill.key}}.data.buff" value="{{skill.buff}}" />
                 </td>
                 <td title="{{formatExplanation skill.value.components}}">{{skill.value.total}}</td>
                 {{#if ../../data.creationMode.enabled}}
@@ -294,8 +294,8 @@
               <td>{{skill.duration.value}}</td>
               <td>
                 <div class="multi-item">
-                  {{#each skill.cost as |entry|}}
-                    <div class="flex-row multi-item {{errorClass when=entry.error}}">
+                  {{#each skill.cost as |costEntry costKey|}}
+                    <div class="flex-row multi-item {{errorClass when=costEntry.error}}">
                       <span>{{entry.value}} {{entry.postfix}}</span>
                       <a class="modify-metrics" title="{{formatCosts entry.costStructure}}" data-deduct="{{json entry.costStructure}}">
                         <i class="fas fa-minus-square"></i>
@@ -464,13 +464,13 @@
                 </div>
               {{/if}}
             {{/each}}
-            {{#if computed.evasion}}
+            {{#if actor.skills.aus}}
               <div class="weapon-slot">
                 <h4><strong>Ausweichen</strong></h4>
                 <div class="line-view multi-item">
                   <div class="flex-row multi-item flex-end">
                     <img src="icons/svg/daze.svg" class="table-icon" alt="Ausweichen" title="Ausweichen" />
-                    {{formatCheckView check=computed.evasion.check label='Ausweichen'}}
+                    {{formatCheckView check=actor.skills.aus.check label='Ausweichen'}}
                   </div>
                 </div>
               </div>

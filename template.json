@@ -75,8 +75,8 @@
         "attribute2": null,
         "xpCategory": null,
         "gained": [],
-        "xp": 0,
-        "buff": 0
+        "buff": 0,
+        "value": null
       }
     },
     "skill": {
@@ -90,8 +90,8 @@
         "type": ""
       },
       "cost": {
-        "perTurn": { "formula": ""},
-        "oneTime": { "formula": ""}
+        "perTurn": { "formula": "" },
+        "oneTime": { "formula": "" }
       },
       "effect": {
         "formula": "",

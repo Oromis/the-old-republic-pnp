@@ -1,5 +1,5 @@
 import Config from '../Config.js'
-import ObjectUtils from '../ObjectUtils.js'
+import ObjectUtils from '../util/ObjectUtils.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import { calcUpgradeCost, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
 import Property from '../properties/Property.js'
@@ -17,9 +17,8 @@ class HumanoidAttribute extends Property {
 class HumanoidAttributePrototype extends PropertyPrototype {
   constructor(key, staticData) {
     super(key, {
-      staticData,
+      staticData: { xpCategory: Config.character.attributes.xpCategory, ...staticData },
       template: {
-        xpCategory: Config.character.attributes.xpCategory,
         xp: 0,
         gp: 0,
         gained: [],

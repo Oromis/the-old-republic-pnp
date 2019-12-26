@@ -3,14 +3,20 @@ import HumanoidMetrics from './HumanoidMetrics.js'
 import HumanoidActor from '../actor/HumanoidActor.js'
 import ResistanceTypes from './ResistanceTypes.js'
 import HumanoidSpecies from './HumanoidSpecies.js'
-import XpTable from '../XpTable.js'
+import XpTable from './XpTable.js'
 import Skill from '../item/Skill.js'
 import SkillCategories from './SkillCategories.js'
 import ForceSkill from '../item/ForceSkill.js'
-import RangeTypes from '../RangeTypes.js'
+import RangeTypes from './RangeTypes.js'
 import DurationTypes from './DurationTypes.js'
-import EffectModifiers from '../EffectModifiers.js'
-import ForceDispositions from '../ForceDispositions.js'
+import EffectModifiers from './EffectModifiers.js'
+import ForceDispositions from './ForceDispositions.js'
+import ActorTypes from './ActorTypes.js'
+import OwnedSkill from '../item/OwnedSkill.js'
+
+function validObjectsFilter(arg) {
+  return arg != null && typeof arg === 'object'
+}
 
 export default Object.freeze({
   fromActorType(type) {
@@ -22,24 +28,26 @@ export default Object.freeze({
       species: HumanoidSpecies,
       resistances: ResistanceTypes,
       xpTable: XpTable,
+      skillCategories: SkillCategories,
     }
   },
 
-  fromItemType(type) {
+  fromItemType(type, { owned } = {}) {
     switch (type) {
       case 'skill':
         return {
-          delegate: Skill,
-          categories: SkillCategories,
+          delegates: [Skill, owned && OwnedSkill].filter(validObjectsFilter),
+          actorTypes: ActorTypes,
         }
 
       case 'force-skill':
         return {
           delegates: [
             Skill,
+            owned && OwnedSkill,
             ForceSkill,
-          ],
-          categories: SkillCategories,
+          ].filter(validObjectsFilter),
+          actorTypes: ActorTypes,
           rangeTypes: RangeTypes,
           durationTypes: DurationTypes,
           effectModifiers: EffectModifiers,
