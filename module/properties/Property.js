@@ -7,18 +7,15 @@ export default class Property {
     this._updaters = updaters
 
     // Make data available directly (without doing .data.foo, but directly .foo)
-    for (const [key,] of Object.entries(this.full)) {
-      if (!(key in this)) {
-        Object.defineProperty(this, key, {
-          get() { return this.full[key] }
-        })
-      }
-    }
+    this._makeDataAccessible()
   }
 
   update() {
     for (const updater of this._updaters) {
       updater(this._data, { entity: this._entity, property: this })
+    }
+    if (this._updaters.length > 0) {
+      this._makeDataAccessible()  // Some new keys may be present, add them to our properties
     }
     return this
   }
@@ -46,5 +43,15 @@ export default class Property {
 
   get key() {
     return this._key
+  }
+
+  _makeDataAccessible() {
+    for (const [key] of Object.entries(this.full)) {
+      if (!(key in this)) {
+        Object.defineProperty(this, key, {
+          get() { return this.full[key] }
+        })
+      }
+    }
   }
 }

@@ -4,8 +4,13 @@ import HumanoidActor from '../actor/HumanoidActor.js'
 import ResistanceTypes from './ResistanceTypes.js'
 import HumanoidSpecies from './HumanoidSpecies.js'
 import XpTable from '../XpTable.js'
-import RegularSkill from '../item/RegularSkill.js'
+import Skill from '../item/Skill.js'
 import SkillCategories from './SkillCategories.js'
+import ForceSkill from '../item/ForceSkill.js'
+import RangeTypes from '../RangeTypes.js'
+import DurationTypes from './DurationTypes.js'
+import EffectModifiers from '../EffectModifiers.js'
+import ForceDispositions from '../ForceDispositions.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -24,8 +29,21 @@ export default Object.freeze({
     switch (type) {
       case 'skill':
         return {
-          delegate: RegularSkill,
+          delegate: Skill,
           categories: SkillCategories,
+        }
+
+      case 'force-skill':
+        return {
+          delegates: [
+            Skill,
+            ForceSkill,
+          ],
+          categories: SkillCategories,
+          rangeTypes: RangeTypes,
+          durationTypes: DurationTypes,
+          effectModifiers: EffectModifiers,
+          dispositions: ForceDispositions,
         }
 
       default:

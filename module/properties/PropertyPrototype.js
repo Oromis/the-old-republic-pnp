@@ -1,4 +1,5 @@
 import Property from './Property.js'
+import ObjectUtils from '../ObjectUtils.js'
 
 export default class PropertyPrototype {
   constructor(key, { staticData, template, updaters = [], PropertyClass = Property }) {
@@ -19,7 +20,7 @@ export default class PropertyPrototype {
   }
 
   instantiate(entity, data) {
-    return new this.PropertyClass(this.key, entity, this.applyTemplate(data), {
+    return new this.PropertyClass(this.key, entity, this.applyTemplate(ObjectUtils.cloneDeep(data)), {
       staticData: this._staticData,
       updaters: this._updaters,
     })

@@ -5,14 +5,16 @@ import Skills from './Skills.js'
 import Attributes from './datasets/HumanoidAttributes.js'
 import Metrics from './datasets/HumanoidMetrics.js'
 
-export function analyzeExpression({ path, defaultExpr = '' }) {
+export function analyzeExpression({ expression, path, defaultExpr = '' }) {
+  const result = { error: false, variables: [] }
   try {
-    const text = ObjectUtils.try(...path) || defaultExpr
+    const text = expression || ObjectUtils.try(...path) || defaultExpr
     const expr = Parser.parse(text)
-    return { variables: expr.variables() }
+    result.variables = expr.variables()
   } catch (e) {
-    return { error: true }
+    result.error = true
   }
+  return result
 }
 
 export function analyzeDamageFormula({ path, defaultExpr = '' }) {

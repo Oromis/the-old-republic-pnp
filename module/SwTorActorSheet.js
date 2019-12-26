@@ -11,7 +11,7 @@ import {
 } from './CharacterFormulas.js'
 import Metrics from './datasets/HumanoidMetrics.js'
 import RangeTypes from './RangeTypes.js'
-import DurationTypes from './DurationTypes.js'
+import DurationTypes from './datasets/DurationTypes.js'
 import {Parser} from './vendor/expr-eval/expr-eval.js'
 import ForceDispositions from './ForceDispositions.js'
 import EffectModifiers from './EffectModifiers.js'

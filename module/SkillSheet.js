@@ -6,7 +6,7 @@ import Attributes from './datasets/HumanoidAttributes.js' // TODO make dynamic
 import SkillCategories from './datasets/SkillCategories.js'
 import XpTable from './XpTable.js'
 import RangeTypes from './RangeTypes.js'
-import DurationTypes from './DurationTypes.js'
+import DurationTypes from './datasets/DurationTypes.js'
 import ObjectUtils from './ObjectUtils.js'
 import EffectModifiers from './EffectModifiers.js'
 import ForceDispositions from './ForceDispositions.js'
@@ -47,21 +47,12 @@ export default class SkillSheet extends ItemSheet {
     data.computed = {}
 
     if (this.skill.isForceSkill) {
-      data.rangeTypes = RangeTypes.list
-      data.durationTypes = DurationTypes.list
-      data.effectModifiers = EffectModifiers.list
-      data.dispositions = ForceDispositions.list
       data.computed.hasRangeField = data.data.range.type === RangeTypes.map.m.key
-      data.computed.hasDurationField = data.data.duration.type === DurationTypes.map.rounds.key
-      if (data.computed.hasDurationField) {
-        data.computed.duration = analyzeExpression({ path: [data.data.duration, 'formula'] })
-      }
-      const durationType = ObjectUtils.try(DurationTypes.map, ObjectUtils.try(data.data.duration, 'type'), { default: DurationTypes.map.instant })
-      data.computed.hasPerTurnCost = !!durationType.hasPerTurnCost
+      data.computed.hasPerTurnCost = !!this.skill.duration.hasPerTurnCost
       if (data.computed.hasPerTurnCost) {
         data.computed.perTurnCost = analyzeExpression({ path: [data.data.cost, 'perTurn', 'formula'], defaultExpr: '0' })
       }
-      data.computed.hasOneTimeCost = !!durationType.hasOneTimeCost
+      data.computed.hasOneTimeCost = !!this.skill.duration.hasOneTimeCost
       if (data.computed.hasOneTimeCost) {
         data.computed.oneTimeCost = analyzeExpression({ path: [data.data.cost, 'oneTime', 'formula'], defaultExpr: '0' })
       }

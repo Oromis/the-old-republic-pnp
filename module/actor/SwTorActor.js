@@ -1,11 +1,10 @@
 import DataSets from '../datasets/DataSets.js'
 import ObjectUtils from '../ObjectUtils.js'
+import DataCache from '../util/DataCache.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
     super(...args)
-
-    this._categorizedItemStore = null
 
     this._callDelegate('afterConstruct')
   }
@@ -37,14 +36,14 @@ export default class SwTorActor extends Actor {
 
   _onUpdate(...args) {
     const res = super._onUpdate(...args)
-    this._categorizedItemStore = null
+    this._cache.clear()
     return res
   }
 
   _getItems(...args) {
     // _getItems() re-generates the array of owned items. Reset the cache in this case.
     const res = super._getItems(...args)
-    this._categorizedItemStore = null
+    this._cache && this._cache.clearKey('categorizedItems')
     return res
   }
 
@@ -89,20 +88,24 @@ export default class SwTorActor extends Actor {
   }
 
   get dataSet() {
-    if (this._dataSetStore == null) {
-      this._dataSetStore = DataSets.fromActorType(this.type)
-    }
-    return this._dataSetStore
+    return this._cache.lookup('dataSet', () => DataSets.fromActorType(this.type))
   }
 
   // ---------------------------------------------------------------------
   // Private stuff
   // ---------------------------------------------------------------------
 
+  get _cache() {
+    if (this._cacheStore == null) {
+      this._cacheStore = new DataCache()
+    }
+    return this._cacheStore
+  }
+
   get _categorizedItems() {
-    if (this._categorizedItemStore == null) {
+    return this._cache.lookup('categorizedItems', () => {
       // Re-calculate cached lists
-      const store = this._categorizedItemStore = {
+      const categories = {
         skills: [],
         forceSkills: [],
         trainings: [],
@@ -112,23 +115,23 @@ export default class SwTorActor extends Actor {
       }
       this.data.items.forEach(item => {
         if (item.type === 'skill' || item.type === 'force-skill') {
-          store.skills.push(item)
+          categories.skills.push(item)
           if (item.type === 'force-skill') {
-            store.forceSkills.push(item)
+            categories.forceSkills.push(item)
           }
         } else if(item.type === 'training') {
-          store.trainings.push(item)
+          categories.trainings.push(item)
         } else {
-          store.inventory.push(item)
+          categories.inventory.push(item)
           if (item.isEquipped) {
-            store.equippedItems.push(item)
+            categories.equippedItems.push(item)
           } else {
-            store.freeItems.push(item)
+            categories.freeItems.push(item)
           }
         }
       })
-    }
-    return this._categorizedItemStore
+      return categories
+    })
   }
 
   _callDelegate(callbackName, ...args) {
@@ -136,14 +139,6 @@ export default class SwTorActor extends Actor {
     if (typeof delegate[callbackName] === 'function') {
       return delegate[callbackName].apply(this, args)
     }
-  }
-
-  _defineDataAccessor(key) {
-    Object.defineProperty(this, key, {
-      get() {
-        return this.data.data[key]
-      }
-    })
   }
 
   _getItemCollectionProxy(items) {
@@ -162,6 +157,7 @@ export default class SwTorActor extends Actor {
   _getPropertyCollectionProxy(key) {
     return new Proxy(this, {
       get(actor, prop) {
+        // Cache?
         if (prop === 'list') {
           // Array-based access
           return actor.dataSet[key].list.map(a => a.instantiate(actor, actor.data.data[key][a.key]))

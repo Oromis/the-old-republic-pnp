@@ -1,5 +1,6 @@
 import { calcFreeXp, calcGp, calcTotalXp } from '../CharacterFormulas.js'
 import Config from '../Config.js'
+import { defineDataAccessor, defineEnumAccessor } from '../util/EntityUtils.js'
 
 /**
  * Functionality for humanoid characters. "humanoid" refers to intelligent life forms, it has
@@ -14,19 +15,13 @@ import Config from '../Config.js'
  */
 export default {
   beforeConstruct() {
-    this._defineDataAccessor('xp')
-    this._defineDataAccessor('gp')
+    defineDataAccessor(this, 'xp')
+    defineDataAccessor(this, 'gp')
+    defineEnumAccessor(this, 'species', { dataSetKey: 'species' })
 
     Object.defineProperty(this, 'xpFromGp', {
       get() {
         return this.xp.gp * Config.character.gpToXpRate
-      }
-    })
-
-    Object.defineProperty(this, 'species', {
-      get() {
-        const result = this.dataSet.species.map[this.data.data.species]
-        return result || this.dataSet.species.map[this.dataSet.species.default]
       }
     })
   },

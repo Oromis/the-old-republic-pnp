@@ -90,7 +90,7 @@
                 {{/if}}
                 <select name="data.range.type">
                   {{#select data.range.type}}
-                    {{#each rangeTypes as |type|}}
+                    {{#each skill.dataSet.rangeTypes.list as |type|}}
                       <option value="{{type.key}}">{{type.label}}</option>
                     {{/each}}
                   {{/select}}
@@ -101,18 +101,18 @@
           <tr>
             <td class="align-right">Wirkungsdauer</td>
             <td>
-              <div class="flex-row multi-item {{errorClass when=computed.duration.error}}">
-                {{#if computed.hasDurationField}}
+              <div class="flex-row multi-item {{errorClass when=skill.duration.error}}">
+                {{#if skill.duration.hasFormula}}
                   <input type="text" name="data.duration.formula" value="{{data.duration.formula}}" placeholder="[n]" class="formula" />
                 {{/if}}
                 <select name="data.duration.type">
                   {{#select data.duration.type}}
-                    {{#each durationTypes as |type|}}
+                    {{#each skill.dataSet.durationTypes.list as |type|}}
                       <option value="{{type.key}}">{{type.label}}</option>
                     {{/each}}
                   {{/select}}
                 </select>
-                {{expressionVariables computed.duration.variables}}
+                {{expressionVariables skill.duration.variables}}
               </div>
             </td>
           </tr>
@@ -142,7 +142,7 @@
                 <input type="text" name="data.effect.d6" value="{{data.effect.d6}}" placeholder="w6" title="w6" />
                 <select name="data.effect.modifier" title="Modifier">
                   {{#select data.effect.modifier}}
-                    {{#each effectModifiers as |modifier|}}
+                    {{#each skill.dataSet.effectModifiers.list as |modifier|}}
                       <option value="{{modifier.key}}">{{modifier.label}}</option>
                     {{/each}}
                   {{/select}}
@@ -157,7 +157,7 @@
               <div class="flex-row multi-item">
                 <select name="data.disposition">
                   {{#select data.disposition}}
-                    {{#each dispositions as |disposition|}}
+                    {{#each skill.dataSet.dispositions.list as |disposition|}}
                       <option value="{{disposition.key}}">{{disposition.label}}</option>
                     {{/each}}
                   {{/select}}
