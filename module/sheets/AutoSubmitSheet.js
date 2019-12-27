@@ -1,18 +1,15 @@
 import { timeout } from '../util/Timing.js'
+import Mixin from './Mixin.js'
 
-export default class AutoSubmitSheet {
+export default class AutoSubmitSheet extends Mixin {
   constructor(parent) {
-    this.parent = parent
+    super(parent)
 
-    const parentActivateListeners = this.parent.activateListeners
-    this.parent.activateListeners = (...args) => {
-      this.activateListeners(...args)
-      parentActivateListeners.call(this.parent, ...args)
-    }
+    this.interceptMethod('activateListeners', this.activateListeners)
 
     // Disable default submit logic (it doesn't update the entity immediately when jumping between inputs)
-    this.parent._onUnfocus = () => {}
-    this.parent._onSubmit = () => Promise.resolve({})
+    this.interceptMethod('_onUnfocus', () => false)
+    this.interceptMethod('_onSubmit', () => Promise.resolve({}))
 
     this._filters = []
   }

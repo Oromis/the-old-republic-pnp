@@ -67,39 +67,6 @@
         </tr>
       </tbody>
     </table>
-    <table>
-      <thead>
-        <tr>
-          <th>Effekte</th>
-          <th class="skill-key-col"></th>
-          <th class="value-col">Wert</th>
-          <th class="icon-col"></th>
-        </tr>
-      </thead>
-      <tbody>
-      {{#each data.effects as |effect index|}}
-        <tr data-effect-key="{{effect.key}}">
-          <td>{{effect.label}}</td>
-          <td>{{effect.key}}</td>
-          <td>
-            <input type="text" name="data.effects.{{index}}.value" value="{{effect.value}}" />
-          </td>
-          <td>
-            <a class="effect-control effect-delete" title="Löschen"><i class="fas fa-trash"></i></a>
-          </td>
-        </tr>
-      {{/each}}
-      <tr>
-        <td>
-          <div class="drop-zone">
-            <span>Drop skills here!</span>
-          </div>
-        </td>
-        <td><input type="text" placeholder="Key" class="effect-new effect-new-key" name="data.newKey" value="{{data.newKey}}" /></td>
-        <td><input type="text" placeholder="0" class="effect-new effect-new-value" name="data.newValue" value="{{data.newValue}}" /></td>
-        <td><a class="effect-control effect-add" title="Hinzufuegen"><i class="fas fa-plus"></i></a></td>
-      </tr>
-      </tbody>
-    </table>
+    {{> "systems/sw-tor/templates/effects-editor.html" item=item newEffect=newEffect predefinedEffects=predefinedEffects}}
   </section>
 </form>

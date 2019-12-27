@@ -141,7 +141,6 @@
     },
     "wearable": {
       "templates": ["described", "physical", "equippable"],
-      "armor": 0,
       "encumberance": 0
     },
     "consumable": {

@@ -2,6 +2,9 @@ import PropertyPrototype from '../properties/PropertyPrototype.js'
 import ObjectUtils from './ObjectUtils.js'
 import { Parser } from '../vendor/expr-eval/expr-eval.js'
 import { roundDecimal } from './MathUtils.js'
+import { detectPropertyType } from '../CharacterFormulas.js'
+import Attributes from '../datasets/AllAttributes.js'
+import Metrics from '../datasets/AllMetrics.js'
 
 export function defineDataAccessor(object, key, { configurable = false } = {}) {
   Object.defineProperty(object, key, {
@@ -13,13 +16,13 @@ export function defineDataAccessor(object, key, { configurable = false } = {}) {
 }
 
 export function defineEnumAccessor(
-  object, key, { dataKey = key, dataSetKey = key + 's', getEnumData, instanceDataKey, configurable = false } = {}
+  object, key, { dataKey = key, getKey, dataSetKey = key + 's', getEnumData, instanceDataKey, configurable = false } = {}
 ) {
   Object.defineProperty(object, key, {
     configurable,
     get() {
       return this._cache.lookup(key, () => {
-        const key = ObjectUtils.try(this.data.data, ...dataKey.split('.'))
+        const key = typeof getKey === 'function' ? getKey() : ObjectUtils.try(this.data.data, ...dataKey.split('.'))
         const enumData = typeof getEnumData === 'function' ? getEnumData() : this.dataSet[dataSetKey]
         let result = enumData.map[key]
         if (result == null) {
@@ -89,8 +92,16 @@ export function evalSkillExpression(expr, skill, { vars, round }) {
   return { value, formulaError, evalError, variables, formula: expr }
 }
 
-export default {
-  defineDataAccessor,
-  defineEnumAccessor,
-  defineGetter,
+export function resolveGlobalProperty(key) {
+  const type = detectPropertyType({ key }, { throwOnError: false })
+  switch (type) {
+    case 'skill':
+      // Look for a global skill item with the given key
+      return game.items.entities.find(entity => entity.key === key && (entity.type || '').indexOf('skill') !== -1)
+    case 'attribute':
+      return Attributes.map[key.toLowerCase()]
+    case 'metric':
+      return Metrics.map[key.toLowerCase()]
+  }
+  return null
 }

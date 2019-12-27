@@ -1,7 +1,7 @@
 import ObjectUtils from '../util/ObjectUtils.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import Property from '../properties/Property.js'
-import { explainArmor, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
+import { explainPropertyValue } from '../CharacterFormulas.js'
 
 function resistFlat(damage) {
   return { damage: Math.max(0, damage - this.value.total) }
@@ -36,11 +36,7 @@ class ResistanceTypePrototype extends PropertyPrototype {
       },
       updaters: [
         (data, { entity, property }) => {
-          if (property.key === 'r_armor') {
-            data.value = explainArmor(entity)
-          } else {
-            data.value = explainPropertyValue(entity, property)
-          }
+          data.value = explainPropertyValue(entity, property)
         }
       ],
       PropertyClass: ResistanceTypeInstance,

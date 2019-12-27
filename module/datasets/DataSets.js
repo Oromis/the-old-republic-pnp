@@ -15,6 +15,14 @@ import ActorTypes from './ActorTypes.js'
 import OwnedSkill from '../item/OwnedSkill.js'
 import OwnedForceSkill from '../item/OwnedForceSkill.js'
 import { validObjectsFilter } from '../util/ObjectUtils.js'
+import ItemTypes from '../ItemTypes.js'
+import PhysicalItem from '../item/PhysicalItem.js'
+import Weapon from '../item/Weapon.js'
+import RangedWeapon from '../item/RangedWeapon.js'
+import DamageTypes from '../DamageTypes.js'
+import SlotTypes from '../SlotTypes.js'
+import ItemWithEffects from '../item/ItemWithEffects.js'
+import Wearable from '../item/Wearable.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -53,9 +61,28 @@ export default Object.freeze({
           dispositions: ForceDispositions,
         }
 
+      case 'training':
+        return {
+          delegates: [
+            ItemWithEffects,
+          ],
+        }
+
       default:
         // Regular inventory item
-        return {}
+        const itemType = ItemTypes.map[type] || ItemTypes.map[ItemTypes.default]
+        return {
+          delegates: [
+            PhysicalItem,
+            itemType.isWeapon && Weapon,
+            itemType.isRangedWeapon && RangedWeapon,
+            itemType.isWearable && Wearable,
+            itemType.hasEffects && ItemWithEffects,
+          ].filter(validObjectsFilter),
+          itemTypes: ItemTypes,
+          damageTypes: DamageTypes,
+          slotTypes: SlotTypes,
+        }
     }
   }
 })

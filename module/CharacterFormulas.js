@@ -1,11 +1,9 @@
 import Config from './Config.js'
 import ObjectUtils from './util/ObjectUtils.js'
 import Species from './datasets/HumanoidSpecies.js'
-import Attributes, {attrValue} from './datasets/HumanoidAttributes.js'
 import XpTable from './datasets/XpTable.js'
-import Metrics from './datasets/HumanoidMetrics.js'
 
-export function detectPropertyType(property) {
+export function detectPropertyType(property, { throwOnError = true } = {}) {
   const key = property.key
   if (key.startsWith('r_')) {
     return 'resistance'
@@ -18,7 +16,11 @@ export function detectPropertyType(property) {
       return 'skill'
     }
   } else {
-    throw new Error(`Unknown property type: ${key}`)
+    if (throwOnError) {
+      throw new Error(`Unknown property type: ${key}`)
+    } else {
+      return null
+    }
   }
 }
 
@@ -179,16 +181,5 @@ export function calcUpgradeCost(actor, property, { max } = {}) {
 }
 
 export function calcMaxInventoryWeight(actor) {
-  return (attrValue(actor, 'kk') + attrValue(actor, 'ko')) / 2
-}
-
-export function explainArmor(actor) {
-  const components = [
-    ...actor.equippedItems.filter(item => item.data.armor != null && item.data.armor !== 0).map(item => ({ label: item.name, value: item.data.armor })),
-    explainSpeciesMod(actor, 'r_armor')
-  ].filter(mod => mod.value !== 0)
-  return {
-    total: components.reduce((acc, cur) => acc + (+cur.value), 0),
-    components
-  }
+  return (actor.attrValue('kk') + actor.attrValue('ko')) / 2
 }

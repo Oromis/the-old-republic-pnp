@@ -1,5 +1,6 @@
 import DataSets from '../datasets/DataSets.js'
 import DataCache from '../util/DataCache.js'
+import ObjectUtils from '../util/ObjectUtils.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
@@ -47,6 +48,10 @@ export default class SwTorActor extends Actor {
 
   get attributes() {
     return this._getPropertyCollectionProxy('attributes')
+  }
+
+  attrValue(key) {
+    return ObjectUtils.try(this.attributes[key], 'value', 'total', { default: 0 })
   }
 
   get metrics() {

@@ -1,6 +1,5 @@
 import Config from '../Config.js'
 import ObjectUtils from '../util/ObjectUtils.js'
-import {attrValue} from './HumanoidAttributes.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import { calcUpgradeCost, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
 import Property from '../properties/Property.js'
@@ -49,7 +48,7 @@ const LeP = new HumanoidMetricsPrototype('LeP', {
   xpCategory: Config.character.LeP.xpCategory,
   backgroundColor: '#ffaaaa',
   calcBaseValue(actor) {
-    return Math.round((attrValue(actor, 'ko') * 2 + attrValue(actor, 'kk')) / 3)
+    return Math.round((actor.attrValue('ko') * 2 + actor.attrValue('kk')) / 3)
   }
 })
 const AuP = new HumanoidMetricsPrototype('AuP', {
@@ -58,7 +57,7 @@ const AuP = new HumanoidMetricsPrototype('AuP', {
   xpCategory: Config.character.AuP.xpCategory,
   backgroundColor: '#aaffaa',
   calcBaseValue(actor) {
-    return Math.round((attrValue(actor, 'ko') + attrValue(actor, 'kk') + attrValue(actor, 'wk')) * 0.66)
+    return Math.round((actor.attrValue('ko') + actor.attrValue('kk') + actor.attrValue('wk')) * 0.66)
   }
 })
 const MaP = new HumanoidMetricsPrototype('MaP', {
@@ -68,7 +67,7 @@ const MaP = new HumanoidMetricsPrototype('MaP', {
   backgroundColor: '#e3caff',
   fallbackCostOptions: [AuP.key, LeP.key],  // If the force user is out of MaP, costs will be paid in AuP and then LeP
   calcBaseValue(actor) {
-    return Math.round((attrValue(actor, 'ch') + attrValue(actor, 'in') + attrValue(actor, 'kl') + attrValue(actor, 'wk')) / 2)
+    return Math.round((actor.attrValue('ch') + actor.attrValue('in') + actor.attrValue('kl') + actor.attrValue('wk')) / 2)
   }
 })
 const EnP = new HumanoidMetricsPrototype('EnP', {

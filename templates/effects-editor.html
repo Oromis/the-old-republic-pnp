@@ -1,0 +1,59 @@
+<table>
+  <thead>
+    <tr>
+      <th>Effekte</th>
+      <th class="skill-key-col"></th>
+      <th class="value-col">Wert</th>
+      <th class="icon-col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each item.effects as |effect index|}}
+      <tr data-effect-key="{{effect.key}}">
+        <td>{{effect.label}}</td>
+        <td>{{effect.key}}</td>
+        <td>
+          <input type="text" name="data.effects.{{index}}.value" value="{{effect.value}}" />
+        </td>
+        <td>
+          <a class="delete-effect" data-index="{{index}}" title="{{effect.label}} löschen">
+            <i class="fas fa-trash"></i>
+          </a>
+        </td>
+      </tr>
+    {{/each}}
+    <tr>
+      <td>
+        <div class="flex-row multi-item">
+          <div class="drop-zone flex-grow">
+            <span>Drop skills here!</span>
+          </div>
+          <select name="newEffect.type" class="small">
+            {{#select newEffect.type}}
+              <option value="">[Manuell]</option>
+              {{#each predefinedEffects as |effectGroup|}}
+                <optgroup label="{{effectGroup.label}}">
+                  {{#each effectGroup.properties as |effect|}}
+                    <option value="{{effect.key}}">{{effect.label}}</option>
+                  {{/each}}
+                </optgroup>
+              {{/each}}
+            {{/select}}
+          </select>
+          {{#unless newEffect.type}}
+            <input type="text" name="newEffect.label" value="{{newEffect.label}}" placeholder="Name" class="formula flex-no-shrink" />
+          {{/unless}}
+        </div>
+      </td>
+      <td>
+        {{#unless newEffect.type}}
+          <input type="text" name="newEffect.key" value="{{newEffect.key}}" placeholder="Key" class="submit-effect" />
+        {{/unless}}
+      </td>
+      <td>
+        <input type="text" name="newEffect.value" value="{{newEffect.value}}" placeholder="Wert" data-dtype="Number" class="submit-effect" />
+      </td>
+      <td><a class="new-effect" title="Effekt anlegen"><i class="fas fa-plus"></i></a></td>
+    </tr>
+  </tbody>
+</table>

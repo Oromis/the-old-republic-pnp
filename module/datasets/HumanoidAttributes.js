@@ -4,10 +4,6 @@ import PropertyPrototype from '../properties/PropertyPrototype.js'
 import { calcUpgradeCost, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
 import Property from '../properties/Property.js'
 
-export function attrValue(actor, attr) {
-  return ObjectUtils.try(actor.attributes[attr], 'value', 'total', { default: 0 })
-}
-
 class HumanoidAttribute extends Property {
   get upgradeCost() {
     return calcUpgradeCost(this._entity, this, { max: this._entity.xp.free })
@@ -71,5 +67,4 @@ const list = [
 ]
 
 const map = ObjectUtils.asObject(list, 'key')
-
 export default Object.freeze({ list, map })

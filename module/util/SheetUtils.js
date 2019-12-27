@@ -1,9 +1,6 @@
 import ObjectUtils from './ObjectUtils.js'
 import { Parser } from '../vendor/expr-eval/expr-eval.js'
-import {detectPropertyType} from '../CharacterFormulas.js'
-import Skills from '../Skills.js'
-import Attributes from '../datasets/HumanoidAttributes.js'
-import Metrics from '../datasets/HumanoidMetrics.js'
+import { resolveGlobalProperty } from './EntityUtils.js'
 
 export function analyzeExpression({ expression, path, defaultExpr = '' }) {
   const text = expression || ObjectUtils.try(...path) || defaultExpr
@@ -17,25 +14,14 @@ export function analyzeExpression({ expression, path, defaultExpr = '' }) {
   return result
 }
 
-export function analyzeDamageFormula({ path, defaultExpr = '' }) {
-  const text = ObjectUtils.try(...path) || defaultExpr
-  return { error: !text.match(/^\s*\d+\s*(\+\s*\d+[wd]\d+(\/\d+)?\s*)?$/g) }
+export function analyzeDamageFormula({ expression, path, defaultExpr = '' }) {
+  const text = expression != null ? expression : (ObjectUtils.try(...path) || defaultExpr)
+  return { formulaError: !text.match(/^\s*\d+\s*(\+\s*\d+[wd]\d+(\/\d+)?\s*)?$/g) }
 }
 
 export function resolveEffectLabel(key, { defaultLabel = key } = {}) {
-  let type = ''
-  try {
-    type = detectPropertyType({key})
-  } catch(e) {}
-  if(type === 'skill') {
-    // TODO do this differently. The Skills object needs to go
-    return ObjectUtils.try(Skills.getMap()[key.toLowerCase()], 'label', { default: defaultLabel })
-  } else if(type === 'attribute') {
-    return ObjectUtils.try(Attributes.map[key.toLowerCase()], 'label', { default: defaultLabel })
-  } else if(type === 'metric') {
-    return ObjectUtils.try(Metrics.map[key], 'label', { default: defaultLabel })
-  }
-  return defaultLabel
+  const property = resolveGlobalProperty(key)
+  return ObjectUtils.try(property, 'label', { default: defaultLabel })
 }
 
 export function onDragOver() {

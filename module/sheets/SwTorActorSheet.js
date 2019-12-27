@@ -68,21 +68,12 @@ function processDeltaValue(text, oldValue) {
   return oldValue
 }
 
-function evalExpression(expr, { vars }) {
-  try {
-    const parsed = Parser.parse(expr)
-    return parsed.evaluate(vars)
-  } catch (e) {
-    console.warn(`Evaluating ${expr} failed: `, e)
-  }
-}
-
 /**
  * Extend the basic ActorSheet with some very simple modifications
  */
 export default class SwTorActorSheet extends ActorSheet {
   constructor(...args) {
-    super(...args);
+    super(...args)
 
     /**
      * Keep track of the currently active sheet tab
@@ -285,10 +276,6 @@ export default class SwTorActorSheet extends ActorSheet {
           2
         ),
         max: calcMaxInventoryWeight(computedActorData),
-      },
-      flags: {
-        hasGp: this.actor.gp.value > 0,
-        canRefundXpToGp: this.actor.xp.gp > 0,
       },
       // TODO
       // damageIncoming: {

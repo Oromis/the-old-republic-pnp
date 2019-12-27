@@ -1,7 +1,7 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import CharacterDispositions from '../datasets/CharacterDispositions.js'
-import ObjectUtils from '../util/ObjectUtils.js'
 import {onDragOver, onDropItem, resolveEffectLabel} from '../util/SheetUtils.js'
+import SheetWithEffects from './SheetWithEffects.js'
 
 export function describeTraining(training) {
   let desc = 'GP: '.concat( training.data.gp)
@@ -13,25 +13,10 @@ export function describeTraining(training) {
 
 export default class TrainingSheet extends ItemSheet {
   constructor(...args) {
-    super(...args);
-
-    /**
-     * Keep track of the currently active sheet tab
-     * @type {string}
-     */
-    this._sheetTab = "description"
+    super(...args)
 
     const autoSubmit = new AutoSubmitSheet(this)
-    autoSubmit.addFilter('data.effects.*.value', (obj, { name, path }) => {
-      const effects = ObjectUtils.cloneDeep(this.item.data.data.effects || [])
-      const index = +path[2]
-      if (effects.length >= index) {
-        effects[index].value = +obj[name]
-        return { 'data.effects': effects }
-      } else {
-        return {}
-      }
-    })
+    new SheetWithEffects(this, { autoSubmit })
   }
 
   /**
@@ -62,6 +47,7 @@ export default class TrainingSheet extends ItemSheet {
     if(data.data.baseTraining) {
       data.baseTrainingEffects = describeTraining(data.data.baseTraining)
     }
+    data.item = this.item
     return data
   }
 
@@ -74,46 +60,12 @@ export default class TrainingSheet extends ItemSheet {
 	activateListeners(html) {
     super.activateListeners(html)
 
-    // Activate tabs
-    let tabs = html.find('.tabs')
-    let initial = this._sheetTab
-    new Tabs(tabs, {
-      initial: initial,
-      callback: clicked => this._sheetTab = clicked.data("tab")
-    });
-
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return
 
-    // Make the Training sheet droppable for items
+    // Make the Item sheet droppable for other items
     this.form.ondragover = onDragOver()
-    this.form.ondrop = onDropItem(this.handleDrop)
-
-    // Delete Effect
-    html.find('.effect-delete').click(ev => {
-      const li = $(ev.currentTarget).parents("[data-effect-key]")
-      this.deleteEffect(li.data("effectKey"))
-      li.slideUp(200, () => this.render(false))
-    });
-
-    // Add New Effect
-    html.find('.effect-add').click(ev => {
-      const li = $(ev.currentTarget).parents("[data-effect-key]")
-      let key = html.find('.effect-new-key')[0].value
-      let value = html.find('.effect-new-value')[0].value
-      this.addEffect({key, value})
-      this.item.update({
-        'data.newKey': '',
-        'data.newValue': '',
-      })
-      this.render(false)
-    });
-
-    html.find('.effect-new').on('keypress', e => {
-      if (e.key === 'Enter') {
-        html.find('.effect-add').click()
-      }
-    })
+    this.form.ondrop = onDropItem(this._handleDrop)
 
     // Delete BaseTraining Item
     html.find('.baseTraining-delete').click(ev => {
@@ -131,34 +83,18 @@ export default class TrainingSheet extends ItemSheet {
    * This defines how to update the subject of the form when the form is submitted
    * @private
    */
-  _updateObject(event, formData) {
+  _updateObject() {
     return Promise.resolve()
   }
 
-  addEffect(newEffect) {
-    if(!newEffect.key || newEffect.key.length < 1)
-      return
-    if(!newEffect.value)
-      newEffect.value = 0
-    if(!newEffect.label)
-      newEffect.label = resolveEffectLabel(newEffect.key)
-    const itemData = this.item.data.data
-    this.item.update({ 'data.effects': [...(itemData.effects || []), ObjectUtils.pick(newEffect, ['key', 'label', 'value'])] })
-  }
-
-  deleteEffect(key) {
-    this.item.update({
-      'data.effects': ( this.item.data.data.effects || []).filter((v, i) => v.key !== key),
-    })
-  }
-
-  handleDrop = (type, item) => {
+  _handleDrop = (type, item) => {
     if(type === 'training') {
       this.item.update({
         'data.baseTraining': item
       })
-    } else if(item.name && item.data.key) {
-      this.addEffect({label: item.name, key: item.data.key})
+      return true
+    } else {
+      return false
     }
   }
 }

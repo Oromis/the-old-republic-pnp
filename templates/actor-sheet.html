@@ -60,10 +60,10 @@
             <span title="Generierungspunkte">GP</span>
             <span class="flex-grow">{{actor.gp.value}}</span>
             {{#if data.creationMode.enabled}}
-              {{#if computed.flags.hasGp}}
+              {{#if actor.gp.value}}
                 <button type="button" class="small gp-to-xp">GP → XP</button>
               {{/if}}
-              {{#if computed.flags.canRefundXpToGp}}
+              {{#if actor.xp.gp}}
                 <button type="button" class="small xp-to-gp">GP ← XP</button>
               {{/if}}
             {{/if}}
@@ -583,7 +583,7 @@
                     <td title="Schaden">{{item.data.damage.formula}}</td>
                   {{/if}}
                   {{#if category.isWearable}}
-                    <td title="Rüstung">{{item.data.armor}}</td>
+                    <td title="Rüstung">{{item.armor}}</td>
                     <td title="Behinderung">{{item.data.encumberance}}</td>
                   {{/if}}
                   {{#if category.isEquippable}}

@@ -4,6 +4,7 @@ import { defineDataAccessor, defineEnumAccessor, defineGetter } from '../util/En
 export default {
   beforeConstruct() {
     defineDataAccessor(this, 'key')
+    defineGetter(this, 'label', function () { return this.name })
     defineDataAccessor(this, 'xpCategory')
     defineDataAccessor(this, 'category')
 
@@ -20,5 +21,12 @@ export default {
 
     defineEnumAccessor(this, 'attribute1', { getEnumData: () => this.actorDataSet.attributes, configurable: true })
     defineEnumAccessor(this, 'attribute2', { getEnumData: () => this.actorDataSet.attributes, configurable: true })
+
+    this._addUpdateFilter('data.key', data => {
+      // Ensures that skill keys are stored as lowercase internally
+      if (typeof data.data.key === 'string') {
+        data.data.key = data.data.key.toLowerCase()
+      }
+    })
   }
 }

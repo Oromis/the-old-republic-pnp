@@ -17,7 +17,7 @@
   <section class="sheet-body">
     <table>
       <tbody>
-        {{#if flags.isOwned}}
+        {{#if item.isOwned}}
           <tr>
             <td class="align-right label-col">Anzahl</td>
             <td>
@@ -37,21 +37,21 @@
             <input type="text" name="data.price" value="{{data.price}}" data-dtype="Number" />
           </td>
         </tr>
-        {{#if flags.isWeapon}}
+        {{#if item.itemType.isWeapon}}
           <tr>
             <td class="align-right">Waffenfähigkeit</td>
             <td>
               <div class="flex-row multi-item">
-                <input type="text" name="data.skill" value="{{computed.skill.key}}" />
-                <span>{{computed.skill.label}}</span>
+                <input type="text" name="data.skill" value="{{item.skill.key}}" class="uppercase" />
+                <span>{{item.skill.name}}</span>
               </div>
             </td>
           </tr>
           <tr>
             <td class="align-right">Schaden</td>
             <td>
-              <div class="flex-row multi-item {{errorClass when=computed.damage.error}}">
-                <input type="text" name="data.damage.formula" value="{{data.damage.formula}}" class="formula" />
+              <div class="flex-row multi-item {{errorClass when=item.damage.formulaError}}">
+                <input type="text" name="data.damage.formula" value="{{item.damage.formula}}" class="formula" />
               </div>
             </td>
           </tr>
@@ -60,7 +60,7 @@
             <td>
               <select name="data.damageType">
                 {{#select data.damageType}}
-                  {{#each damageTypes as |type|}}
+                  {{#each item.dataSet.damageTypes.list as |type|}}
                     <option value="{{type.key}}">{{type.label}}</option>
                   {{/each}}
                 {{/select}}
@@ -68,7 +68,7 @@
             </td>
           </tr>
         {{/if}}
-        {{#if flags.isMeleeWeapon}}
+        {{#if item.itemType.isMeleeWeapon}}
           <tr title="Stellt ein, ob sich die Körperkraft des Kämpfers auf den Schaden auswirkt">
             <td class="align-right">Körperkraftmodifikator</td>
             <td>
@@ -76,33 +76,27 @@
             </td>
           </tr>
         {{/if}}
-        {{#if flags.isRangedWeapon}}
+        {{#if item.itemType.isRangedWeapon}}
           <tr>
             <td class="align-right">Präzision</td>
             <td>
-              <div class="flex-row multi-item {{errorClass when=computed.precision.error}}">
+              <div class="flex-row multi-item {{errorClass when=item.precision.formulaError}}">
                 <input type="text" name="data.precision.formula" value="{{data.precision.formula}}" class="formula" />
-                {{expressionVariables computed.precision.variables}}
+                {{expressionVariables item.precision.variables}}
               </div>
             </td>
           </tr>
           <tr>
             <td class="align-right">Projektilenergie</td>
             <td>
-              <div class="flex-row multi-item {{errorClass when=computed.projectileEnergy.error}}">
+              <div class="flex-row multi-item {{errorClass when=item.projectileEnergy.formulaError}}">
                 <input type="text" name="data.projectileEnergy.formula" value="{{data.projectileEnergy.formula}}" class="formula" />
-                {{expressionVariables computed.projectileEnergy.variables}}
+                {{expressionVariables item.projectileEnergy.variables}}
               </div>
             </td>
           </tr>
         {{/if}}
-        {{#if flags.isWearable}}
-          <tr>
-            <td class="align-right">Rüstung</td>
-            <td>
-              <input type="text" name="data.armor" value="{{data.armor}}" data-dtype="Number" />
-            </td>
-          </tr>
+        {{#if item.itemType.isWearable}}
           <tr>
             <td class="align-right">Behinderung</td>
             <td>
@@ -110,7 +104,7 @@
             </td>
           </tr>
         {{/if}}
-        {{#if flags.isEquippable}}
+        {{#if item.itemType.isEquippable}}
           <tr>
             <td class="align-right">Slottypen</td>
             <td>
@@ -120,7 +114,7 @@
                     <select name="data.slotTypes.{{index}}">
                       <option value="">[Auswählen]</option>
                       {{#select slotType}}
-                        {{#each ../slotTypes as |type|}}
+                        {{#each ../item.dataSet.slotTypes.list as |type|}}
                           <option value="{{type.key}}">{{type.label}}</option>
                         {{/each}}
                       {{/select}}
@@ -132,7 +126,7 @@
               </div>
             </td>
           </tr>
-          {{#if flags.isOwned}}
+          {{#if item.isOwned}}
             <tr>
               <td class="align-right label-col">Zustand</td>
               <td>
@@ -141,41 +135,10 @@
             </tr>
           {{/if}}
         {{/if}}
-        {{#if flags.hasEffects}}
-          <tr>
-            <td class="align-right">Effekte</td>
-            <td>
-              <div class="multi-item">
-                {{#each computed.effects as |effect index|}}
-                  <div class="flex-row multi-item">
-                    <span title="{{effect.key}}" class="effect-table-key">{{effect.label}}</span>
-                    <input type="text" name="data.effects.{{index}}.value" value="{{effect.value}}" placeholder="Wert" />
-                    <a class="delete-effect" data-index="{{index}}" title="{{effect.label}} löschen">
-                      <i class="fas fa-trash"></i>
-                    </a>
-                  </div>
-                {{/each}}
-                <div class="flex-row multi-item">
-                  <select name="data.newEffect.type" class="small">
-                    {{#select data.newEffect.type}}
-                      <option value="">[Manuell]</option>
-                      {{#each effects as |effect|}}
-                        <option value="{{effect.key}}">{{effect.label}}</option>
-                      {{/each}}
-                    {{/select}}
-                  </select>
-                  {{#if computed.newEffect.isCustom}}
-                    <input type="text" name="data.newEffect.key" value="{{data.newEffect.key}}" placeholder="Key" />
-                    <input type="text" name="data.newEffect.label" value="{{data.newEffect.label}}" placeholder="Name" class="formula" />
-                  {{/if}}
-                  <input type="text" name="data.newEffect.value" value="{{data.newEffect.value}}" placeholder="Wert" data-dtype="Number" />
-                  <a class="new-effect" title="Effekt anlegen"><i class="fas fa-plus"></i></a>
-                </div>
-              </div>
-            </td>
-          </tr>
-        {{/if}}
       </tbody>
     </table>
+    {{#if item.itemType.hasEffects}}
+      {{> "systems/sw-tor/templates/effects-editor.html" item=item newEffect=newEffect predefinedEffects=predefinedEffects}}
+    {{/if}}
   </section>
 </form>

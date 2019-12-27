@@ -1,3 +1,5 @@
+import ObjectUtils from './util/ObjectUtils.js'
+
 const list = [
   { key: 'melee-weapon', label: 'Nahkampf', isWeapon: true, isMeleeWeapon: true, isEquippable: true, hasEffects: true },
   { key: 'ranged-weapon', label: 'Fernkampf', isWeapon: true, isRangedWeapon: true, isEquippable: true, hasEffects: true },
@@ -8,8 +10,6 @@ const list = [
 
 export default Object.freeze({
   list,
-  map: list.reduce((acc, cur) => {
-    acc[cur.key] = cur
-    return acc
-  }, {})
+  map: ObjectUtils.asObject(list, 'key'),
+  default: 'other',
 })

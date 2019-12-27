@@ -1,4 +1,4 @@
-import SwTorItemSheet from "./sheets/SwTorItemSheet.js"
+import PhysicalItemSheet from "./sheets/PhysicalItemSheet.js"
 import SwTorActorSheet from "./sheets/SwTorActorSheet.js"
 import SkillSheet from "./sheets/SkillSheet.js"
 import TrainingSheet from "./sheets/TrainingSheet.js"
@@ -15,7 +15,8 @@ Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
   await loadTemplates([
-    'systems/sw-tor/templates/check-roll.html'
+    'systems/sw-tor/templates/check-roll.html',
+    'systems/sw-tor/templates/effects-editor.html'
   ])
 
   registerHelpers()
@@ -34,7 +35,7 @@ Hooks.once("init", async function() {
   Actors.unregisterSheet("core", ActorSheet)
   Actors.registerSheet("sw-tor", SwTorActorSheet, { makeDefault: true })
   Items.unregisterSheet("core", ItemSheet)
-  Items.registerSheet("sw-tor", SwTorItemSheet, { makeDefault: true })
+  Items.registerSheet("sw-tor", PhysicalItemSheet, { makeDefault: true })
   Items.registerSheet("sw-tor", SkillSheet, { types: ['skill', 'force-skill'], makeDefault: true })
   Items.registerSheet("sw-tor", TrainingSheet, { types: ['training'], makeDefault: true })
 })
