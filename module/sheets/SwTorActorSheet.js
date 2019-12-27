@@ -219,18 +219,6 @@ export default class SwTorActorSheet extends ActorSheet {
     //   }
     // }
 
-    // TODO force skill mixin
-    // const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
-    //   skill.cost = []
-    //   const effectModifier = ObjectUtils.try(skill.data.effect, 'modifier')
-    //   skill.effect = {
-    //     prefix: effectModifier ? EffectModifiers.map[effectModifier].label : null,
-    //     ...evalSkillExpression(ObjectUtils.try(skill.data.effect, 'formula'), skill, { round: 0 }),
-    //     d6: +ObjectUtils.try(skill.data.effect, 'd6', { default: 0 }),
-    //   }
-    //   return skill
-    // })
-
     // TODO
     // let incomingDamage = ObjectUtils.try(data.data.combat, 'damageIncoming', 'amount')
     // const incomingDamageType = DamageTypes.map[ObjectUtils.try(data.data.combat, 'damageIncoming', 'type')]
@@ -270,7 +258,6 @@ export default class SwTorActorSheet extends ActorSheet {
         { label: 'Mächte', skills: forceSkills }
       ],
       forceSkills: forceSkills.length > 0 ? forceSkills : null,
-      metrics: this.actor.metrics.list,
       slots: Slots.layout.map(row => row.map(slot => {
         if (slot == null) {
           return null
@@ -563,16 +550,14 @@ export default class SwTorActorSheet extends ActorSheet {
   _onChangeMetricGained = event => {
     const action = event.currentTarget.getAttribute('data-action')
     const key = event.currentTarget.getAttribute('data-metric')
-    const metric = {
-      ...Metrics.map[key],
-      ...this.actorData.metrics[key],
-    }
+    const defaultXpCategory = this.actor.dataSet.metrics.map[key].xpCategory
+    const metric = this.actor.metrics[key]
 
-    const { xp, gainLog } = calcGainChange(this.computeActorData(this.actor.data), metric, { action })
+    const { xp, gainLog } = calcGainChange(this.actor, metric, { action, defaultXpCategory })
     this.actor.update({
       [`data.metrics.${key}.gained`]: gainLog,
       [`data.metrics.${key}.xp`]: xp,
-      [`data.metrics.${key}.xpCategory`]: Metrics.map[key].xpCategory,  // Reset XP category after every change
+      [`data.metrics.${key}.xpCategory`]: defaultXpCategory,  // Reset XP category after every change
     })
   }
 

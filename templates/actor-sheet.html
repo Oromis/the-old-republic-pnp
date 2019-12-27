@@ -183,7 +183,6 @@
               </td>
               <td title="{{formatExplanation attr.value.components}}">
                 {{attr.value.total}}
-                <input type="hidden" name="data.attributes.{{attr.key}}.value" value="{{attr.value.total}}" data-dtype="Number" />
               </td>
             </tr>
           {{/each}}
@@ -620,7 +619,7 @@
           </tr>
         </thead>
         <tbody>
-          {{#each computed.metrics as |metric|}}
+          {{#each actor.metrics.list as |metric|}}
             <tr>
               <td>{{metric.key}}</td>
               <td title="{{metric.desc}}">{{metric.label}}</td>
@@ -629,40 +628,43 @@
               </td>
               <td title="{{formatExplanation metric.mod.components}}">{{formatMod metric.mod.total}}</td>
               <td>
-                {{#if metric.gained}}
+                {{#if metric.xpCategory}}
                   <select name="data.metrics.{{metric.key}}.xpCategory">
                     {{#select metric.xpCategory}}
-                      {{#each ../computed.xpCategories as |category|}}
+                      {{#each ../actor.dataSet.xpTable.categoryNames as |category|}}
                         <option value="{{category}}">{{category}}</option>
                       {{/each}}
                     {{/select}}
                   </select>
                 {{/if}}
               </td>
-              <td>{{metric.xp}}</td>
               <td>
-                <div class="flex-row multi-item">
-                  {{#if ../data.creationMode.enabled}}
-                    {{#if metric.gained.canDowngrade}}
-                      <button type="button" class="small char change-metric-gained" data-metric="{{metric.key}}" data-action="-">-</button>
+                {{#if metric.xpCategory}}{{metric.xp}}{{/if}}
+              </td>
+              <td>
+                {{#if metric.xpCategory}}
+                  <div class="flex-row multi-item">
+                    {{#if ../data.creationMode.enabled}}
+                      {{#if metric.gained.length}}
+                        <button type="button" class="small char change-metric-gained" data-metric="{{metric.key}}" data-action="-">-</button>
+                      {{else}}
+                        <span class="char-button-placeholder"></span>
+                      {{/if}}
+                    {{/if}}
+                    <span class="metric-gained">{{metric.gained.length}}</span>
+                    {{#if metric.upgradeCost}}
+                      <button type="button" class="small char change-metric-gained" title="{{metric.upgradeCost}} XP" data-metric="{{metric.key}}" data-action="+">+</button>
                     {{else}}
                       <span class="char-button-placeholder"></span>
                     {{/if}}
-                  {{/if}}
-                  <span class="metric-gained">{{metric.gained.value}}</span>
-                  {{#if metric.gained.upgradeCost}}
-                    <button type="button" class="small char change-metric-gained" title="{{metric.gained.upgradeCost}} XP" data-metric="{{metric.key}}" data-action="+">+</button>
-                  {{else}}
-                    <span class="char-button-placeholder"></span>
-                  {{/if}}
-                </div>
+                  </div>
+                {{/if}}
               </td>
               <td>
                 <input type="text" name="data.metrics.{{metric.key}}.buff" value="{{metric.buff}}" />
               </td>
               <td title="{{formatExplanation metric.maxComponents}}">
-                {{metric.max.total}}
-                <input type="hidden" name="data.metrics.{{metric.key}}.max" value="{{metric.max.total}}" data-dtype="Number" />
+                {{metric.max}}
               </td>
             </tr>
           {{/each}}
