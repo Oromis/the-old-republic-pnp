@@ -18,6 +18,7 @@ import EffectModifiers from '../datasets/EffectModifiers.js'
 import Slots from '../Slots.js'
 import {describeTraining} from "./TrainingSheet.js"
 import DamageTypes from '../DamageTypes.js'
+import { roundDecimal } from '../util/MathUtils.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -67,10 +68,6 @@ function processDeltaValue(text, oldValue) {
   return oldValue
 }
 
-function roundDecimal(val, places) {
-  return Math.round(val * (10 ** places)) / (10 ** places)
-}
-
 function evalExpression(expr, { vars }) {
   try {
     const parsed = Parser.parse(expr)
@@ -78,30 +75,6 @@ function evalExpression(expr, { vars }) {
   } catch (e) {
     console.warn(`Evaluating ${expr} failed: `, e)
   }
-}
-
-function evalSkillExpression(expr, skill, { vars, round }) {
-  let error = false
-  let value = null
-  let variables = null
-  const defaultVariables = {
-    skill: skill.value.total,
-    [skill.data.key]: skill.value.total,
-    [skill.data.key.toUpperCase()]: skill.value.total,
-  }
-  const defaultVariableNames = Object.keys(defaultVariables)
-
-  try {
-    const parsed = Parser.parse(expr)
-    variables = parsed.variables().filter(name => defaultVariableNames.indexOf(name) === -1)
-    value = parsed.evaluate({ ...defaultVariables, ...vars })
-    if (round != null) {
-      value = roundDecimal(value, round)
-    }
-  } catch (e) {
-    error = true
-  }
-  return { value, error, variables }
 }
 
 /**
@@ -248,35 +221,13 @@ export default class SwTorActorSheet extends ActorSheet {
 
     // TODO force skill mixin
     // const forceSkills = skills.filter(skill => skill.type === 'force-skill').map(skill => {
-    //   skill.range = RangeTypes.map[skill.data.range.type].format(skill.data.range)
-    //   const durationType = ObjectUtils.try(DurationTypes.map[skill.data.duration.type], { default: DurationTypes.map.instant })
-    //   if (durationType.hasFormula) {
-    //     const expressionResult = evalSkillExpression(skill.data.duration.formula, skill, { round: 0 })
-    //     skill.duration = { ...expressionResult, value: `${expressionResult.value} ${durationType.label}` }
-    //   } else {
-    //     skill.duration = { value: durationType.label }
-    //   }
     //   skill.cost = []
-    //   if (durationType.hasOneTimeCost) {
-    //     skill.cost.push({
-    //       key: 'oneTime',
-    //       ...this._evalForceSkillCost(skill, ObjectUtils.try(skill.data.cost, 'oneTime')),
-    //     })
-    //   }
-    //   if (durationType.hasPerTurnCost) {
-    //     skill.cost.push({
-    //       key: 'perTurn',
-    //       ...this._evalForceSkillCost(skill, ObjectUtils.try(skill.data.cost, 'perTurn')),
-    //       postfix: 'pro Runde',
-    //     })
-    //   }
     //   const effectModifier = ObjectUtils.try(skill.data.effect, 'modifier')
     //   skill.effect = {
     //     prefix: effectModifier ? EffectModifiers.map[effectModifier].label : null,
     //     ...evalSkillExpression(ObjectUtils.try(skill.data.effect, 'formula'), skill, { round: 0 }),
     //     d6: +ObjectUtils.try(skill.data.effect, 'd6', { default: 0 }),
     //   }
-    //   skill.disposition = ObjectUtils.try(ForceDispositions.map, skill.data.disposition, { default: ForceDispositions.map.neutral })
     //   return skill
     // })
 
@@ -417,7 +368,6 @@ export default class SwTorActorSheet extends ActorSheet {
 
     html.find('.gp-to-xp').click(this._onGpToXp)
     html.find('.xp-to-gp').click(this._onXpToGp)
-    html.find('button.set-value').click(this._onSetValueButton)
     html.find('button.change-attr-gained').click(this._onChangeAttrGained)
     html.find('button.change-skill-gained').click(this._onChangeSkillGained)
     html.find('button.change-metric-gained').click(this._onChangeMetricGained)
@@ -483,19 +433,12 @@ export default class SwTorActorSheet extends ActorSheet {
     let diff, factor = 1
     const raw = target.getAttribute('data-deduct')
     if (raw != null) {
-      diff = JSON.parse(raw)
-      factor = -1
+      diff = this.actor.calculateMetricsCosts(JSON.parse(raw))
     } else {
       diff = JSON.parse(target.getAttribute('data-add'))
     }
 
-    const metrics = {}
-    for (const [key, val] of Object.entries(diff)) {
-      if (this.actorData.metrics[key] != null && typeof this.actorData.metrics[key].value === 'number') {
-        metrics[key] = { value: this.actorData.metrics[key].value + (factor * val) }
-      }
-    }
-    this.actor.update({ data: { metrics } })
+    return this.actor.modifyMetrics(diff)
   }
 
   _onChangeEquipment = event => {
@@ -678,28 +621,6 @@ export default class SwTorActorSheet extends ActorSheet {
       const old = ObjectUtils.try(this.actor.data, ...name.split('.'))
       formData[name] = Math.round(processDeltaValue(input, old))
     }
-  }
-
-  _evalForceSkillCost(skill, costData) {
-    const result = evalSkillExpression(
-      ObjectUtils.try(costData, 'formula'),
-      skill,
-      { vars: ObjectUtils.try(costData, 'vars'), round: 0 }
-    )
-    let amount = result.value
-    const options = [Metrics.map.MaP, Metrics.map.AuP, Metrics.map.LeP]
-    result.costStructure = {}
-    for (const option of options) {
-      if (amount <= 0) {
-        break
-      }
-      const delta = option === Metrics.map.LeP ? amount : Math.min(amount, this.actorData.metrics[option.key].value)
-      if (delta !== 0) {
-        amount -= delta
-        result.costStructure[option.key] = delta
-      }
-    }
-    return result
   }
 
   /* -------------------------------------------- */

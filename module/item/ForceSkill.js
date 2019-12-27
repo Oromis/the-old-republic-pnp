@@ -1,18 +1,13 @@
-import { defineDataAccessor, defineEnumAccessor } from '../util/EntityUtils.js'
+import { defineDataAccessor, defineEnumAccessor, defineGetter, evalSkillExpression } from '../util/EntityUtils.js'
 import { analyzeExpression } from '../util/SheetUtils.js'
 
 export default {
   beforeConstruct() {
-    defineDataAccessor(this, 'cost')
-    defineDataAccessor(this, 'effect')
-    defineEnumAccessor(this, 'range', { dataKey: 'range.type', dataSetKey: 'rangeTypes' })
+    defineDataAccessor(this, 'cost', { configurable: true })
+    defineDataAccessor(this, 'effect', { configurable: true })
+    defineEnumAccessor(this, 'range', { dataKey: 'range.type', dataSetKey: 'rangeTypes', instanceDataKey: 'range' })
     defineEnumAccessor(this, 'duration', { dataKey: 'duration.type', dataSetKey: 'durationTypes', instanceDataKey: 'duration' })
-
-    this._addUpdateFilter('data.duration.formula', data => {
-      if (this.duration.hasFormula) {
-        Object.assign(data.data.duration, analyzeExpression({ expression: data.data.duration.formula }))
-      }
-    })
+    defineEnumAccessor(this, 'disposition')
 
     this._addUpdateFilter('data.cost.oneTime.formula', data => {
       Object.assign(data.data.cost.oneTime, analyzeExpression({ expression: data.data.cost.oneTime.formula, defaultExpr: '0' }))

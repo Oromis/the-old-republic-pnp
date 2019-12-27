@@ -7,12 +7,12 @@ import Metrics from '../datasets/HumanoidMetrics.js'
 
 export function analyzeExpression({ expression, path, defaultExpr = '' }) {
   const text = expression || ObjectUtils.try(...path) || defaultExpr
-  const result = { formula: text, error: false, variables: [] }
+  const result = { formula: text, formulaError: false, variables: [] }
   try {
     const expr = Parser.parse(text)
     result.variables = expr.variables()
   } catch (e) {
-    result.error = true
+    result.formulaError = true
   }
   return result
 }

@@ -45,10 +45,15 @@ export default class Property {
     return this._key
   }
 
+  get entity() {
+    return this._entity
+  }
+
   _makeDataAccessible() {
     for (const [key] of Object.entries(this.full)) {
       if (!(key in this)) {
         Object.defineProperty(this, key, {
+          configurable: true,
           get() { return this.full[key] }
         })
       }

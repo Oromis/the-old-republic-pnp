@@ -9,6 +9,10 @@ class HumanoidMetric extends Property {
   calcBaseValue({ target = 'value' } = {}) {
     return target === 'value' ? 5 : this._staticData.calcBaseValue(this._entity)
   }
+
+  get costOptions() {
+    return [this.key, ...(this.fallbackCostOptions || [])]
+  }
 }
 
 class HumanoidMetricsPrototype extends PropertyPrototype {
@@ -35,43 +39,43 @@ class HumanoidMetricsPrototype extends PropertyPrototype {
   }
 }
 
-const list = [
-  new HumanoidMetricsPrototype('LeP', {
-    label: 'Lebenspunkte',
-    desc: 'Repräsentiert den körperlichen Gesundheitszustand',
-    xpCategory: Config.character.LeP.xpCategory,
-    backgroundColor: '#ffaaaa',
-    calcBaseValue(actor) {
-      return Math.round((attrValue(actor, 'ko') * 2 + attrValue(actor, 'kk')) / 3)
-    }
-  }),
-  new HumanoidMetricsPrototype('AuP', {
-    label: 'Ausdauerpunkte',
-    desc: 'Misst den körperlichen und geistigen Erschöpfungsgrad',
-    xpCategory: Config.character.AuP.xpCategory,
-    backgroundColor: '#aaffaa',
-    calcBaseValue(actor) {
-      return Math.round((attrValue(actor, 'ko') + attrValue(actor, 'kk') + attrValue(actor, 'wk')) * 0.66)
-    }
-  }),
-  new HumanoidMetricsPrototype('MaP', {
-    label: 'Machtpunkte',
-    desc: 'Ein Maß für die Menge an Macht-Kräften, die zur Verfügung stehen',
-    xpCategory: Config.character.MaP.xpCategory,
-    backgroundColor: '#e3caff',
-    calcBaseValue(actor) {
-      return Math.round((attrValue(actor, 'ch') + attrValue(actor, 'in') + attrValue(actor, 'kl') + attrValue(actor, 'wk')) / 2)
-    }
-  }),
-  new HumanoidMetricsPrototype('EnP', {
-    label: 'Energiepunkte',
-    desc: 'Steht für den Ladezustand der Akkus',
-    backgroundColor: '#c7d6ff',
-    calcBaseValue() {
-      return 0 // Energy pool is governed by equipment alone
-    }
-  }),
-]
+const LeP = new HumanoidMetricsPrototype('LeP', {
+  label: 'Lebenspunkte',
+  desc: 'Repräsentiert den körperlichen Gesundheitszustand',
+  xpCategory: Config.character.LeP.xpCategory,
+  backgroundColor: '#ffaaaa',
+  calcBaseValue(actor) {
+    return Math.round((attrValue(actor, 'ko') * 2 + attrValue(actor, 'kk')) / 3)
+  }
+})
+const AuP = new HumanoidMetricsPrototype('AuP', {
+  label: 'Ausdauerpunkte',
+  desc: 'Misst den körperlichen und geistigen Erschöpfungsgrad',
+  xpCategory: Config.character.AuP.xpCategory,
+  backgroundColor: '#aaffaa',
+  calcBaseValue(actor) {
+    return Math.round((attrValue(actor, 'ko') + attrValue(actor, 'kk') + attrValue(actor, 'wk')) * 0.66)
+  }
+})
+const MaP = new HumanoidMetricsPrototype('MaP', {
+  label: 'Machtpunkte',
+  desc: 'Ein Maß für die Menge an Macht-Kräften, die zur Verfügung stehen',
+  xpCategory: Config.character.MaP.xpCategory,
+  backgroundColor: '#e3caff',
+  fallbackCostOptions: [AuP.key, LeP.key],  // If the force user is out of MaP, costs will be paid in AuP and then LeP
+  calcBaseValue(actor) {
+    return Math.round((attrValue(actor, 'ch') + attrValue(actor, 'in') + attrValue(actor, 'kl') + attrValue(actor, 'wk')) / 2)
+  }
+})
+const EnP = new HumanoidMetricsPrototype('EnP', {
+  label: 'Energiepunkte',
+  desc: 'Steht für den Ladezustand der Akkus',
+  backgroundColor: '#c7d6ff',
+  calcBaseValue() {
+    return 0 // Energy pool is governed by equipment alone
+  }
+})
 
+const list = [LeP, AuP, MaP, EnP]
 const map = ObjectUtils.asObject(list, 'key')
 export default Object.freeze({ list, map })

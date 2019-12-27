@@ -1,9 +1,11 @@
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import ObjectUtils from './ObjectUtils.js'
-import Property from '../properties/Property.js'
+import { Parser } from '../vendor/expr-eval/expr-eval.js'
+import { roundDecimal } from './MathUtils.js'
 
-export function defineDataAccessor(object, key) {
+export function defineDataAccessor(object, key, { configurable = false } = {}) {
   Object.defineProperty(object, key, {
+    configurable,
     get() {
       return this.data.data[key]
     }
@@ -54,6 +56,37 @@ export function makeRoll(property) {
     result.target = Math.floor(result.value / 5)
   }
   return result
+}
+
+export function evalSkillExpression(expr, skill, { vars, round }) {
+  let formulaError = false
+  let evalError = false
+  let value = null
+  let variables = null
+  const skillValue = skill.value.total
+  const defaultVariables = {
+    skill: skillValue,
+    [skill.key]: skillValue,
+    [skill.key.toUpperCase()]: skillValue,
+  }
+  const defaultVariableNames = Object.keys(defaultVariables)
+
+  try {
+    const parsed = Parser.parse(expr)
+    variables = parsed.variables().filter(name => defaultVariableNames.indexOf(name) === -1)
+    try {
+      value = parsed.evaluate({ ...defaultVariables, ...vars })
+      if (round != null) {
+        value = roundDecimal(value, round)
+      }
+    } catch (e) {
+      evalError = true
+    }
+  } catch (e) {
+    formulaError = true
+    evalError = true
+  }
+  return { value, formulaError, evalError, variables, formula: expr }
 }
 
 export default {

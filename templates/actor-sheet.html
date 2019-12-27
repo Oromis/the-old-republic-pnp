@@ -290,14 +290,14 @@
                   <a class="flex-grow item-control item-edit">{{skill.name}}</a>
                 </div>
               </td>
-              <td>{{skill.range}}</td>
-              <td>{{skill.duration.value}}</td>
+              <td>{{skill.range.formatted}}</td>
+              <td>{{skill.duration.formatted}}</td>
               <td>
                 <div class="multi-item">
-                  {{#each skill.cost as |costEntry costKey|}}
-                    <div class="flex-row multi-item {{errorClass when=costEntry.error}}">
+                  {{#each skill.costs as |entry|}}
+                    <div class="flex-row multi-item {{errorClass when=entry.evalError}}">
                       <span>{{entry.value}} {{entry.postfix}}</span>
-                      <a class="modify-metrics" title="{{formatCosts entry.costStructure}}" data-deduct="{{json entry.costStructure}}">
+                      <a class="modify-metrics" title="{{formatCosts ../../actor entry.diff}}" data-deduct="{{json entry.diff}}">
                         <i class="fas fa-minus-square"></i>
                       </a>
                     </div>
@@ -306,8 +306,8 @@
                         <span>{{var}}:</span>
                         <input
                             type="text"
-                            name="skills.{{skill.data.key}}.data.cost.{{entry.key}}.vars.{{var}}"
-                            value="{{resolve skill.data.cost entry.key 'vars' var}}"
+                            name="skills.{{skill.key}}.data.cost.{{entry.key}}.vars.{{var}}"
+                            value="{{resolve skill.cost entry.key 'vars' var}}"
                             class="flex-grow"
                             placeholder="{{var}}"
                         />

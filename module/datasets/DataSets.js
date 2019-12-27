@@ -13,10 +13,8 @@ import EffectModifiers from './EffectModifiers.js'
 import ForceDispositions from './ForceDispositions.js'
 import ActorTypes from './ActorTypes.js'
 import OwnedSkill from '../item/OwnedSkill.js'
-
-function validObjectsFilter(arg) {
-  return arg != null && typeof arg === 'object'
-}
+import OwnedForceSkill from '../item/OwnedForceSkill.js'
+import { validObjectsFilter } from '../util/ObjectUtils.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -46,6 +44,7 @@ export default Object.freeze({
             Skill,
             owned && OwnedSkill,
             ForceSkill,
+            owned && OwnedForceSkill,
           ].filter(validObjectsFilter),
           actorTypes: ActorTypes,
           rangeTypes: RangeTypes,

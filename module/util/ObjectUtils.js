@@ -39,6 +39,10 @@ function mapValues(obj, func) {
     .reduce(zipEntries, {})
 }
 
+export function validObjectsFilter(arg) {
+  return arg != null && typeof arg === 'object'
+}
+
 export default Object.freeze({
   asArray,
 
@@ -95,4 +99,6 @@ export default Object.freeze({
   },
 
   cloneDeep,
+
+  validObjectsFilter,
 })

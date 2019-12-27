@@ -29,6 +29,10 @@ function categorizeD20Result(value) {
 
 const formatAttrKey = key => key.toUpperCase()
 
+function formatMetricChanges(diff) {
+  return Object.entries(diff).map(([label, cost]) => `${label}: ${formatMod(cost)}`).join(' | ')
+}
+
 export function registerHelpers() {
   Handlebars.registerHelper({
     json: obj => JSON.stringify(obj),
@@ -84,16 +88,9 @@ export function registerHelpers() {
         return components.map(component => `${component.label}: ${formatMod(component.value)}`).join(' | ')
       }
     },
-    formatRegen: regen => Object.entries(regen).map(([label, cost]) => `${label}: ${formatMod(cost)}`).join(' | '),
-    formatCosts: costs => Object.entries(costs || {}).map(([label, cost]) => `${label}: ${formatMod(-cost)}`).join(' | '),
+    formatRegen: regen => formatMetricChanges(regen),
+    formatCosts: (actor, costs) => formatMetricChanges(actor.calculateMetricsCosts(costs)),
     expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',
-    stepButtons: ({ hash: { val, name, buttonClass = 'small char set-value', valueClass = '' } }) => {
-      return new Handlebars.SafeString(`
-        <button type="button" class="${buttonClass}" data-field="${name}" data-value="${val - 1}" data-action="-">-</button>
-        <span class="${valueClass}">${val}</span>
-        <button type="button" class="${buttonClass}" data-field="${name}" data-value="${val + 1}" data-action="+">+</button>
-      `)
-    },
     metricView: ({ hash: { metric, linked } }) => new Handlebars.SafeString(`
       <div class="metric" title="${metric.key} | ${metric.label}m">
         <div class="metric-bar" style="width: ${(metric.value / metric.max) * 100}%; background-color: ${metric.backgroundColor};"></div>

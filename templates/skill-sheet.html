@@ -22,12 +22,12 @@
           <td><input type="text" class="uppercase" name="data.key" value="{{data.key}}" minlength="3" maxlength="3"/>
           </td>
         </tr>
-        <tr>
-          <td class="align-right" title="Legt fest, welchem Actor-Typ diese Fähigkeit zugeornet werden kann">
+        <tr title="Legt fest, welchem Actor-Typ diese Fähigkeit zugeornet werden kann">
+          <td class="align-right">
             Actor-Typ
           </td>
           <td>
-            <select name="data.actorType" title="Actor Typ">
+            <select name="data.actorType">
               {{#select data.actorType}}
                 {{#each skill.dataSet.actorTypes.list as |type|}}
                   <option value="{{type.key}}">{{type.label}}</option>
@@ -115,7 +115,7 @@
           <tr>
             <td class="align-right">Wirkungsdauer</td>
             <td>
-              <div class="flex-row multi-item {{errorClass when=skill.duration.error}}">
+              <div class="flex-row multi-item {{errorClass when=skill.duration.formulaError}}">
                 {{#if skill.duration.hasFormula}}
                   <input type="text" name="data.duration.formula" value="{{data.duration.formula}}" placeholder="[n]" class="formula" />
                 {{/if}}
@@ -134,7 +134,7 @@
             <tr>
               <td class="align-right">Aktivierungskosten</td>
               <td>
-                <div class="flex-row multi-item {{errorClass when=skill.cost.oneTime.error}}">
+                <div class="flex-row multi-item {{errorClass when=skill.cost.oneTime.formulaError}}">
                   <input type="text" name="data.cost.oneTime.formula" value="{{data.cost.oneTime.formula}}" class="formula" />
                   {{expressionVariables skill.cost.oneTime.variables}}
                 </div>
@@ -145,7 +145,7 @@
             <tr>
               <td class="align-right">Kosten pro Runde</td>
               <td>
-                <div class="flex-row multi-item {{errorClass when=skill.cost.perTurn.error}}">
+                <div class="flex-row multi-item {{errorClass when=skill.cost.perTurn.formulaError}}">
                   <input type="text" name="data.cost.perTurn.formula" value="{{data.cost.perTurn.formula}}" class="formula" />
                   {{expressionVariables skill.cost.perTurn.variables}}
                 </div>
@@ -155,7 +155,7 @@
           <tr>
             <td class="align-right">Effekt</td>
             <td>
-              <div class="flex-row multi-item {{errorClass when=skill.effect.error}}">
+              <div class="flex-row multi-item {{errorClass when=skill.effect.formulaError}}">
                 <input type="text" name="data.effect.formula" value="{{data.effect.formula}}" class="formula" placeholder="Formula" />
                 <span>
                   +<input type="text" name="data.effect.d6" value="{{data.effect.d6}}" placeholder="w6" title="w6" class="small" />w6

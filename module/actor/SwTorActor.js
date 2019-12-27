@@ -196,7 +196,7 @@ export default class SwTorActor extends Actor {
   }
 
   updateOwnedItem(data, ...rest) {
-    const item = this.getOwnedItem(data.id)
+    let item = this.getOwnedItem(data.id)
     if (item != null) {
       data = item._filterUpdateData(data)
     } else {
@@ -210,6 +210,8 @@ export default class SwTorActor extends Actor {
       promise = promise.then(res => {
         this._cache.clearKey('categorizedItems')
         this.render(false)
+        item = this.getOwnedItem(data.id)
+        item.sheet.render(false)
         return res
       })
     }
