@@ -289,10 +289,6 @@ export default class SwTorActorSheet extends ActorSheet {
     }
     data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
     data.damageTypes = DamageTypes.list
-    data.trainings = computedActorData.trainings.map(t => ({
-      ...t,
-      desc: t.summary,
-    }))
     data.itemTypes = ItemTypes.list
     data.ui = {
       inventoryHidden: this._inventoryHidden,

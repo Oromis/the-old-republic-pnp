@@ -39,11 +39,12 @@
             <div class="training-info flex-row multi-item">
               <span>Ausbildungen:</span>
               <div class="trainings flex-row multi-item">
-                {{#each trainings as |training|}}
+                {{#each actor.trainings as |training|}}
                   <div data-item-id="{{training.id}}">
-                    <span title="{{training.desc}}">{{training.name}}</span>
+                    <a class="item-control item-edit" title="{{training.summary}}">
+                      {{training.name}}
+                    </a>
                     {{#if ../data.creationMode.enabled}}
-                      <a class="item-control item-edit" title="Bearbeiten"><i class="fas fa-edit"></i></a>
                       <a class="item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
                     {{/if}}
                     {{#unless @last}}

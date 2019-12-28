@@ -76,18 +76,18 @@ export function calcSkillXp(actor, property) {
 
 function calcXpFromTrainingSkill(training, property, from) {
   if(training.data.baseTraining) {
-    from += (+training.data.baseTraining.data.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0))
+    from += (+training.baseTraining.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0))
   }
   return XpTable.getUpgradeCost({
     category: property.xpCategory,
     from: from,
-    to: from + (+training.data.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0))
+    to: from + (+training.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0))
   })
 }
 
 export function calcPropertyTrainingsEffects(actor, property) {
   if(detectPropertyType(property) !== 'skill') {
-    return actor.trainings.map(t => t.data.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0)).reduce((acc, v) => acc + (+v), 0)
+    return actor.trainings.map(t => t.effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0)).reduce((acc, v) => acc + (+v), 0)
   }
   const from = property.isBasicSkill ? 5 : 0
   const xp = actor.trainings.map(t => calcXpFromTrainingSkill(t, property, from)).reduce((acc, v) => acc + (+v), 0)
@@ -156,7 +156,7 @@ export function explainPropertyValue(actor, property, options) {
   }
   const items = actor.equippedItems || []
   for (const item of items) {
-    const effects = item.data.effects || []
+    const effects = item.effects || []
     const value = effects.filter(e => e.key === property.key).reduce((acc, cur) => acc + (+cur.value), 0)
     if (value !== 0 && !isNaN(value)) {
       result.total += value
