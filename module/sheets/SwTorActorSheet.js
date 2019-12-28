@@ -1,22 +1,12 @@
-import Attributes from '../datasets/HumanoidAttributes.js'
 import ObjectUtils from '../util/ObjectUtils.js'
-import XpTable from '../datasets/XpTable.js'
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import ItemTypes from '../ItemTypes.js'
-import SkillCategories from '../datasets/SkillCategories.js'
 import {
   calcMaxInventoryWeight,
   calcPropertyBaseValue,
   calcUpgradeCost,
 } from '../CharacterFormulas.js'
-import Metrics from '../datasets/HumanoidMetrics.js'
-import RangeTypes from '../datasets/RangeTypes.js'
-import DurationTypes from '../datasets/DurationTypes.js'
-import {Parser} from '../vendor/expr-eval/expr-eval.js'
-import ForceDispositions from '../datasets/ForceDispositions.js'
-import EffectModifiers from '../datasets/EffectModifiers.js'
 import Slots from '../Slots.js'
-import {describeTraining} from "./TrainingSheet.js"
 import DamageTypes from '../DamageTypes.js'
 import { roundDecimal } from '../util/MathUtils.js'
 
@@ -301,7 +291,7 @@ export default class SwTorActorSheet extends ActorSheet {
     data.damageTypes = DamageTypes.list
     data.trainings = computedActorData.trainings.map(t => ({
       ...t,
-      desc: describeTraining(t)
+      desc: t.summary,
     }))
     data.itemTypes = ItemTypes.list
     data.ui = {

@@ -24,39 +24,43 @@
       </thead>
       <tbody>
         <tr>
-          <td class="">GP</td>
+          <td>GP</td>
           <td>
             <input type="text" name="data.gp" value="{{data.gp}}" />
           </td>
         </tr>
         <tr>
-          <td class="">Fraktion</td>
+          <td>Fraktion</td>
           <td>
             <input type="text" class="text" name="data.fraction" value="{{data.fraction}}" />
           </td>
         </tr>
         <tr>
-          <td class="">Ausrichtung</td>
+          <td>Ausrichtung</td>
           <td class="flex-row">
-            {{#each dispositionList as |dispo|}}
-              <div class="checkbox-element">
-                <input type="checkbox" id="{{dispo.key}}" name="data.dispositions.{{dispo.key}}" {{#if dispo.value}}checked{{/if}} />
-                <label for="{{dispo.key}}">{{dispo.label}}</label>
-              </div>
-            {{/each}}
+            <div class="flex-row multi-item">
+              {{#each training.dataSet.characterDispositions.list as |dispo|}}
+                <label class="flex-row multi-item">
+                  <span>
+                    <input type="checkbox" name="data.dispositions.{{dispo.key}}" {{checked (resolve ../training.dispositions dispo.key)}} />
+                  </span>
+                  <span>{{dispo.label}}</span>
+                </label>
+              {{/each}}
+            </div>
           </td>
         </tr>
         <tr>
-          <td class="">Zusätzliche Informationen</td>
+          <td>Zusätzliche Informationen</td>
           <td>
             <textarea placeholder="" name="data.additionalInformation" class="flex-grow">{{data.additionalInformation}}</textarea>
           </td>
         </tr>
         <tr>
-          <td>Zugehoerige Grundausbildung</td>
+          <td>Zugehörige Grundausbildung</td>
           <td>
-            {{#if data.baseTraining}}
-              <span title="{{baseTrainingEffects}}">{{data.baseTraining.name}}</span>
+            {{#if training.baseTraining}}
+              <span title="{{training.baseTraining.summary}}">{{training.baseTraining.name}}</span>
               <a class="baseTraining-control baseTraining-delete" title="Löschen"><i class="fas fa-trash"></i></a>
             {{else}}
               <div class="drop-zone">

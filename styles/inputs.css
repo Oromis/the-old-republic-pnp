@@ -29,15 +29,8 @@
   width: 22px;
 }
 
-.sw-tor .checkbox-element {
-  display: flex;
-  margin-right: 5px;
-}
-
-.sw-tor .checkbox-element label {
-  height: 20px;
-  line-height: 20px;
-  margin: 3px 0;
+.sw-tor .multi-item input[type=checkbox] {
+  margin-right: 0;
 }
 
 .sw-tor select {

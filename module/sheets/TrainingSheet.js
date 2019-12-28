@@ -1,15 +1,6 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
-import CharacterDispositions from '../datasets/CharacterDispositions.js'
-import {onDragOver, onDropItem, resolveEffectLabel} from '../util/SheetUtils.js'
+import { onDragOver, onDropItem } from '../util/SheetUtils.js'
 import SheetWithEffects from './SheetWithEffects.js'
-
-export function describeTraining(training) {
-  let desc = 'GP: '.concat( training.data.gp)
-  for (const effect of training.data.effects) {
-    desc = desc.concat('\n', effect.label || resolveEffectLabel(effect.key), ': ', effect.value)
-  }
-  return desc
-}
 
 export default class TrainingSheet extends ItemSheet {
   constructor(...args) {
@@ -40,14 +31,7 @@ export default class TrainingSheet extends ItemSheet {
    */
   getData() {
     const data = super.getData()
-    data.dispositionList = CharacterDispositions.list.map(e => ({
-      ...e,
-      value: data.data.dispositions[e.key]
-    }))
-    if(data.data.baseTraining) {
-      data.baseTrainingEffects = describeTraining(data.data.baseTraining)
-    }
-    data.item = this.item
+    data.training = data.item = this.item
     return data
   }
 
@@ -68,12 +52,12 @@ export default class TrainingSheet extends ItemSheet {
     this.form.ondrop = onDropItem(this._handleDrop)
 
     // Delete BaseTraining Item
-    html.find('.baseTraining-delete').click(ev => {
+    html.find('.baseTraining-delete').click(() => {
       this.item.update({
         'data.baseTraining': null
       })
       this.render(false)
-    });
+    })
   }
 
   /* -------------------------------------------- */
@@ -89,6 +73,8 @@ export default class TrainingSheet extends ItemSheet {
 
   _handleDrop = (type, item) => {
     if(type === 'training') {
+      // TODO is it a good idea to store the entire training data structure? If the base training changes,
+      //  the child won't be adjusted automatically.
       this.item.update({
         'data.baseTraining': item
       })

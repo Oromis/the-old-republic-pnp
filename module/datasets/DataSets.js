@@ -23,6 +23,8 @@ import DamageTypes from '../DamageTypes.js'
 import SlotTypes from '../SlotTypes.js'
 import ItemWithEffects from '../item/ItemWithEffects.js'
 import Wearable from '../item/Wearable.js'
+import Training from '../item/Training.js'
+import CharacterDispositions from './CharacterDispositions.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -64,8 +66,10 @@ export default Object.freeze({
       case 'training':
         return {
           delegates: [
+            Training,
             ItemWithEffects,
           ],
+          characterDispositions: CharacterDispositions,
         }
 
       default:
