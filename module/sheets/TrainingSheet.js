@@ -27,7 +27,7 @@ export default class TrainingSheet extends ItemSheet {
 	  return mergeObject(super.defaultOptions, {
 			classes: ["sw-tor", "sheet", "item"],
 			template: "systems/sw-tor/templates/training-sheet.html",
-			width: 520,
+			width: 554,
 			height: 700,
 		})
   }

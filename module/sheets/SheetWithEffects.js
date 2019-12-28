@@ -26,7 +26,9 @@ export default class SheetWithEffects extends Mixin {
       // as a full effect
       const key = path[path.length - 1]
       this._newEffect[key] = obj[name]
-      parent.render(false)
+      if (key === 'type') {
+        parent.render(false)
+      }
       return {}
     })
 
