@@ -20,6 +20,9 @@ export default class AutoSubmitSheet extends Mixin {
       html.find('input, select')
         .on('change', this._onChangeInput)
         .on('keypress', this._onEnter)
+
+      html.find('textarea')
+        .on('change', this._onChangeInput)
     }
 
     // Support Image updates
