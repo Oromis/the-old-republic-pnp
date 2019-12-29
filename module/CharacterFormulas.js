@@ -179,7 +179,3 @@ export function calcUpgradeCost(actor, property, { max } = {}) {
   }
   return result
 }
-
-export function calcMaxInventoryWeight(actor) {
-  return (actor.attrValue('kk') + actor.attrValue('ko')) / 2
-}

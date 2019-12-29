@@ -1,6 +1,8 @@
 import DataSets from '../datasets/DataSets.js'
 import DataCache from '../util/DataCache.js'
 import ObjectUtils from '../util/ObjectUtils.js'
+import { roundDecimal } from '../util/MathUtils.js'
+import { defineGetter } from '../util/EntityUtils.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
@@ -92,6 +94,22 @@ export default class SwTorActor extends Actor {
 
   get dataSet() {
     return this._cache.lookup('dataSet', () => DataSets.fromActorType(this.type))
+  }
+
+  get weight() {
+    return this._cache.lookup('weight', () => {
+      const result = {}
+      defineGetter(result, 'value', () => this._cache.lookup('inventoryWeight', () => (
+        roundDecimal(this.inventory.reduce((acc, cur) => acc + (cur.quantity || 1) * (cur.weight || 0), 0), 2)
+      )))
+      defineGetter(result, 'max', () => this._cache.lookup('inventoryWeightMax', () => (
+        (this.attrValue('kk') + this.attrValue('ko')) / 2
+      )))
+      defineGetter(result, 'isOverloaded', () => this._cache.lookup('inventoryOverloaded', () => (
+        this.weight.value > this.weight.max
+      )))
+      return result
+    })
   }
 
   // ---------------------------------------------------------------------
@@ -197,7 +215,19 @@ export default class SwTorActor extends Actor {
   // ----------------------------------------------------------------------------
 
   createOwnedItem(data, ...rest) {
-    return this._checkValidItem(data, () => super.createOwnedItem(data, ...rest))
+    let promise = this._checkValidItem(data, () => super.createOwnedItem(data, ...rest))
+
+    if (this.isToken) {
+      // This is done to work around a FoundryVTT-bug that causes token actors to not update automatically when
+      // an item is changed.
+      promise = promise.then(res => {
+        this._cache.clearKey('categorizedItems')
+        this.render(false)
+        return res
+      })
+    }
+
+    return promise
   }
 
   updateOwnedItem(data, ...rest) {
@@ -209,9 +239,9 @@ export default class SwTorActor extends Actor {
     }
     let promise = this._checkValidItem(data, () => super.updateOwnedItem(data, ...rest))
 
-    // This is done to work around a FoundryVTT-bug that causes token actors to miss an item update. I.e.
-    // updates are always delayed by one change
     if (this.isToken) {
+      // This is done to work around a FoundryVTT-bug that causes token actors to miss an item update. I.e.
+      // updates are always delayed by one change
       promise = promise.then(res => {
         this._cache.clearKey('categorizedItems')
         this.render(false)

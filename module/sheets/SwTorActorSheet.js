@@ -2,7 +2,6 @@ import ObjectUtils from '../util/ObjectUtils.js'
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import ItemTypes from '../ItemTypes.js'
 import {
-  calcMaxInventoryWeight,
   calcPropertyBaseValue,
   calcUpgradeCost,
 } from '../CharacterFormulas.js'
@@ -255,18 +254,11 @@ export default class SwTorActorSheet extends ActorSheet {
           }
         }
       })),
-      inventory: ItemTypes.list.map(type => ({
+      inventory: this.actor.dataSet.itemTypes.list.map(type => ({
         ...type,
-        items: computedActorData.inventory.filter(item => item.type === type.key)
+        items: this.actor.inventory.filter(item => item.type === type.key)
       })),
       weaponSlots: computedActorData.weaponSlots,
-      weight: {
-        value: roundDecimal(
-          computedActorData.inventory.reduce((acc, cur) => acc + (cur.data.quantity || 1) * (cur.data.weight || 0), 0),
-          2
-        ),
-        max: calcMaxInventoryWeight(computedActorData),
-      },
       // TODO
       // damageIncoming: {
       //   type: incomingDamageType,
@@ -287,7 +279,6 @@ export default class SwTorActorSheet extends ActorSheet {
       //   }, computedActorData, { label: 'Nächster Tag', className: 'next-day', icon: 'fa-sun' })
       // }
     }
-    data.computed.weight.overloaded = data.computed.weight.value > data.computed.weight.max
     data.damageTypes = DamageTypes.list
     data.itemTypes = ItemTypes.list
     data.ui = {
@@ -377,7 +368,7 @@ export default class SwTorActorSheet extends ActorSheet {
 
   }
 
-  _onCreateItem = () => {
+  _onCreateItem = event => {
     event.preventDefault()
     const type = event.currentTarget.getAttribute('data-type')
     const itemData = {

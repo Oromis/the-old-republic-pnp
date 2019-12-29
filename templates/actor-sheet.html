@@ -523,11 +523,11 @@
     <div class="tab items multi-item" data-group="primary" data-tab="items">
       <div class="flex-row multi-item">
         <div class="flex-grow"></div>
-        <div class="flex-row multi-item {{errorClass when=computed.weight.overloaded}}" title="Traglast">
+        <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
           <i class="fas fa-weight-hanging"></i>
-          <span>{{computed.weight.value}}</span>
+          <span>{{actor.weight.value}}</span>
           <span>/</span>
-          <span>{{computed.weight.max}}</span>
+          <span>{{actor.weight.max}}</span>
         </div>
       </div>
       {{#each computed.inventory as |category|}}
@@ -572,26 +572,26 @@
                   <td>
                     <div class="flex-row multi-item">
                       <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
-                      <a class="item-control item-edit" title="{{item.data.description}}">
-                        {{#if (isMultiple item.data.quantity)}}
-                          {{item.data.quantity}}x
+                      <a class="item-control item-edit" title="{{item.description}}">
+                        {{#if (isMultiple item.quantity)}}
+                          {{item.quantity}}x
                         {{/if}}
                         {{item.name}}
                       </a>
                     </div>
                   </td>
                   {{#if category.isWeapon}}
-                    <td title="Schaden">{{item.data.damage.formula}}</td>
+                    <td title="Schaden">{{item.damage.formula}}</td>
                   {{/if}}
                   {{#if category.isWearable}}
                     <td title="Rüstung">{{item.armor}}</td>
-                    <td title="Behinderung">{{item.data.encumberance}}</td>
+                    <td title="Behinderung">{{item.encumberance}}</td>
                   {{/if}}
                   {{#if category.isEquippable}}
-                    <td class="damage-col" title="Zustand">{{formatPercentage item.data.condition}}</td>
+                    <td class="damage-col" title="Zustand">{{formatPercentage item.condition}}</td>
                   {{/if}}
-                  <td title="Preis">{{item.data.price}}</td>
-                  <td title="Gewicht">{{item.data.weight}}</td>
+                  <td title="Preis">{{item.price}}</td>
+                  <td title="Gewicht">{{item.weight}}</td>
                   <td>
                     <a class="item-control item-delete" title="{{item.name}} löschen"><i class="fas fa-trash"></i></a>
                   </td>

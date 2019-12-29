@@ -37,6 +37,7 @@ export default Object.freeze({
       resistances: ResistanceTypes,
       xpTable: XpTable,
       skillCategories: SkillCategories,
+      itemTypes: ItemTypes,
     }
   },
 

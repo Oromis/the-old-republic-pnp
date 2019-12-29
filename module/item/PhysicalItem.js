@@ -1,7 +1,12 @@
-import { defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
+import { defineDataAccessor, defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
 
 export default {
   beforeConstruct() {
+    defineDataAccessor(this, 'description')
+    defineDataAccessor(this, 'quantity')
+    defineDataAccessor(this, 'weight')
+    defineDataAccessor(this, 'price')
+    defineDataAccessor(this, 'condition')
     defineEnumAccessor(this, 'itemType', { getKey: () => this.data.type, dataSetKey: 'itemTypes' })
 
     this._addUpdateFilter('data.skill', data => {
