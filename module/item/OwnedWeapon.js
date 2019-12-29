@@ -32,5 +32,18 @@ export default {
       }
       return result
     })
+
+    defineGetter(this, 'currentDamageFormula', function () {
+      let result = this.damage.formula
+      const projectileEnergy = this.currentProjectileEnergy
+      if (!isNaN(projectileEnergy) && projectileEnergy !== 1) {
+        result = `(${result})*${projectileEnergy}`
+      }
+      const strengthModifier = this.currentStrengthModifier
+      if (!isNaN(strengthModifier) && strengthModifier !== 1) {
+        result = `(${result}*${strengthModifier})`
+      }
+      return result
+    })
   }
 }
