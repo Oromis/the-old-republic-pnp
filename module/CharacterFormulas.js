@@ -47,7 +47,7 @@ export function calcGp(actor) {
     - (actor.xp.gp || 0)
     - ObjectUtils.try(Species.map[actor.species], 'gp', { default: 0 })
     - actor.attributes.list.reduce((acc, cur) => acc + (cur.gp || 0), 0)
-    - actor.trainings.reduce((acc, cur) => acc + (+cur.data.gp), 0)
+    - actor.trainings.reduce((acc, cur) => acc + (+cur.gp), 0)
 }
 
 export function calcFreeXp(actor) {

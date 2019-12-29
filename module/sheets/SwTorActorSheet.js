@@ -14,7 +14,7 @@ function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const gainLog = property.gained || []
   let newGainLog, newXp
   if (action === '+') {
-    const xpCategory = property.tmpXpCategory || property.xpCategory || defaultXpCategory
+    const xpCategory = property.currentXpCategory || property.xpCategory || defaultXpCategory
     const xpCost = calcUpgradeCost(actor, property)
     newXp = prevXp + xpCost
     newGainLog = [...gainLog, { xpCategory, xp: xpCost }]
@@ -81,21 +81,18 @@ export default class SwTorActorSheet extends ActorSheet {
 
     autoSubmit.addFilter('skills.*', (obj, { name, path }) => {
       const [_unused, key, ...rest] = path
-      const skill = this.getSkill(key)
+      const skill = this.actor.skills[key]
       if (skill != null) {
-        const skillEntity = this.actor.getOwnedItem(skill.id)
-        if (skillEntity != null) {
-          let value = obj[name]
-          if (path.indexOf('buff') !== -1) {
-            value = processDeltaValue(value, skill.data.buff || 0)
-          } else if (path.indexOf('vars') !== -1) {
-            value = value === '' || isNaN(value) ? '' : +value
-          }
-          const payload = { [rest.join('.')]: value }
-          const oldValue = ObjectUtils.try(skill, ...rest)
-          if (value !== oldValue) {
-            skillEntity.update(payload)
-          }
+        let value = obj[name]
+        if (path.indexOf('buff') !== -1) {
+          value = processDeltaValue(value, skill.buff || 0)
+        } else if (path.indexOf('vars') !== -1) {
+          value = value === '' || isNaN(value) ? '' : +value
+        }
+        const payload = { [rest.join('.')]: value }
+        const oldValue = ObjectUtils.try(skill.data, ...rest)
+        if (value !== oldValue) {
+          skill.update(payload)
         }
       }
       // No actor update
@@ -472,16 +469,6 @@ export default class SwTorActorSheet extends ActorSheet {
     if (gp > 0) {
       this.actor.update({ 'data.xp.gp': gp - 1 })
     }
-  }
-
-  _onSetValueButton = event => {
-    let value = event.target.getAttribute('data-value')
-    if (!isNaN(value)) {
-      value = +value
-    }
-    this.actor.update({
-      [event.target.getAttribute('data-field')]: value
-    })
   }
 
   _onChangeAttrGained = event => {
