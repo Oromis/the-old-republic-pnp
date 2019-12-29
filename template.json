@@ -23,7 +23,10 @@
           }
         },
         "resistances": {},
-        "weaponSlots": {},
+        "targetDistance": {
+          "type": "",
+          "value": null
+        },
         "species": "",
         "xp": {
           "gained": 0,

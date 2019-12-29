@@ -3,7 +3,7 @@ import DataCache from '../util/DataCache.js'
 import ObjectUtils from '../util/ObjectUtils.js'
 import { roundDecimal } from '../util/MathUtils.js'
 import { defineGetter } from '../util/EntityUtils.js'
-import Slots from '../datasets/HumanoidSlots.js'
+import { measureDistance } from '../overrides/DistanceMeasurement.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
@@ -11,6 +11,7 @@ export default class SwTorActor extends Actor {
 
     this._callDelegate('afterConstruct')
     this._pendingCalls = []
+    this._cacheClearPending = false
   }
 
   prepareData(actorData) {
@@ -137,10 +138,8 @@ export default class SwTorActor extends Actor {
       const oldItem = this.getItemInSlot(slotKey)
       if (oldItem != null) {
         removedItems.push(oldItem.id)
-        oldItem.unequip()
-        if (this.isToken) {
-          return awaitOperation()
-        }
+        await oldItem.unequip()
+        return awaitOperation()
       }
 
       // Find an item that will be in a slot after the current equipItem() execution has finished
@@ -193,10 +192,8 @@ export default class SwTorActor extends Actor {
             if (prevItem != null) {
               // Remove the previous item
               removedItems.push(prevItem.id)
-              prevItem.unequip()
-              if (this.isToken) {
-                return awaitOperation()
-              }
+              await prevItem.unequip()
+              return awaitOperation()
             }
             // Make sure that no slot is assigned to twice
             slotList.splice(slotList.indexOf(slot), 1)
@@ -210,7 +207,8 @@ export default class SwTorActor extends Actor {
         }
       }
 
-      return await item.equip(newItemSlots)
+      this._cacheClearPending = true
+      return item.equip(newItemSlots)
     } else if (item == null) {
       // Set the slot to empty
       const oldItem = this.getItemInSlot(slotKey)
@@ -222,6 +220,41 @@ export default class SwTorActor extends Actor {
 
   getItemInSlot(slotKey) {
     return this.equippedItems.find(item => item.isEquippedInSlot(slotKey))
+  }
+
+  get equippedWeapons() {
+    return this._cache.lookup('equippedWeapons', () => {
+      const weapons = []
+      this.dataSet.slots.list.filter(slot => slot.supportsWeapon).forEach(slot => {
+        let item = this.getItemInSlot(slot.key)
+        if (item == null) {
+          item = this._getEmptySlotWeapon()
+        }
+        if (item != null) {
+          if (item.id == null || !weapons.some(weapon => weapon.id === item.id)) {
+            weapons.push(item)
+          }
+        }
+      })
+      return weapons
+    })
+  }
+
+  get targetDistance() {
+    if (ObjectUtils.try(this.data.data.targetDistance, 'type') === 'auto') {
+      const token = this.token
+      // TODO this doesn't quite work yet. Need further digging or a Foundry update
+      if (token != null && token.target != null) {
+        return roundDecimal(measureDistance(token, token.target), 2)
+      }
+    }
+
+    // Automatic distance is not available or enabled => use the user-defined distance
+    return ObjectUtils.try(this.data.data.targetDistance, 'value')
+  }
+
+  get usesAutomaticTargetDistance() {
+    return ObjectUtils.try(this.data.data.targetDistance, 'type') === 'auto'
   }
 
   // ---------------------------------------------------------------------
@@ -322,6 +355,11 @@ export default class SwTorActor extends Actor {
     }
   }
 
+  _getEmptySlotWeapon() {
+    // The weapon that the actor uses if a weapon slot is empty. For humanoids, this would be something like a "fist".
+    return null
+  }
+
   // ----------------------------------------------------------------------------
   // Install some item hooks to make sure that item invariants are kept
   // ----------------------------------------------------------------------------
@@ -354,7 +392,12 @@ export default class SwTorActor extends Actor {
     // This is done to work around a FoundryVTT-bug that causes token actors to miss an item update. I.e.
     // updates are always delayed by one change
     promise = promise.then(res => {
-      this._cache.clearKey('categorizedItems')
+      if (this._cacheClearPending) {
+        this._cacheClearPending = false
+        this._cache.clear()
+      } else {
+        this._cache.clearKey('categorizedItems')
+      }
       this.render(false)
       item = this.getOwnedItem(data.id)
       item.sheet.render(false)

@@ -16,7 +16,7 @@ export default {
           return { key, name: key }
         }
       }
-    })
+    }, { configurable: true })
 
     this._addUpdateFilter('data.damage.formula', data => {
       Object.assign(data.data.damage, analyzeDamageFormula({ expression: data.data.damage.formula, defaultExpr: '0' }))

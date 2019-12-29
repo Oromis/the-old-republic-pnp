@@ -43,7 +43,13 @@
             <td>
               <div class="flex-row multi-item">
                 <input type="text" name="data.skill" value="{{item.skill.key}}" class="uppercase" />
-                <span>{{item.skill.name}}</span>
+                <span>
+                  {{#if item.skill}}
+                    {{item.skill.name}}
+                  {{else}}
+                    Fähigkeit fehlt: {{formatAttrKey data.skill}}
+                  {{/if}}
+                </span>
               </div>
             </td>
           </tr>

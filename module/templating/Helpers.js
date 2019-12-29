@@ -27,10 +27,18 @@ function categorizeD20Result(value) {
   }
 }
 
-const formatAttrKey = key => key.toUpperCase()
+const formatAttrKey = key => key && key.toUpperCase()
 
 function formatMetricChanges(diff) {
   return Object.entries(diff).map(([label, cost]) => `${label}: ${formatMod(cost)}`).join(' | ')
+}
+
+function formatCheckDiff(diff, classes = '') {
+  return (
+    `<span class="check-diff ${diff >= 0 ? 'good' : 'bad'} ${classes}">` +
+    `${diff > 0 ? '+' : ''}${diff}` +
+    '</span>'
+  )
 }
 
 export function registerHelpers() {
@@ -56,13 +64,14 @@ export function registerHelpers() {
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
     isMultiple: arg => arg > 1,
     isRelevantFactor: num => typeof num === 'number' && num !== 1,
+    formatList: list => list.join(', '),
     formatAttrKey,
     formatPercentage: val => `${Math.round(val)}%`,
     formatCheckView: ({ hash: { check, label } }) => new Handlebars.SafeString(
       check.rolls.map(roll => `
         <span title="${roll.label}">
           <strong>${formatAttrKey(roll.key)}</strong>
-          ${roll.target}
+          ${roll.target}${roll.advantage ? formatCheckDiff(roll.advantage, 'small') : ''}
         </span>
       `).join('') + `
       <span>|</span>
@@ -74,11 +83,7 @@ export function registerHelpers() {
         <i class="fas fa-dice-d20"></i>
       </a>
     `),
-    formatCheckDiff: (diff, classes = '') => new Handlebars.SafeString(
-      `<span class="check-diff ${diff >= 0 ? 'good' : 'bad'} ${classes}">` +
-      `${diff > 0 ? '+' : ''}${diff}` +
-      '</span>'
-    ),
+    formatCheckDiff: (diff, classes = '') => new Handlebars.SafeString(formatCheckDiff(diff, classes)),
     formatD20Result: result => new Handlebars.SafeString(`<span class="roll d20 ${categorizeD20Result(result)}">${result}</span>`),
     formatMod,
     formatExplanation: components => {

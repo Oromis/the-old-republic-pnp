@@ -345,64 +345,83 @@
         <div class="flex-grow flex-zero">
           <h3 class="align-center">Offensive</h3>
           <div class="multi-item">
-            {{#each computed.weaponSlots as |slot|}}
+            {{#each actor.equippedWeapons as |weapon|}}
               <div class="weapon-slot">
-                <h4>{{slot.label}} - <strong>{{slot.skill.name}}</strong></h4>
-                {{#if slot.skill}}
+                <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
+                {{#if weapon.skill}}
                   <div class="line-view multi-item">
                     <div class="flex-row multi-item">
                       <img src="icons/svg/d20.svg" class="table-icon" alt="Attacke" title="Attacke" />
-                      {{formatCheckView check=slot.attackCheck label=(concat 'Attacke ' slot.label)}}
+                      {{formatCheckView check=weapon.attackCheck label=(concat 'Attacke ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')}}
                     </div>
                     <div class="flex-row multi-item">
                       <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)" title="Erleichterung (>0) / Erschwernis (<0)" />
-                      <input type="text" name="data.weaponSlots.{{slot.key}}.advantage"
-                             value="{{slot.advantage}}" data-dtype="Number"
+                      <input type="text" name="items.{{weapon.id}}.data.attackAdvantage"
+                             value="{{weapon.data.data.attackAdvantage}}" data-dtype="Number"
                              title="Erleichterung (>0) / Erschwernis (<0)"
                       />
-                      {{#if slot.isRanged}}
+                      {{#if weapon.itemType.isRangedWeapon}}
                         <img src="icons/svg/target.svg" class="table-icon" alt="Genauigkeit" title="Genauigkeit" />
-                        <span title="Genauigkeit">{{slot.precision}}</span>
+                        <span title="Genauigkeit">{{weapon.currentPrecision}}</span>
                       {{/if}}
-                      {{#if slot.coordination}}
+                      {{#if weapon.primaryEquippedSlot.coordination}}
                         <i class="fas fa-hand-paper table-icon"></i>
-                        <span title="Koordination">{{slot.coordination}}</span>
+                        <span title="Koordination">{{weapon.primaryEquippedSlot.coordination}}</span>
                       {{/if}}
                     </div>
-                    {{#if slot.item}}
-                      <div class="flex-row multi-item">
-                        <img src="icons/svg/sword.svg" class="table-icon" alt="Schaden" title="Schaden" />
-                        <span class="flex-row">
-                          {{slot.item.data.damage.formula}}
-                          {{#if (isRelevantFactor slot.projectileEnergy)}}
-                            *&nbsp;<span title="Projektilenergie" class="flex-row">{{slot.projectileEnergy}} (<img src="icons/svg/target.svg" class="table-icon small" alt="Projektilenergie" />)</span>
-                          {{/if}}
-                          {{#if (isRelevantFactor slot.strengthModifier)}}
-                            *&nbsp;<span title="Körperkraftmodifikator" class="flex-row">{{slot.strengthModifier}} (<i class="fas fa-fist-raised table-icon small"></i>)</span>
-                          {{/if}}
-                        </span>
-                        <a
-                            class="do-roll"
-                            title="Schaden auswürfeln"
-                            data-formula="{{slot.damage}}"
-                            data-label="Schaden {{slot.label}} ({{slot.item.name}})"
-                        >
-                          <i class="fas fa-dice-d6"></i>
-                        </a>
-                      </div>
-                    {{/if}}
+                    <div class="flex-row multi-item">
+                      <img src="icons/svg/sword.svg" class="table-icon" alt="Schaden" title="Schaden" />
+                      <span class="flex-row">
+                        {{weapon.damage.formula}}
+                        {{#if (isRelevantFactor weapon.currentProjectileEnergy)}}
+                          *&nbsp;
+                          <span title="Projektilenergie" class="flex-row">
+                            {{weapon.currentProjectileEnergy}}
+                            (<img src="icons/svg/target.svg" class="table-icon small" alt="Projektilenergie" />)
+                          </span>
+                        {{/if}}
+                        {{#if (isRelevantFactor weapon.currentStrengthModifier)}}
+                          *&nbsp;
+                          <span title="Körperkraftmodifikator" class="flex-row">
+                            {{weapon.currentStrengthModifier}}
+                            (<i class="fas fa-fist-raised table-icon small"></i>)
+                          </span>
+                        {{/if}}
+                      </span>
+                      <a
+                          class="do-roll"
+                          title="Schaden auswürfeln"
+                          data-formula="{{weapon.damage.formula}}"
+                          data-label="Schaden {{weapon.primaryEquippedSlot.label}} ({{weapon.name}})"
+                      >
+                        <i class="fas fa-dice-d6"></i>
+                      </a>
+                    </div>
                   </div>
                 {{/if}}
               </div>
             {{/each}}
-            <div>
-              <label class="flex-row multi-item">
-                <span>Entfernung Gegner</span>
-                <span>
-                  <input type="text" name="data.combat.enemyDistance" value="{{data.combat.enemyDistance}}" />
-                  m
-                </span>
-              </label>
+            <div class="multi-item">
+              <div>
+                <strong>Zielentfernung</strong>
+              </div>
+              <div class="flex-row multi-item">
+                <select name="data.targetDistance.type">
+                  {{#select data.targetDistance.type}}
+                    <option value="">Manuell</option>
+                    <option value="auto">Auto</option>
+                  {{/select}}
+                </select>
+                <label class="flex-row">
+                  <input
+                      type="text"
+                      name="data.targetDistance.value"
+                      value="{{actor.targetDistance}}"
+                      {{#if actor.usesAutomaticTargetDistance}}disabled{{/if}}
+                  />
+                  <span>&nbsp;m</span>
+                </label>
+              </div>
             </div>
           </div>
         </div>

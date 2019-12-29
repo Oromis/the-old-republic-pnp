@@ -27,6 +27,10 @@ import Training from '../item/Training.js'
 import CharacterDispositions from './CharacterDispositions.js'
 import HumanoidSlots from './HumanoidSlots.js'
 import EquippableItem from '../item/EquippableItem.js'
+import OwnedWeapon from '../item/OwnedWeapon.js'
+import OwnedEquippableItem from '../item/OwnedEquippableItem.js'
+import OwnedRangedWeapon from '../item/OwnedRangedWeapon.js'
+import OwnedMeleeWeapon from '../item/OwnedMeleeWeapon.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -84,9 +88,13 @@ export default Object.freeze({
           delegates: [
             PhysicalItem,
             itemType.isWeapon && Weapon,
+            itemType.isWeapon && owned && OwnedWeapon,
             itemType.isRangedWeapon && RangedWeapon,
+            itemType.isRangedWeapon && owned && OwnedRangedWeapon,
+            itemType.isMeleeWeapon && owned && OwnedMeleeWeapon,
             itemType.isWearable && WearableItem,
             itemType.isEquippable && EquippableItem,
+            itemType.isEquippable && owned && OwnedEquippableItem,
             itemType.hasEffects && ItemWithEffects,
           ].filter(validObjectsFilter),
           itemTypes: ItemTypes,

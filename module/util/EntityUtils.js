@@ -41,8 +41,9 @@ export function defineEnumAccessor(
   })
 }
 
-export function defineGetter(object, key, getter) {
+export function defineGetter(object, key, getter, { configurable = false } = {}) {
   Object.defineProperty(object, key, {
+    configurable,
     get() {
       return getter.call(this)
     }

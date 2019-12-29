@@ -99,6 +99,21 @@ export default class SwTorActorSheet extends ActorSheet {
       return {}
     })
 
+    autoSubmit.addFilter('items.*', (obj, { name, path }) => {
+      const [_unused, id, ...rest] = path
+      const item = this.actor.getOwnedItem(id)
+      if (item != null) {
+        const value = obj[name]
+        const payload = { [rest.join('.')]: value }
+        const oldValue = ObjectUtils.try(item.data, ...rest)
+        if (value !== oldValue) {
+          item.update(payload)
+        }
+      }
+      // No actor update
+      return {}
+    })
+
     autoSubmit.addFilter('input.totalXp', (obj, { name }) => {
       const newVal = Math.round(processDeltaValue(obj[name], this.actor.xp.total))
       return {
