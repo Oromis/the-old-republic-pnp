@@ -482,7 +482,7 @@
                   <input type="text" name="data.combat.damageIncoming.amount" value="{{data.combat.damageIncoming.amount}}" placeholder="Schaden" />
                   <select name="data.combat.damageIncoming.type" class="small">
                     {{#select data.combat.damageIncoming.type}}
-                      {{#each damageTypes as |type|}}
+                      {{#each actor.dataSet.damageTypes as |type|}}
                         <option value="{{type.key}}">
                           {{type.label}}
                         </option>

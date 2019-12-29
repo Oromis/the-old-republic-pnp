@@ -22,9 +22,11 @@ import RangedWeapon from '../item/RangedWeapon.js'
 import DamageTypes from '../DamageTypes.js'
 import SlotTypes from '../SlotTypes.js'
 import ItemWithEffects from '../item/ItemWithEffects.js'
-import Wearable from '../item/Wearable.js'
+import WearableItem from '../item/WearableItem.js'
 import Training from '../item/Training.js'
 import CharacterDispositions from './CharacterDispositions.js'
+import HumanoidSlots from './HumanoidSlots.js'
+import EquippableItem from '../item/EquippableItem.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -38,6 +40,8 @@ export default Object.freeze({
       xpTable: XpTable,
       skillCategories: SkillCategories,
       itemTypes: ItemTypes,
+      damageTypes: DamageTypes,
+      slots: HumanoidSlots,
     }
   },
 
@@ -81,7 +85,8 @@ export default Object.freeze({
             PhysicalItem,
             itemType.isWeapon && Weapon,
             itemType.isRangedWeapon && RangedWeapon,
-            itemType.isWearable && Wearable,
+            itemType.isWearable && WearableItem,
+            itemType.isEquippable && EquippableItem,
             itemType.hasEffects && ItemWithEffects,
           ].filter(validObjectsFilter),
           itemTypes: ItemTypes,

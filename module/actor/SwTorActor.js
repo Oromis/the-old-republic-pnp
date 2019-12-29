@@ -3,12 +3,14 @@ import DataCache from '../util/DataCache.js'
 import ObjectUtils from '../util/ObjectUtils.js'
 import { roundDecimal } from '../util/MathUtils.js'
 import { defineGetter } from '../util/EntityUtils.js'
+import Slots from '../datasets/HumanoidSlots.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
     super(...args)
 
     this._callDelegate('afterConstruct')
+    this._pendingCalls = []
   }
 
   prepareData(actorData) {
@@ -110,6 +112,116 @@ export default class SwTorActor extends Actor {
       )))
       return result
     })
+  }
+
+  async equipItem(slotKey, item) {
+    const targetSlot = this.dataSet.slots.map[slotKey]
+    if (targetSlot == null) {
+      throw new Error(`Ungültiger Slot: ${slotKey}`)
+    }
+
+    if (item != null && !item.isEquippedInSlot(slotKey)) {
+      // Equip Item in slot
+      const prevItemSlots = item.slots || []
+      const itemSlotTypes = [...item.slotTypes]
+
+      const awaitOperation = () => {
+        // Work around a Foundry 0.4.3 bug: If this is a token actor, we need to wait for the response from
+        // the server before proceeding or we'll override any changes done here in the next item update
+        // (even if it is a completely different item)
+        this._pendingCalls.push(() => this.equipItem(slotKey, this.getOwnedItem(item.id)))
+      }
+
+      // Remove any previous item in the slot
+      const removedItems = []
+      const oldItem = this.getItemInSlot(slotKey)
+      if (oldItem != null) {
+        removedItems.push(oldItem.id)
+        oldItem.unequip()
+        if (this.isToken) {
+          return awaitOperation()
+        }
+      }
+
+      // Find an item that will be in a slot after the current equipItem() execution has finished
+      const localGetItemInSlot = (slotKey) => {
+        const item = this.getItemInSlot(slotKey)
+        if (item == null) {
+          return item
+        } else {
+          return removedItems.indexOf(item.id) !== -1 ? null : item
+        }
+      }
+
+      // Add item to the slot we've assigned it to
+      const newItemSlots = [slotKey]
+      {
+        // Remove the assigned slot from the list of slot types we need to take care of
+        const index = itemSlotTypes.indexOf(targetSlot.type)
+        if (index === -1) {
+          throw new Error(`Item doesn't fit into the given slot (${slotKey} is not in [${itemSlotTypes.join(', ')}])`)
+        } else {
+          itemSlotTypes.splice(index, 1)
+        }
+      }
+      // A list of slots that are not fill by our item
+      const slotList = this.dataSet.slots.list.filter(slot => slot.key !== slotKey)
+
+      // Now: For each slot type we need to fill we'll find a corresponding slot to put the item into,
+      // remove any previous items in that slot and add our new item
+      for (const itemSlotType of itemSlotTypes) {
+        let handled = false
+        // See if our item is in one of these slots already
+        for (const prevItemSlot of prevItemSlots) {
+          const slot = this.dataSet.slots.map[prevItemSlot]
+          if (slot.type === itemSlotType) {
+            // Yes, this item is in a matching slot already. Nothing to do.
+            handled = true
+            break
+          }
+        }
+
+        if (!handled) {
+          // Find a slot to put this item into. Prefer empty slots.
+          let slot = slotList.find(slot => slot.type === itemSlotType && localGetItemInSlot(slot.key) == null)
+          if (slot == null) {
+            // No empty slot of the given type => find a filled slot and remove its item
+            slot = slotList.find(slot => slot.type === itemSlotType)
+          }
+          if (slot != null) {
+            const prevItem = localGetItemInSlot(slot.key)
+            if (prevItem != null) {
+              // Remove the previous item
+              removedItems.push(prevItem.id)
+              prevItem.unequip()
+              if (this.isToken) {
+                return awaitOperation()
+              }
+            }
+            // Make sure that no slot is assigned to twice
+            slotList.splice(slotList.indexOf(slot), 1)
+
+            // Add the new item to the slot
+            newItemSlots.push(slot.key)
+          } else {
+            // There's absolutely no slot that can be used.
+            throw new Error(`Kann ${item.name} nicht ausrüsten: Kein freier Slot vom Typ ${itemSlotType}`)
+          }
+        }
+      }
+
+      return await item.equip(newItemSlots)
+    } else if (item == null) {
+      // Set the slot to empty
+      const oldItem = this.getItemInSlot(slotKey)
+      if (oldItem != null) {
+        await oldItem.unequip()
+      }
+    }
+  }
+
+  getItemInSlot(slotKey) {
+    return this.equippedItems.find(item => item.isEquippedInSlot(slotKey))
   }
 
   // ---------------------------------------------------------------------
@@ -239,17 +351,16 @@ export default class SwTorActor extends Actor {
     }
     let promise = this._checkValidItem(data, () => super.updateOwnedItem(data, ...rest))
 
-    if (this.isToken) {
-      // This is done to work around a FoundryVTT-bug that causes token actors to miss an item update. I.e.
-      // updates are always delayed by one change
-      promise = promise.then(res => {
-        this._cache.clearKey('categorizedItems')
-        this.render(false)
-        item = this.getOwnedItem(data.id)
-        item.sheet.render(false)
-        return res
-      })
-    }
+    // This is done to work around a FoundryVTT-bug that causes token actors to miss an item update. I.e.
+    // updates are always delayed by one change
+    promise = promise.then(res => {
+      this._cache.clearKey('categorizedItems')
+      this.render(false)
+      item = this.getOwnedItem(data.id)
+      item.sheet.render(false)
+      this._runPendingCalls()
+      return res
+    })
     return promise
   }
 
@@ -275,5 +386,13 @@ export default class SwTorActor extends Actor {
     }
 
     return cb()
+  }
+
+  _runPendingCalls() {
+    const calls = [...this._pendingCalls]
+    this._pendingCalls = []
+    for (const call of calls) {
+      call()
+    }
   }
 }

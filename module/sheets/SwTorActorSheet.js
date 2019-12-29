@@ -5,7 +5,7 @@ import {
   calcPropertyBaseValue,
   calcUpgradeCost,
 } from '../CharacterFormulas.js'
-import Slots from '../Slots.js'
+import Slots from '../datasets/HumanoidSlots.js'
 import DamageTypes from '../DamageTypes.js'
 import { roundDecimal } from '../util/MathUtils.js'
 
@@ -235,18 +235,18 @@ export default class SwTorActorSheet extends ActorSheet {
         { label: 'Mächte', skills: forceSkills }
       ],
       forceSkills: forceSkills.length > 0 ? forceSkills : null,
-      slots: Slots.layout.map(row => row.map(slot => {
+      slots: this.actor.dataSet.slots.layout.map(row => row.map(slot => {
         if (slot == null) {
           return null
         } else {
-          const equippedItem = computedActorData.equippedItems.find(item => item.id === actorSlots[slot.key])
+          const equippedItem = this.actor.equippedItems.find(item => item.isEquippedInSlot(slot.key))
           return {
             ...slot,
             item: equippedItem,
             options: [
               { id: null, name: '<Leer>', active: equippedItem == null },
-              ...(equippedItem != null ? [{ ...equippedItem, active: true }] : []),
-              ...computedActorData.freeItems.filter(item => Array.isArray(item.data.slotTypes) && item.data.slotTypes.indexOf(slot.type) !== -1)
+              ...(equippedItem != null ? [{ id: equippedItem.id, name: equippedItem.name, active: true }] : []),
+              ...computedActorData.freeItems.filter(item => Array.isArray(item.slotTypes) && item.slotTypes.indexOf(slot.type) !== -1)
             ]
           }
         }
@@ -276,8 +276,6 @@ export default class SwTorActorSheet extends ActorSheet {
       //   }, computedActorData, { label: 'Nächster Tag', className: 'next-day', icon: 'fa-sun' })
       // }
     }
-    data.damageTypes = DamageTypes.list
-    data.itemTypes = ItemTypes.list
     data.ui = {
       inventoryHidden: this._inventoryHidden,
     }
@@ -389,72 +387,14 @@ export default class SwTorActorSheet extends ActorSheet {
     return this.actor.modifyMetrics(diff)
   }
 
-  _onChangeEquipment = event => {
-    const slots = { ...this.actor.data.data.slots }
+  _onChangeEquipment = async event => {
     const slotKey = event.currentTarget.getAttribute('data-slot')
-    const slot = Slots.map[slotKey]
-    if (slot == null) {
-      return ui.notifications.error(`Ungültiger Slot: ${slotKey}`)
-    }
-    function removeItem(id) {
-      for (const key of Object.keys(slots)) {
-        if (slots[key] === id) {
-          slots[key] = null
-        }
-      }
-    }
-
     const rawItemId = event.currentTarget.getAttribute('data-item')
-    const itemId = +rawItemId
-    if (!rawItemId ? slots[slotKey] != null : slots[slotKey] !== itemId) {
-      // Item changed
-      const item = this.actor.getOwnedItem(itemId)
-      if (rawItemId && item != null) {
-        removeItem(itemId) // Remove item from any other slots
-        let found = false
-        const slotsToFill = [...item.data.data.slotTypes].filter(type => {
-          if (found || type !== slot.type) {
-            return true
-          } else {
-            found = true
-            return false
-          }
-        })
-        if (typeof slots[slotKey] === 'number') {
-          // Remove the item that has been in the slot previously
-          removeItem(slots[slotKey])
-        }
-        slots[slotKey] = itemId
-
-        for (const type of slotsToFill) {
-          // Find an empty slot to put this item into
-          let newSlot = Slots.list.find(s => s.type === type && slot.key !== s.key && !slots[s.key])
-          if (newSlot != null) {
-            // Empty slot found :)
-            slots[newSlot.key] = itemId
-          } else {
-            // No empty slot of the type we're looking for => just take any other slot and remove the currently
-            // equipped item
-            newSlot = Slots.list.find(s => s.type === type && slot.key !== s.key)
-            if (newSlot == null) {
-              // Cannot equip the item, don't have enough slots
-              return ui.notifications.error(`Kann ${item.name} nicht ausrüsten: Kein freier Slot vom Typ ${slot.type}`)
-            } else {
-              const oldId = slots[newSlot.key]
-              slots[newSlot.key] = itemId
-              // Remove the old item completely (from all slots)
-              removeItem(oldId)
-            }
-          }
-        }
-      } else {
-        // Set the slot to empty
-        const oldId = slots[slotKey]
-        if (oldId != null) {
-          removeItem(oldId)
-        }
-      }
-      this.actor.update({ 'data.slots': slots })
+    try {
+      return await this.actor.equipItem(slotKey, isNaN(rawItemId) ? null : this.actor.getOwnedItem(+rawItemId))
+    } catch (e) {
+      ui.notifications.error(e.message)
+      return Promise.reject(e)
     }
   }
 

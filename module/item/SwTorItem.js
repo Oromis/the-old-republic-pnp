@@ -47,10 +47,6 @@ export default class SwTorItem extends Item {
   // Data access
   // ----------------------------------------------------------------------------
 
-  get isEquipped() {
-    return Array.isArray(this.data.slots) && this.data.slots.length > 0
-  }
-
   get dataSet() {
     if (this._dataSetStore == null) {
       this._dataSetStore = DataSets.fromItemType(this.type, { owned: this.isOwned })
