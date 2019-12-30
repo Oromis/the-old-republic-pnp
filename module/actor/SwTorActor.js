@@ -213,6 +213,7 @@ export default class SwTorActor extends Actor {
       // Set the slot to empty
       const oldItem = this.getItemInSlot(slotKey)
       if (oldItem != null) {
+        this._cacheClearPending = true
         await oldItem.unequip()
       }
     }
@@ -255,6 +256,42 @@ export default class SwTorActor extends Actor {
 
   get usesAutomaticTargetDistance() {
     return ObjectUtils.try(this.data.data.targetDistance, 'type') === 'auto'
+  }
+
+  calcIncomingDamage({ type, amount }) {
+    let incomingDamage = amount
+    const damageType = type
+    let resistances = []
+    let costs = null
+    if (damageType != null) {
+      costs = {}
+      for (const res of this.resistances.list.filter(rt => rt.canResist(damageType))) {
+        const result = res.full
+        const { damage, cost } = res.resist(incomingDamage, damageType)
+        result.damageBefore = incomingDamage
+        result.damageReduction = incomingDamage - damage
+        result.damageAfter = damage
+        incomingDamage = damage
+
+        if (cost != null && typeof cost === 'object') {
+          for (const [metricKey, amount] of Object.entries(cost)) {
+            if (amount !== 0) {
+              costs[metricKey] = (costs[metricKey] || 0) + amount
+            }
+          }
+        }
+
+        resistances.push(result)
+      }
+
+      // Resistances have reduced the incoming damage, the rest will be deducted from the targets
+      const targets = damageType.targets || [{ key: 'LeP' }]
+      for (const target of targets) {
+        const factor = target.factor || 1
+        costs[target.key] = (costs[target.key] || 0) + (incomingDamage * factor)
+      }
+    }
+    return { resistances, costs }
   }
 
   // ---------------------------------------------------------------------
@@ -392,11 +429,14 @@ export default class SwTorActor extends Actor {
     // This is done to work around a FoundryVTT-bug that causes token actors to miss an item update. I.e.
     // updates are always delayed by one change
     promise = promise.then(res => {
+      this._cache.clear()
       if (this._cacheClearPending) {
         this._cacheClearPending = false
-        this._cache.clear()
-      } else {
-        this._cache.clearKey('categorizedItems')
+
+        // This has been added to force-update the actor's attributes and metrics when an equipped item changes
+        // (because bonuses will change in this case)
+        const data = this.prepareData({})
+        this.update(data)
       }
       this.render(false)
       item = this.getOwnedItem(data.id)

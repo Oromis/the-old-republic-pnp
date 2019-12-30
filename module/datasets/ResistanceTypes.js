@@ -10,8 +10,11 @@ function resistFlat(damage) {
 function resistEnergy(damage, type, actor) {
   const EnP = actor.metrics.EnP.value
   let damageMulti = 1
-  if (type.key === 'ion')
+  if (type.key === 'ion') {
     damageMulti = 10
+  } else if (type.key === 'shock') {
+    damageMulti = 4
+  }
 
   const reduced = Math.min(EnP, damage * damageMulti, this.value.total)
   return { damage: damage - (reduced / damageMulti), cost: { EnP: reduced }}
@@ -24,6 +27,10 @@ function resistPercentage(damage) {
 class ResistanceTypeInstance extends Property {
   canResist(damageType) {
     return this._staticData.resists.indexOf(damageType.key) !== -1
+  }
+
+  resist(damage, type) {
+    return this._staticData.resist.call(this, damage, type, this._entity)
   }
 }
 
@@ -46,10 +53,10 @@ class ResistanceTypePrototype extends PropertyPrototype {
 
 const list = [
   new ResistanceTypePrototype('r_shield',
-    { label: 'Schild', icon: 'icons/svg/circle.svg', resists: ['energy', 'ion'], resist: resistEnergy }
+    { label: 'Schild', icon: 'icons/svg/circle.svg', resists: ['energy', 'ion', 'shock'], resist: resistEnergy }
   ),
   new ResistanceTypePrototype('r_armor',
-    { label: 'Rüstung', icon: 'icons/svg/shield.svg', resists: ['physical', 'energy', 'ion'], resist: resistFlat }
+    { label: 'Rüstung', icon: 'icons/svg/shield.svg', resists: ['physical', 'energy', 'ion', 'stamina'], resist: resistFlat }
   ),
   new ResistanceTypePrototype('r_fire',
     { label: 'Feuerresistenz', icon: 'icons/svg/fire-shield.svg', resists: ['fire'], resist: resistPercentage }

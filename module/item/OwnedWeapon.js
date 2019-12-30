@@ -16,7 +16,7 @@ export default {
     this.calcBaseAttackAdvantage = () => {
       const primarySlot = this.primaryEquippedSlot
       return ((primarySlot && primarySlot.coordination) || 0) +
-        this.data.data.attackAdvantage || 0
+        (this.data.data.attackAdvantage || 0)
     }
 
     defineGetter(this, 'attackAdvantage', this.calcBaseAttackAdvantage, { configurable: true })

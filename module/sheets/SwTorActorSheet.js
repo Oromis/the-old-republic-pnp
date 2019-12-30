@@ -70,6 +70,10 @@ export default class SwTorActorSheet extends ActorSheet {
      */
     this._sheetTab = "attributes"
     this._inventoryHidden = {}
+    this._damageIncoming = {
+      type: DamageTypes.default,
+      amount: 0,
+    }
 
     const autoSubmit = new AutoSubmitSheet(this)
 
@@ -120,6 +124,12 @@ export default class SwTorActorSheet extends ActorSheet {
         'data.xp.gained': newVal - this.actor.xpFromGp
       }
     })
+
+    autoSubmit.addFilter('input.damageIncoming.*', (obj, { name, path }) => {
+      this._damageIncoming[path[path.length - 1]] = obj[name]
+      this.render(false)
+      return {}
+    })
   }
 
   /* -------------------------------------------- */
@@ -147,97 +157,7 @@ export default class SwTorActorSheet extends ActorSheet {
   getData() {
     const data = super.getData()
 
-    const actorSlots = data.data.slots || {}
-
     const computedActorData = this.actor
-
-    // TODO
-    // for (const weaponSlot of computedActorData.weaponSlots) {
-    //   if (weaponSlot.skill && computedActorData.skills[weaponSlot.skill.key]) {
-    //     weaponSlot.skill = computedActorData.skills[weaponSlot.skill.key]
-    //     if (weaponSlot.item != null) {
-    //       if (weaponSlot.skill.data.category === 'ranged') {
-    //         weaponSlot.isRanged = true
-    //         const enemyDistance = ObjectUtils.try(data.data.combat, 'enemyDistance')
-    //         if (enemyDistance != null) {
-    //           weaponSlot.precision = -evalSkillExpression(
-    //             ObjectUtils.try(weaponSlot.item.data.precision, 'formula'),
-    //             weaponSlot.skill,
-    //             { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance'), round: 0 }
-    //           ).value
-    //           weaponSlot.projectileEnergy = Math.max(roundDecimal(evalSkillExpression(
-    //             ObjectUtils.try(weaponSlot.item.data.projectileEnergy, 'formula'),
-    //             weaponSlot.skill,
-    //             { vars: ObjectUtils.sameValue(enemyDistance, 'Entfernung', 'entfernung', 'Distance', 'distance') }
-    //           ).value, 3), 0)
-    //         }
-    //       }
-    //
-    //       if (weaponSlot.item.data.hasStrengthModifier) {
-    //         weaponSlot.strengthModifier = roundDecimal((computedActorData.attributes.kk.value.total + 50) / 100, 2)
-    //       }
-    //     }
-    //
-    //     // Defense
-    //     if (weaponSlot.skill.data.category === 'melee') {
-    //       weaponSlot.canDefend = true
-    //       const paradeAdvantage = (weaponSlot.coordination || 0) +
-    //         ObjectUtils.try(data.data.weaponSlots, weaponSlot.key, 'paradeAdvantage', { default: 0 })
-    //       weaponSlot.paradeCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
-    //       for (const roll of weaponSlot.paradeCheck.rolls) {
-    //         roll.advantage = paradeAdvantage
-    //       }
-    //     }
-    //
-    //     // Offense
-    //     const attackAdvantage = (weaponSlot.precision || 0) +
-    //       (weaponSlot.coordination || 0) +
-    //       ObjectUtils.try(data.data.weaponSlots, weaponSlot.key, 'advantage', { default: 0 })
-    //     weaponSlot.attackCheck = ObjectUtils.cloneDeep(weaponSlot.skill.check)
-    //     for (const roll of weaponSlot.attackCheck.rolls) {
-    //       roll.advantage = attackAdvantage
-    //     }
-    //     if (weaponSlot.item != null) {
-    //       weaponSlot.damage = weaponSlot.item.data.damage.formula
-    //       if (weaponSlot.projectileEnergy != null && weaponSlot.projectileEnergy !== 1) {
-    //         weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.projectileEnergy}`
-    //       }
-    //       if (weaponSlot.strengthModifier != null && weaponSlot.strengthModifier !== 1) {
-    //         weaponSlot.damage = `(${weaponSlot.damage})*${weaponSlot.strengthModifier}`
-    //       }
-    //     }
-    //   } else {
-    //     weaponSlot.skill = null
-    //   }
-    // }
-
-    // TODO
-    // let incomingDamage = ObjectUtils.try(data.data.combat, 'damageIncoming', 'amount')
-    // const incomingDamageType = DamageTypes.map[ObjectUtils.try(data.data.combat, 'damageIncoming', 'type')]
-    // let incomingDamageResistances = []
-    // let incomingDamageCost = null
-    // if (incomingDamageType != null) {
-    //   incomingDamageCost = { LeP: 0 }
-    //   incomingDamageResistances = resistances.filter(rt => rt.canResist(incomingDamageType))
-    //   for (const res of incomingDamageResistances) {
-    //     const { damage, cost } = res.resist(incomingDamage, incomingDamageType, computedActorData)
-    //     res.damageBefore = incomingDamage
-    //     res.damageReduction = incomingDamage - damage
-    //     res.damageAfter = damage
-    //     incomingDamage = damage
-    //
-    //     if (cost != null && typeof cost === 'object') {
-    //       for (const [metricKey, amount] of Object.entries(cost)) {
-    //         if (amount !== 0) {
-    //           incomingDamageCost[metricKey] = (incomingDamageCost[metricKey] || 0) + amount
-    //         }
-    //       }
-    //     }
-    //   }
-    //
-    //   // Resistances have reduced the incoming damage, the rest will be deducted from HP
-    //   incomingDamageCost.LeP += incomingDamage
-    // }
 
     const skills = this.actor.skills.list
     const forceSkills = this.actor.forceSkills.list
@@ -270,13 +190,6 @@ export default class SwTorActorSheet extends ActorSheet {
         ...type,
         items: this.actor.inventory.filter(item => item.type === type.key)
       })),
-      weaponSlots: computedActorData.weaponSlots,
-      // TODO
-      // damageIncoming: {
-      //   type: incomingDamageType,
-      //   resistances: incomingDamageResistances,
-      //   cost: incomingDamageCost,
-      // },
       // TODO
       // regeneration: {
       //   turn: this._prepareRegen('turn', {
@@ -291,8 +204,18 @@ export default class SwTorActorSheet extends ActorSheet {
       //   }, computedActorData, { label: 'Nächster Tag', className: 'next-day', icon: 'fa-sun' })
       // }
     }
+
+    const incomingDamageType = DamageTypes.map[this._damageIncoming.type] || DamageTypes.map[DamageTypes.default]
+    const incomingDamageAmount = this._damageIncoming.amount
+    const incomingDamage = this.actor.calcIncomingDamage({ type: incomingDamageType, amount: incomingDamageAmount })
     data.ui = {
       inventoryHidden: this._inventoryHidden,
+      damageIncoming: {
+        type: incomingDamageType,
+        amount: incomingDamageAmount,
+        resistances: incomingDamage.resistances,
+        cost: incomingDamage.costs,
+      },
     }
     data.actor = this.actor
     return data
@@ -420,7 +343,7 @@ export default class SwTorActorSheet extends ActorSheet {
   }
 
   _onXpToGp = () => {
-    const gp = this.actor.gp.value
+    const gp = this.actor.xp.gp
     if (gp > 0) {
       this.actor.update({ 'data.xp.gp': gp - 1 })
     }

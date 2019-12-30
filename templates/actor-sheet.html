@@ -389,10 +389,10 @@
                         {{/if}}
                       </span>
                       <a
-                          class="do-roll"
-                          title="Schaden auswürfeln"
-                          data-formula="{{weapon.currentDamageFormula}}"
-                          data-label="Schaden {{weapon.primaryEquippedSlot.label}} ({{weapon.name}})"
+                        class="do-roll"
+                        title="Schaden auswürfeln"
+                        data-formula="{{weapon.currentDamageFormula}}"
+                        data-label="Schaden {{weapon.primaryEquippedSlot.label}} ({{weapon.name}})"
                       >
                         <i class="fas fa-dice-d6"></i>
                       </a>
@@ -406,7 +406,7 @@
                 <strong>Zielentfernung</strong>
               </div>
               <div class="flex-row multi-item">
-                <select name="data.targetDistance.type">
+                <select name="data.targetDistance.type" class="small">
                   {{#select data.targetDistance.type}}
                     <option value="">Manuell</option>
                     <option value="auto">Auto</option>
@@ -418,6 +418,7 @@
                       name="data.targetDistance.value"
                       value="{{actor.targetDistance}}"
                       {{#if actor.usesAutomaticTargetDistance}}disabled{{/if}}
+                      data-dtype="Number"
                   />
                   <span>&nbsp;m</span>
                 </label>
@@ -457,25 +458,27 @@
         <div class="flex-grow flex-zero">
           <h3 class="align-center">Defensive</h3>
           <div class="multi-item align-right">
-            {{#each computed.weaponSlots as |slot|}}
-              {{#if slot.canDefend}}
+            {{#each actor.equippedWeapons as |weapon|}}
+              {{#if weapon.canDefend}}
                 <div class="weapon-slot">
-                  <h4>{{slot.label}} - <strong>{{slot.skill.name}}</strong></h4>
-                  {{#if slot.skill}}
+                  <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
+                  {{#if weapon.skill}}
                     <div class="line-view multi-item">
                       <div class="flex-row multi-item flex-end">
                         <img src="icons/svg/shield.svg" class="table-icon" alt="Parade" title="Parade" />
-                        {{formatCheckView check=slot.paradeCheck label=(concat 'Parade ' slot.label)}}
+                        {{formatCheckView check=weapon.paradeCheck label=(concat 'Parade ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')}}
                       </div>
                       <div class="flex-row multi-item flex-end">
-                        <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)" title="Erleichterung (>0) / Erschwernis (<0)" />
-                        <input type="text" name="data.weaponSlots.{{slot.key}}.paradeAdvantage"
-                               value="{{slot.paradeAdvantage}}" data-dtype="Number"
+                        <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)"
+                             title="Erleichterung (>0) / Erschwernis (<0)"
+                        />
+                        <input type="text" name="items.{{weapon.id}}.data.paradeAdvantage"
+                               value="{{weapon.data.data.paradeAdvantage}}" data-dtype="Number"
                                title="Erleichterung (>0) / Erschwernis (<0)"
                         />
-                        {{#if slot.coordination}}
+                        {{#if weapon.primaryEquippedSlot.coordination}}
                           <i class="fas fa-hand-paper table-icon"></i>
-                          <span title="Koordination">{{slot.coordination}}</span>
+                          <span title="Koordination">{{weapon.primaryEquippedSlot.coordination}}</span>
                         {{/if}}
                       </div>
                     </div>
@@ -498,19 +501,22 @@
               <h4><strong>Eingehender Schaden</strong></h4>
               <div class="line-view multi-item">
                 <div class="flex-row multi-item flex-end">
-                  <input type="text" name="data.combat.damageIncoming.amount" value="{{data.combat.damageIncoming.amount}}" placeholder="Schaden" />
-                  <select name="data.combat.damageIncoming.type" class="small">
-                    {{#select data.combat.damageIncoming.type}}
-                      {{#each actor.dataSet.damageTypes as |type|}}
+                  <input type="text" name="input.damageIncoming.amount"
+                         value="{{ui.damageIncoming.amount}}" placeholder="Schaden"
+                         data-dtype="Number"
+                  />
+                  <select name="input.damageIncoming.type" class="small">
+                    {{#select ui.damageIncoming.type.key}}
+                      {{#each actor.dataSet.damageTypes.list as |type|}}
                         <option value="{{type.key}}">
                           {{type.label}}
                         </option>
                       {{/each}}
                     {{/select}}
                   </select>
-                  {{damageIcon type=computed.damageIncoming.type classes='table-icon'}}
+                  {{damageIcon type=ui.damageIncoming.type classes='table-icon'}}
                 </div>
-                {{#each computed.damageIncoming.resistances as |res|}}
+                {{#each ui.damageIncoming.resistances as |res|}}
                   <div class="flex-row multi-item flex-end">
                     <img src="{{res.icon}}" alt="{{res.label}}" title="{{res.label}}" class="table-icon" />
                     <span title="{{formatExplanation res.value.components}}">{{res.value.total}}</span>
@@ -520,13 +526,13 @@
                     <span>{{res.damageAfter}}</span>
                   </div>
                 {{/each}}
-                {{#if computed.damageIncoming.cost}}
+                {{#if ui.damageIncoming.cost}}
                   <div class="flex-row multi-item flex-end border-top">
                     <img src="icons/svg/degen.svg" alt="Effektivschaden" title="Effektivschaden" class="table-icon" />
-                    {{#each computed.damageIncoming.cost as |cost key|}}
+                    {{#each ui.damageIncoming.cost as |cost key|}}
                       <span>-{{cost}} {{key}}</span>
                     {{/each}}
-                    <a class="modify-metrics" data-deduct="{{json computed.damageIncoming.cost}}" title="Abziehen">
+                    <a class="modify-metrics" data-deduct="{{json ui.damageIncoming.cost}}" title="Abziehen">
                       <i class="fas fa-minus-square"></i>
                     </a>
                   </div>
