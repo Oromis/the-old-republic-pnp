@@ -12,6 +12,8 @@ export default class AutoSubmitSheet extends Mixin {
     this.interceptMethod('_onSubmit', () => Promise.resolve({}))
 
     this._filters = []
+    this._focusSelector = null
+    this._focusSelectorTimeout = null
   }
 
   activateListeners(html) {
@@ -23,10 +25,18 @@ export default class AutoSubmitSheet extends Mixin {
 
       html.find('textarea')
         .on('change', this._onChangeInput)
+
+      html.find('button')
+        .on('click', this._recordFocus)
     }
 
     // Support Image updates
     html.find('img[data-editable]').click(this._onEditImage)
+
+    if (this._focusSelector != null) {
+      const elements = html.find(this._focusSelector)
+      elements.focus().select()
+    }
   }
 
   addFilter(path, callback) {
@@ -34,6 +44,10 @@ export default class AutoSubmitSheet extends Mixin {
       path = path.split('.')
     }
     this._filters.push({ path, callback })
+  }
+
+  get focusSelector() {
+    return this._focusSelector
   }
 
   _onEditImage = (event) => {
@@ -67,15 +81,28 @@ export default class AutoSubmitSheet extends Mixin {
     }
   }
 
-  async _onSubmit(event) {
+  _recordFocus = async () => {
     // Make sure the focus has moved to the next element (if any) - this way we're able to restore focus after updating
     await timeout(0)
 
     const activeElement = document.activeElement
-    let focusKey = null
-    if (activeElement != null) {
-      focusKey = activeElement.getAttribute('name')
+    let focusSelector = null
+    if (activeElement != null && this.parent.form.contains(activeElement)) {
+      for (const attr of ['name', 'data-id', 'data-link']) {
+        const val = activeElement.getAttribute(attr)
+        if (val != null) {
+          focusSelector = `[${attr}="${val}"]`
+          break
+        }
+      }
     }
+    clearTimeout(this._focusSelectorTimeout)
+    this._focusSelector = focusSelector
+    setTimeout(() => this._focusSelector = null, 500)
+  }
+
+  async _onSubmit(event) {
+    await this._recordFocus()
 
     // Do not perform a general submit, only update one single field
     const target = event.target
@@ -112,10 +139,6 @@ export default class AutoSubmitSheet extends Mixin {
       if (Object.keys(updateData).length > 0) {
         await this.parent.entity.update(updateData)
       }
-    }
-
-    if (focusKey != null) {
-      $(this.parent.form).find(`[name="${focusKey}"]`).focus().select()
     }
   }
 }

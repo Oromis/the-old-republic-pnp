@@ -347,3 +347,7 @@
     width: 40px;
     border-left: 1px solid #aaa;
 }
+
+.sw-tor .tab[data-tab] {
+    display: block;
+}

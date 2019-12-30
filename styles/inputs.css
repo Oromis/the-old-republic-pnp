@@ -29,6 +29,11 @@
   width: 22px;
 }
 
+.sw-tor button:focus:not(:hover), .sw-tor select:focus {
+  box-shadow: 0 0 3px red;
+  outline: none;
+}
+
 .sw-tor .multi-item input[type=checkbox] {
   margin-right: 0;
 }

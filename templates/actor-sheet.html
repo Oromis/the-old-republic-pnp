@@ -62,10 +62,10 @@
             <span class="flex-grow">{{actor.gp.value}}</span>
             {{#if data.creationMode.enabled}}
               {{#if actor.gp.value}}
-                <button type="button" class="small gp-to-xp">GP → XP</button>
+                <button type="button" class="small gp-to-xp" data-id="gp-to-xp">GP → XP</button>
               {{/if}}
               {{#if actor.xp.gp}}
-                <button type="button" class="small xp-to-gp">GP ← XP</button>
+                <button type="button" class="small xp-to-gp" data-id="xp-to-gp">GP ← XP</button>
               {{/if}}
             {{/if}}
           </div>
@@ -166,14 +166,16 @@
                 <div class="flex-row multi-item">
                   {{#if ../data.creationMode.enabled}}
                     {{#if attr.gained.length}}
-                      <button type="button" class="small char change-attr-gained" data-attr="{{attr.key}}" data-action="-">-</button>
+                      <button type="button" class="small char change-attr-gained" data-attr="{{attr.key}}"
+                              data-action="-" data-id="attr.{{attr.key}}.-">-</button>
                     {{else}}
                       <span class="char-button-placeholder"></span>
                     {{/if}}
                   {{/if}}
                   <span class="attribute-gained">{{attr.gained.length}}</span>
                   {{#if attr.upgradeCost}}
-                    <button type="button" class="small char change-attr-gained" title="{{attr.upgradeCost}} XP" data-attr="{{attr.key}}" data-action="+">+</button>
+                    <button type="button" class="small char change-attr-gained" data-id="attr.{{attr.key}}.+"
+                            title="{{attr.upgradeCost}} XP" data-attr="{{attr.key}}" data-action="+">+</button>
                   {{else}}
                     <span class="char-button-placeholder"></span>
                   {{/if}}
@@ -239,14 +241,16 @@
                   <div class="flex-row multi-item">
                     {{#if ../../data.creationMode.enabled}}
                       {{#if skill.gained.length}}
-                        <button type="button" class="small char change-skill-gained" data-skill="{{skill.key}}" data-action="-">-</button>
+                        <button type="button" class="small char change-skill-gained" data-id="skill.{{skill.key}}.-"
+                                data-skill="{{skill.key}}" data-action="-">-</button>
                       {{else}}
                         <span class="char-button-placeholder"></span>
                       {{/if}}
                     {{/if}}
                     <span class="skill-gained">{{fallback skill.gained.length 0}}</span>
                     {{#if skill.upgradeCost}}
-                      <button type="button" class="small char change-skill-gained" title="{{skill.upgradeCost}} XP" data-skill="{{skill.key}}" data-action="+">+</button>
+                      <button type="button" class="small char change-skill-gained" data-id="skill.{{skill.key}}.+"
+                              title="{{skill.upgradeCost}} XP" data-skill="{{skill.key}}" data-action="+">+</button>
                     {{else}}
                       <span class="char-button-placeholder"></span>
                     {{/if}}
@@ -672,14 +676,18 @@
                   <div class="flex-row multi-item">
                     {{#if ../data.creationMode.enabled}}
                       {{#if metric.gained.length}}
-                        <button type="button" class="small char change-metric-gained" data-metric="{{metric.key}}" data-action="-">-</button>
+                        <button type="button" class="small char change-metric-gained"
+                                data-id="metrics.{{metric.key}}.-"
+                                data-metric="{{metric.key}}" data-action="-">-</button>
                       {{else}}
                         <span class="char-button-placeholder"></span>
                       {{/if}}
                     {{/if}}
                     <span class="metric-gained">{{metric.gained.length}}</span>
                     {{#if metric.upgradeCost}}
-                      <button type="button" class="small char change-metric-gained" title="{{metric.upgradeCost}} XP" data-metric="{{metric.key}}" data-action="+">+</button>
+                      <button type="button" class="small char change-metric-gained"
+                              data-id="metrics.{{metric.key}}.+" title="{{metric.upgradeCost}} XP"
+                              data-metric="{{metric.key}}" data-action="+">+</button>
                     {{else}}
                       <span class="char-button-placeholder"></span>
                     {{/if}}

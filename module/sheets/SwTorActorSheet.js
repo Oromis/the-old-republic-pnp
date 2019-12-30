@@ -222,7 +222,7 @@ export default class SwTorActorSheet extends ActorSheet {
   }
 
   _prepareRegen(key, diff, actor, data) {
-    const factor = ObjectUtils.try(this.actorData.regeneration, key, 'factor', { default: 1 })
+    const factor = ObjectUtils.try(this.actor.regeneration, key, 'factor', { default: 1 })
     diff = ObjectUtils.omitZero(ObjectUtils.mapValues(diff, (val, mk) => {
       const delta = Math.floor(val * factor)
       return Math.min(delta, actor.metrics[mk].max.total - actor.metrics[mk].value)
@@ -447,13 +447,5 @@ export default class SwTorActorSheet extends ActorSheet {
   _updateObject() {
     // Disable regular form submissions (we use AutoSubmitForm)
     return Promise.resolve()
-  }
-
-  get actorData() {
-    return this.actor.data.data
-  }
-
-  getSkill(key) {
-    return this.actor.data.items.find(item => ['skill', 'force-skill'].indexOf(item.type) !== -1 && item.data.key === key)
   }
 }
