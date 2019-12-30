@@ -83,7 +83,7 @@
             />
           </label>
           <div class="flex-row multi-item flex-end">
-            {{#each computed.regeneration as |reg|}}
+            {{#each actor.regenerationTypes as |reg|}}
               <select class="small" name="data.regeneration.{{reg.key}}.factor" title="Regenerationsfaktor">
                 {{#select reg.factor}}
                   <option value="2">2</option>

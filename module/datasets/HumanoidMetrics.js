@@ -1,24 +1,16 @@
 import Config from '../Config.js'
 import ObjectUtils from '../util/ObjectUtils.js'
-import PropertyPrototype from '../properties/PropertyPrototype.js'
-import { calcUpgradeCost, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
-import Property from '../properties/Property.js'
+import { calcUpgradeCost } from '../CharacterFormulas.js'
+import Metric from '../properties/Metric.js'
+import MetricPrototype from '../properties/MetricPrototype.js'
 
-class HumanoidMetric extends Property {
-  calcBaseValue({ target = 'value' } = {}) {
-    return target === 'value' ? 5 : this._staticData.calcBaseValue(this._entity)
-  }
-
-  get costOptions() {
-    return [this.key, ...(this.fallbackCostOptions || [])]
-  }
-
+class HumanoidMetric extends Metric {
   get upgradeCost() {
     return calcUpgradeCost(this._entity, this, { max: this._entity.xp.free })
   }
 }
 
-class HumanoidMetricsPrototype extends PropertyPrototype {
+class HumanoidMetricPrototype extends MetricPrototype {
   constructor(key, staticData) {
     super(key, {
       staticData,
@@ -28,52 +20,58 @@ class HumanoidMetricsPrototype extends PropertyPrototype {
         gained: [],
         buff: 0,
       },
-      updaters: [
-        (data, { entity, property }) => {
-          data.mod = explainEffect(entity, property)
-          const maxExplanation = explainPropertyValue(entity, property, { target: 'max' })
-          data.max = maxExplanation.total
-          data.maxComponents = maxExplanation.components
-          data.missing = data.max - data.value
-        }
-      ],
       PropertyClass: HumanoidMetric,
     })
   }
 }
 
-const LeP = new HumanoidMetricsPrototype('LeP', {
+const LeP = new HumanoidMetricPrototype('LeP', {
   label: 'Lebenspunkte',
   desc: 'Repräsentiert den körperlichen Gesundheitszustand',
   xpCategory: Config.character.LeP.xpCategory,
   backgroundColor: '#ffaaaa',
+  regen: {
+    day() { return this.calcBaseValue({ target: 'max' }) / 4 },
+  },
   calcBaseValue(actor) {
     return Math.round((actor.attrValue('ko') * 2 + actor.attrValue('kk')) / 3)
   }
 })
-const AuP = new HumanoidMetricsPrototype('AuP', {
+const AuP = new HumanoidMetricPrototype('AuP', {
   label: 'Ausdauerpunkte',
   desc: 'Misst den körperlichen und geistigen Erschöpfungsgrad',
   xpCategory: Config.character.AuP.xpCategory,
   backgroundColor: '#aaffaa',
+  regen: {
+    day: 'missing',
+    turn: 1,
+  },
   calcBaseValue(actor) {
     return Math.round((actor.attrValue('ko') + actor.attrValue('kk') + actor.attrValue('wk')) * 0.66)
   }
 })
-const MaP = new HumanoidMetricsPrototype('MaP', {
+const MaP = new HumanoidMetricPrototype('MaP', {
   label: 'Machtpunkte',
   desc: 'Ein Maß für die Menge an Macht-Kräften, die zur Verfügung stehen',
   xpCategory: Config.character.MaP.xpCategory,
   backgroundColor: '#e3caff',
   fallbackCostOptions: [AuP.key, LeP.key],  // If the force user is out of MaP, costs will be paid in AuP and then LeP
+  regen: {
+    day: 'missing',
+    turn: 2,
+  },
   calcBaseValue(actor) {
     return Math.round((actor.attrValue('ch') + actor.attrValue('in') + actor.attrValue('kl') + actor.attrValue('wk')) / 2)
   }
 })
-const EnP = new HumanoidMetricsPrototype('EnP', {
+const EnP = new HumanoidMetricPrototype('EnP', {
   label: 'Energiepunkte',
   desc: 'Steht für den Ladezustand der Akkus',
   backgroundColor: '#c7d6ff',
+  regen: {
+    day: 'missing',
+    turn: 4,  // TODO adjust depending on energy generator
+  },
   calcBaseValue() {
     return 0 // Energy pool is governed by equipment alone
   }

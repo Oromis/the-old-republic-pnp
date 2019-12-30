@@ -23,6 +23,7 @@
           }
         },
         "resistances": {},
+        "regeneration": {},
         "targetDistance": {
           "type": "",
           "value": null

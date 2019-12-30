@@ -298,6 +298,26 @@ export default class SwTorActor extends Actor {
     return { resistances, costs }
   }
 
+  get regenerationTypes() {
+    return this._cache.lookup('regenerationTypes', () => [
+      this.getRegeneration('turn', { label: 'Nächste Runde', className: 'next-turn', icon: 'fa-redo' }),
+      this.getRegeneration('day', { label: 'Nächster Tag', className: 'next-day', icon: 'fa-sun' }),
+    ])
+  }
+
+  getRegeneration(key, data) {
+    let diff = this.metrics.list.reduce((result, metric) => {
+      result[metric.key] = metric.getRegeneration(key)
+      return result
+    }, {})
+    const factor = ObjectUtils.try(this.data.data.regeneration, key, 'factor', { default: 1 })
+    diff = ObjectUtils.omitZero(ObjectUtils.mapValues(diff, (val, mk) => {
+      const delta = Math.floor(val * factor)
+      return Math.min(delta, this.metrics[mk].missing)
+    }))
+    return { key, ...data, diff, factor }
+  }
+
   // ---------------------------------------------------------------------
   // Private stuff
   // ---------------------------------------------------------------------

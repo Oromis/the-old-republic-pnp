@@ -3,6 +3,7 @@ import ObjectUtils from '../util/ObjectUtils.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import { calcUpgradeCost, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
 import Property from '../properties/Property.js'
+import AttributePrototype from '../properties/AttributePrototype.js'
 
 class HumanoidAttribute extends Property {
   get upgradeCost() {
@@ -10,7 +11,7 @@ class HumanoidAttribute extends Property {
   }
 }
 
-class HumanoidAttributePrototype extends PropertyPrototype {
+class HumanoidAttributePrototype extends AttributePrototype {
   constructor(key, staticData) {
     super(key, {
       staticData: { xpCategory: Config.character.attributes.xpCategory, ...staticData },
@@ -20,12 +21,6 @@ class HumanoidAttributePrototype extends PropertyPrototype {
         gained: [],
         buff: 0,
       },
-      updaters: [
-        (data, { entity, property }) => {
-          data.mod = explainEffect(entity, property)
-          data.value = explainPropertyValue(entity, property)
-        }
-      ],
       PropertyClass: HumanoidAttribute,
     })
   }

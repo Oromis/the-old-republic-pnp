@@ -186,19 +186,6 @@ export default class SwTorActorSheet extends ActorSheet {
         ...type,
         items: this.actor.inventory.filter(item => item.type === type.key)
       })),
-      // TODO
-      // regeneration: {
-      //   turn: this._prepareRegen('turn', {
-      //     EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'max', 'total', { default: 0 }) / 25,
-      //     MaP: 2,
-      //   }, computedActorData, { label: 'Nächste Runde', className: 'next-turn', icon: 'fa-redo' }),
-      //   day: this._prepareRegen('day', {
-      //     EnP: ObjectUtils.try(computedActorData.metrics.EnP, 'missing', { default: 0 }),
-      //     MaP: ObjectUtils.try(computedActorData.metrics.MaP, 'missing', { default: 0 }),
-      //     AuP: ObjectUtils.try(computedActorData.metrics.AuP, 'missing', { default: 0 }),
-      //     LeP: ObjectUtils.try(computedActorData.metrics.LeP, 'missing', { default: 0 }),
-      //   }, computedActorData, { label: 'Nächster Tag', className: 'next-day', icon: 'fa-sun' })
-      // }
     }
 
     const incomingDamageType = DamageTypes.map[this._damageIncoming.type] || DamageTypes.map[DamageTypes.default]
@@ -215,15 +202,6 @@ export default class SwTorActorSheet extends ActorSheet {
     }
     data.actor = this.actor
     return data
-  }
-
-  _prepareRegen(key, diff, actor, data) {
-    const factor = ObjectUtils.try(this.actor.regeneration, key, 'factor', { default: 1 })
-    diff = ObjectUtils.omitZero(ObjectUtils.mapValues(diff, (val, mk) => {
-      const delta = Math.floor(val * factor)
-      return Math.min(delta, actor.metrics[mk].max.total - actor.metrics[mk].value)
-    }))
-    return { key, factor, diff, ...data }
   }
 
   /* -------------------------------------------- */
