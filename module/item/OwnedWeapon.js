@@ -1,8 +1,10 @@
-import { defineGetter } from '../util/EntityUtils.js'
+import { defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
 import ObjectUtils from '../util/ObjectUtils.js'
 
 export default {
   beforeConstruct() {
+    defineEnumAccessor(this, 'damageType')
+
     defineGetter(this, 'skill', function () {
       const key = this.data.data.skill
       if (key) {

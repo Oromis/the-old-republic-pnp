@@ -1,6 +1,7 @@
 import { calcFreeXp, calcGp, calcTotalXp } from '../CharacterFormulas.js'
 import Config from '../Config.js'
 import { defineDataAccessor, defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
+import SwTorItem from '../item/SwTorItem.js'
 
 /**
  * Functionality for humanoid characters. "humanoid" refers to intelligent life forms, it has
@@ -94,6 +95,23 @@ export default {
         }
       }
       this.update({ data: { metrics } })
+    }
+
+    this._getEmptySlotWeapon = function _getEmptySlotWeapon(slotKey) {
+      const skillRating = this.skillValue('fau')
+      return new SwTorItem({
+        data: {
+          skill: 'fau',
+          damage: {
+            formula: `${skillRating / 5}+${skillRating >= 50 ? 2 : 1}d6`
+          },
+          damageType: 'stamina',
+          hasStrengthModifier: true,
+          slots: [slotKey],
+        },
+        type: 'melee-weapon',
+        name: 'Faust'
+      }, { actor: this, temporary: true })
     }
   },
 }

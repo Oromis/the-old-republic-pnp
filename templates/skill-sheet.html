@@ -42,6 +42,7 @@
             <td>
               <select name="data.category" title="Kategorie">
                 {{#select data.category}}
+                  <option value="">[Auswählen]</option>
                   {{#each skill.actorDataSet.skillCategories.list as |category|}}
                     <option value="{{category.key}}">{{category.label}}</option>
                   {{/each}}

@@ -29,8 +29,13 @@
   width: 22px;
 }
 
-.sw-tor button:focus:not(:hover), .sw-tor select:focus {
+.sw-tor button:focus:not(:hover) {
   box-shadow: 0 0 3px red;
+  outline: none;
+}
+
+.sw-tor select:focus {
+  box-shadow: 0 0 5px red;
   outline: none;
 }
 

@@ -75,6 +75,10 @@ export default class SwTorActor extends Actor {
     return this._getItemCollectionProxy(this._categorizedItems.skills)
   }
 
+  skillValue(key) {
+    return ObjectUtils.try(this.skills[key], 'value', 'total', { default: 0 })
+  }
+
   get forceSkills() {
     return this._getItemCollectionProxy(this._categorizedItems.forceSkills)
   }
@@ -229,7 +233,7 @@ export default class SwTorActor extends Actor {
       this.dataSet.slots.list.filter(slot => slot.supportsWeapon).forEach(slot => {
         let item = this.getItemInSlot(slot.key)
         if (item == null) {
-          item = this._getEmptySlotWeapon()
+          item = this._getEmptySlotWeapon(slot.key)
         }
         if (item != null) {
           if (item.id == null || !weapons.some(weapon => weapon.id === item.id)) {

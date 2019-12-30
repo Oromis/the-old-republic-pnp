@@ -1,13 +1,8 @@
 import ObjectUtils from '../util/ObjectUtils.js'
 import AutoSubmitSheet from './AutoSubmitSheet.js'
-import ItemTypes from '../ItemTypes.js'
-import {
-  calcPropertyBaseValue,
-  calcUpgradeCost,
-} from '../CharacterFormulas.js'
-import Slots from '../datasets/HumanoidSlots.js'
+import { calcPropertyBaseValue, calcUpgradeCost } from '../CharacterFormulas.js'
 import DamageTypes from '../DamageTypes.js'
-import { roundDecimal } from '../util/MathUtils.js'
+import ArrayUtils from '../util/ArrayUtils.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -159,15 +154,16 @@ export default class SwTorActorSheet extends ActorSheet {
 
     const computedActorData = this.actor
 
-    const skills = this.actor.skills.list
+    const skills = [...this.actor.skills.list]
     const forceSkills = this.actor.forceSkills.list
     data.computed = {
       skillCategories: [
         ...this.actor.dataSet.skillCategories.list.map(cat => ({
           label: cat.label,
-          skills: skills.filter(skill => skill.category === cat.key)
+          skills: ArrayUtils.removeBy(skills, skill => skill.category === cat.key),
         })),
-        { label: 'Mächte', skills: forceSkills }
+        { label: 'Mächte', skills: ArrayUtils.removeBy(skills, skill => skill.isForceSkill) },
+        { label: 'Sonstige', skills },
       ],
       forceSkills: forceSkills.length > 0 ? forceSkills : null,
       slots: this.actor.dataSet.slots.layout.map(row => row.map(slot => {
@@ -287,19 +283,9 @@ export default class SwTorActorSheet extends ActorSheet {
 
     html.find('.modify-metrics').click(this._onModifyMetrics)
     html.find('.equip-btn').click(this._onChangeEquipment)
-    html.find('.next-turn').click(this._onNextTurn)
-    html.find('.next-day').click(this._onNextDay)
   }
 
   /* -------------------------------------------- */
-
-  _onNextTurn = () => {
-
-  }
-
-  _onNextDay = () => {
-
-  }
 
   _onCreateItem = event => {
     event.preventDefault()

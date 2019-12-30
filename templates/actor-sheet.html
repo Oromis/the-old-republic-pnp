@@ -355,7 +355,7 @@
                 {{#if weapon.skill}}
                   <div class="line-view multi-item">
                     <div class="flex-row multi-item">
-                      <img src="icons/svg/d20.svg" class="table-icon" alt="Attacke" title="Attacke" />
+                      <img src="icons/svg/sword.svg" class="table-icon" alt="Attacke" title="Attacke" />
                       {{formatCheckView check=weapon.attackCheck label=(concat 'Attacke ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')}}
                     </div>
                     <div class="flex-row multi-item">
@@ -374,7 +374,7 @@
                       {{/if}}
                     </div>
                     <div class="flex-row multi-item">
-                      <img src="icons/svg/sword.svg" class="table-icon" alt="Schaden" title="Schaden" />
+                      {{damageIcon type=weapon.damageType classes='table-icon'}}
                       <span class="flex-row">
                         {{weapon.damage.formula}}
                         {{#if (isRelevantFactor weapon.currentProjectileEnergy)}}
