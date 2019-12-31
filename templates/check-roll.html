@@ -1,6 +1,6 @@
 <div class="flex-row multi-item sw-tor flex-cross-stretch">
   {{#each rolls as |roll|}}
-    <div class="multi-item check-roll dice-tooltip">
+    <div class="{{#if (isOne ../rolls.length)}}flex-row flex-space-between {{/if}}multi-item check-roll dice-tooltip">
       <div title="{{roll.label}}"><strong>{{formatAttrKey roll.key}}</strong> {{roll.value}}</div>
       <div class="flex-row multi-item dice-rolls flex-center">
         {{formatD20Result roll.die}}

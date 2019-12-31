@@ -63,27 +63,12 @@ export function registerHelpers() {
     errorClass: ({ hash }) => conditionalClass(ERROR_CLASS, hash),
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
     isMultiple: arg => arg > 1,
+    isOne: arg => arg === 1,
     isNumber: arg => typeof arg === 'number',
     isRelevantFactor: num => typeof num === 'number' && num !== 1,
     formatList: list => list.join(', '),
     formatAttrKey,
     formatPercentage: val => `${Math.round(val)}%`,
-    formatCheckView: ({ hash: { check, label } }) => new Handlebars.SafeString(
-      check.rolls.map(roll => `
-        <span title="${roll.label}" class="align-center">
-          <strong>${formatAttrKey(roll.key)}</strong>
-          ${roll.target}${roll.advantage ? formatCheckDiff(roll.advantage, 'small') : ''}
-        </span>
-      `).join('') + `
-      <span>|</span>
-      <span title="Ausgleichspunkte" class="align-center">
-        <strong>AgP</strong>
-        ${check.AgP}
-      </span>
-      <a class="roll-check" title="Probe werfen" data-check='${JSON.stringify(check)}' data-label="${label}">
-        <i class="fas fa-dice-d20"></i>
-      </a>
-    `),
     formatCheckDiff: (diff, classes = '') => new Handlebars.SafeString(diff != null ? formatCheckDiff(diff, classes) : ''),
     formatD20Result: result => new Handlebars.SafeString(`<span class="roll d20 ${categorizeD20Result(result)}">${result}</span>`),
     formatMod,

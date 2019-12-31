@@ -139,6 +139,7 @@
             <th>Gain</th>
             <th>Buff</th>
             <th>Wert</th>
+            <th class="icon-col"></th>
           </tr>
         </thead>
         <tbody>
@@ -188,6 +189,12 @@
               </td>
               <td title="{{formatExplanation attr.value.components}}">
                 {{attr.value.total}}
+              </td>
+              <td>
+                <a class="roll-check" title="Probe werfen" data-path="attributes.{{attr.key}}.check"
+                   data-label="{{attr.label}}">
+                  <i class="fas fa-dice-d20"></i>
+                </a>
               </td>
             </tr>
           {{/each}}

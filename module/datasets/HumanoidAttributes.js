@@ -4,10 +4,17 @@ import PropertyPrototype from '../properties/PropertyPrototype.js'
 import { calcUpgradeCost, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
 import Property from '../properties/Property.js'
 import AttributePrototype from '../properties/AttributePrototype.js'
+import { defineGetter, makeRoll } from '../util/EntityUtils.js'
 
 class HumanoidAttribute extends Property {
   get upgradeCost() {
     return calcUpgradeCost(this._entity, this, { max: this._entity.xp.free })
+  }
+
+  get check() {
+    return {
+      rolls: [makeRoll(this)],
+    }
   }
 }
 
