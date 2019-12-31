@@ -115,7 +115,7 @@
   {{#tabGroup id='main' minWidth=600}}
     {{tabHeader id='attributes' label='Attributes'}}
     {{tabHeader id='skills' label='Fähigkeiten'}}
-    {{#if computed.forceSkills}}
+    {{#if ../computed.forceSkills}}
       {{tabHeader id='force-skills' label='Mächte'}}
     {{/if}}
     {{tabHeader id='equipment' label='Ausrüstung'}}
@@ -223,7 +223,7 @@
                     <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
                     <span class="skill-key-col">{{formatAttrKey skill.key}}</span>
                     <a class="flex-grow item-control item-edit" title="{{skill.name}} bearbeiten">{{skill.name}}</a>
-                    <a class="roll-check" title="Probe werfen" data-check='{{json skill.check}}' data-label="{{skill.name}}">
+                    <a class="roll-check" title="Probe werfen" data-path="skills.{{skill.key}}.check" data-label="{{skill.name}}">
                       <i class="fas fa-dice-d20"></i>
                     </a>
                   </div>
@@ -329,14 +329,13 @@
                   <div class="flex-row multi-item">
                     <span>
                       {{skill.effect.prefix}}
-                      {{skill.effect.value}}
-                      {{#if skill.effect.d6}}
-                        + {{skill.effect.d6}}w6
-                      {{/if}}
+                      {{skill.fullEffectFormula}}
                     </span>
                     {{#if skill.effect.d6}}
-                      <a class="do-roll" title="Würfeln" data-formula="{{skill.effect.value}} + {{skill.effect.d6}}d6" data-label="{{skill.name}}">
-                        <i class="fas fa-dice-d20"></i>
+                      <a class="do-roll" title="Würfeln"
+                         data-formula="skills.{{skill.key}}.fullEffectFormula"
+                         data-label="Effekt {{skill.name}}">
+                        <i class="fas fa-dice-d6"></i>
                       </a>
                     {{/if}}
                   </div>
@@ -355,14 +354,19 @@
         <div class="flex-grow flex-zero">
           <h3 class="align-center">Offensive</h3>
           <div class="multi-item">
-            {{#each actor.equippedWeapons as |weapon|}}
+            {{#each actor.equippedWeapons as |weapon index|}}
               <div class="weapon-slot">
                 <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
                 {{#if weapon.skill}}
                   <div class="line-view multi-item">
                     <div class="flex-row multi-item">
                       <img src="icons/svg/sword.svg" class="table-icon" alt="Attacke" title="Attacke" />
-                      {{formatCheckView check=weapon.attackCheck label=(concat 'Attacke ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')}}
+                      {{index}}
+                      {{> "systems/sw-tor/templates/check-preview.html"
+                          check=weapon.attackCheck
+                          path=(concat 'equippedWeapons.' index '.attackCheck')
+                          label=(concat 'Attacke ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')
+                      }}
                     </div>
                     <div class="flex-row multi-item">
                       <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)" title="Erleichterung (>0) / Erschwernis (<0)" />
@@ -401,7 +405,7 @@
                       <a
                         class="do-roll"
                         title="Schaden auswürfeln"
-                        data-formula="{{weapon.currentDamageFormula}}"
+                        data-formula="equippedWeapons.{{index}}.currentDamageFormula"
                         data-label="Schaden {{weapon.primaryEquippedSlot.label}} ({{weapon.name}})"
                       >
                         <i class="fas fa-dice-d6"></i>
@@ -468,7 +472,7 @@
         <div class="flex-grow flex-zero">
           <h3 class="align-center">Defensive</h3>
           <div class="multi-item align-right">
-            {{#each actor.equippedWeapons as |weapon|}}
+            {{#each actor.equippedWeapons as |weapon index|}}
               {{#if weapon.canDefend}}
                 <div class="weapon-slot">
                   <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
@@ -476,7 +480,11 @@
                     <div class="line-view multi-item">
                       <div class="flex-row multi-item flex-end">
                         <img src="icons/svg/shield.svg" class="table-icon" alt="Parade" title="Parade" />
-                        {{formatCheckView check=weapon.paradeCheck label=(concat 'Parade ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')}}
+                        {{> "systems/sw-tor/templates/check-preview.html"
+                            check=weapon.paradeCheck
+                            path=(concat 'equippedWeapons.' index '.paradeCheck')
+                            label=(concat 'Parade ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')
+                        }}
                       </div>
                       <div class="flex-row multi-item flex-end">
                         <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)"
@@ -502,7 +510,11 @@
                 <div class="line-view multi-item">
                   <div class="flex-row multi-item flex-end">
                     <img src="icons/svg/daze.svg" class="table-icon" alt="Ausweichen" title="Ausweichen" />
-                    {{formatCheckView check=actor.skills.aus.check label='Ausweichen'}}
+                    {{> "systems/sw-tor/templates/check-preview.html"
+                        check=actor.skills.aus.check
+                        path=(concat 'skills.aus.check')
+                        label='Ausweichen'
+                    }}
                   </div>
                 </div>
               </div>

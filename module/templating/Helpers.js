@@ -44,7 +44,7 @@ function formatCheckDiff(diff, classes = '') {
 export function registerHelpers() {
   Handlebars.registerHelper({
     json: obj => JSON.stringify(obj),
-    concat: (...args) => args.filter(arg => typeof arg === 'string').join(''),
+    concat: (...args) => args.filter(arg => typeof arg !== 'object').join(''),
     fallback: (...args) => {
       // Last argument is Handlebars-specific. Don't use it.
       let result
@@ -63,6 +63,7 @@ export function registerHelpers() {
     errorClass: ({ hash }) => conditionalClass(ERROR_CLASS, hash),
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
     isMultiple: arg => arg > 1,
+    isNumber: arg => typeof arg === 'number',
     isRelevantFactor: num => typeof num === 'number' && num !== 1,
     formatList: list => list.join(', '),
     formatAttrKey,
@@ -83,7 +84,7 @@ export function registerHelpers() {
         <i class="fas fa-dice-d20"></i>
       </a>
     `),
-    formatCheckDiff: (diff, classes = '') => new Handlebars.SafeString(formatCheckDiff(diff, classes)),
+    formatCheckDiff: (diff, classes = '') => new Handlebars.SafeString(diff != null ? formatCheckDiff(diff, classes) : ''),
     formatD20Result: result => new Handlebars.SafeString(`<span class="roll d20 ${categorizeD20Result(result)}">${result}</span>`),
     formatMod,
     formatExplanation: components => {

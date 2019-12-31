@@ -5,6 +5,8 @@ import DamageTypes from '../DamageTypes.js'
 import ArrayUtils from '../util/ArrayUtils.js'
 import { itemNameComparator } from '../util/SheetUtils.js'
 import SheetWithTabs from './SheetWithTabs.js'
+import RollUtils from '../util/RollUtils.js'
+import SwTorActor from '../actor/SwTorActor.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -149,6 +151,12 @@ export default class SwTorActorSheet extends ActorSheet {
    */
   getData() {
     const data = super.getData()
+
+    if (!(this.actor instanceof SwTorActor)) {
+      const message = `Star Wars: The old Republic System has not been loaded correctly. Try reloading.`
+      ui.notifications.error(message)
+      throw new Error(message)
+    }
 
     const skills = [...this.actor.skills.list]
     const forceSkills = this.actor.forceSkills.list
@@ -351,42 +359,27 @@ export default class SwTorActorSheet extends ActorSheet {
   }
 
   _onDoRoll = event => {
-    const formula = event.currentTarget.getAttribute('data-formula').replace(/(\d+)w(\d+)/g, '$1d$2')
-    new Roll(formula).toMessage({
-      speaker: { actor: this.actor.id },
-      flavor: event.currentTarget.getAttribute('data-label')
+    const formula = ObjectUtils.try(this.actor, ...event.currentTarget.getAttribute('data-formula').split('.'))
+    RollUtils.rollFormula(formula, {
+      actor: this.actor.id,
+      label: event.currentTarget.getAttribute('data-label') || undefined
     })
   }
 
   _onRollCheck = async event => {
-    const check = JSON.parse(event.currentTarget.getAttribute('data-check'))
-    const flavor = event.currentTarget.getAttribute('data-label') || undefined
-    const die = new Die(20)
-    die.roll(check.rolls.length)
+    let check
+    const path = event.currentTarget.getAttribute('data-path')
+    if (path != null) {
+      check = ObjectUtils.try(this.actor, ...path.split('.'))
+    } else {
+      check = JSON.parse(event.currentTarget.getAttribute('data-check'))
+    }
+    if (check == null) {
+      throw new Error(`Check invalid. Path: ${path}`)
+    }
+    const label = event.currentTarget.getAttribute('data-label') || undefined
 
-    const payload = {
-      rolls: check.rolls.map((roll, i) => {
-        const target = Math.floor(roll.value / 5)
-        return { ...roll, die: die.results[i], target, diff: target + (roll.advantage || 0) - die.results[i] }
-      }),
-    }
-    if (check.AgP) {
-      payload.AgP = {
-        value: check.AgP,
-        diff: check.AgP - payload.rolls.reduce((acc, cur) => acc + (cur.diff < 0 ? -cur.diff : 0), 0)
-      }
-    }
-    const chatData = {
-      user: game.user._id,
-      type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-      rollMode: game.settings.get("core", "rollMode"),
-      flavor,
-      speaker: { actor: this.actor.id },
-      sound: CONFIG.sounds.dice,
-      content: await renderTemplate('systems/sw-tor/templates/check-roll.html', payload)
-    }
-
-    ChatMessage.create(chatData)
+    await RollUtils.rollCheck(check, { actor: this.actor.id, label })
   }
 
   _processDeltaProperty = (formData, { name }) => {

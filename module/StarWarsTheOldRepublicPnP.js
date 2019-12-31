@@ -10,13 +10,15 @@ import {registerSystemSettings} from './Settings.js'
 import {migrateWorld} from './migration/Migrations.js'
 import SwTorActor from './actor/SwTorActor.js'
 import SwTorItem from './item/SwTorItem.js'
+import ChatMessageMixin from './ChatMessageMixin.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
   await loadTemplates([
     'systems/sw-tor/templates/check-roll.html',
-    'systems/sw-tor/templates/effects-editor.html'
+    'systems/sw-tor/templates/check-preview.html',
+    'systems/sw-tor/templates/effects-editor.html',
   ])
 
   registerHelpers()
@@ -28,6 +30,10 @@ Hooks.once("init", async function() {
 	CONFIG.initiative.formula = "1d6 + (@attributes.in.value + @attributes.sc.value) / 10"
   CONFIG.Actor.entityClass = SwTorActor
   CONFIG.Item.entityClass = SwTorItem
+
+  // Chat Messages cannot currently (0.4.3) be extended like actors and items, so we need to mix
+  // our functionality into the existing class
+  new ChatMessageMixin(ChatMessage.prototype)
 
   registerSystemSettings()
 

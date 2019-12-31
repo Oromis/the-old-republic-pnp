@@ -1,0 +1,19 @@
+{{#each check.rolls as |roll|}}
+  <span title="{{roll.label}}" class="align-center">
+    <strong>{{formatAttrKey roll.key}}</strong>
+    {{roll.target}}{{formatCheckDiff roll.advantage 'small'}}
+  </span>
+{{/each}}
+{{#if (isNumber check.AgP)}}
+  <span>|</span>
+  <span title="Ausgleichspunkte" class="align-center">
+  <strong>AgP</strong>
+    {{check.AgP}}
+  </span>
+{{/if}}
+<a class="roll-check" title="Probe werfen"
+   {{#if path}}data-path="{{path}}" {{else}}data-check="{{json check}}"{{/if}}
+   data-label="{{label}}"
+>
+  <i class="fas fa-dice-d20"></i>
+</a>

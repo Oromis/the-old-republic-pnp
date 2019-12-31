@@ -473,21 +473,25 @@ export default class SwTorActor extends Actor {
 
   _checkValidItem(data, cb) {
     // Check if actor type matches
-    const newActorType = data.data.actorType
-    if (newActorType != null && newActorType !== this.type) {
-      const msg = `Bad actor type: ${newActorType}`
-      return Promise.reject(msg)
-    }
+    if (data.data) {
+      // data.data can be absent if we're updating something outside the data object, like the name.
+      // Don't do anything in this case as it's never harmful.
+      const newActorType = data.data.actorType
+      if (newActorType != null && newActorType !== this.type) {
+        const msg = `Bad actor type: ${newActorType}`
+        return Promise.reject(msg)
+      }
 
-    // Check that there are no duplicate keys
-    const newKey = data.data.key
-    if (typeof newKey === 'string' && newKey.length > 0) {
-      for (const item of this.items) {
-        const key = item.data.data.key
-        if (key === newKey) {
-          // Duplicate found => reject to add the item
-          const msg = `Found duplicate Item key: ${newKey}`
-          return Promise.reject(msg)
+      // Check that there are no duplicate keys
+      const newKey = data.data.key
+      if (typeof newKey === 'string' && newKey.length > 0) {
+        for (const item of this.items) {
+          const key = item.data.data.key
+          if (key === newKey) {
+            // Duplicate found => reject to add the item
+            const msg = `Found duplicate Item key: ${newKey}`
+            return Promise.reject(msg)
+          }
         }
       }
     }

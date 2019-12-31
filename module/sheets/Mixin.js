@@ -6,18 +6,20 @@ export default class Mixin {
 
   interceptMethod(name, handler, { wrapSuper = false } = {}) {
     this._originalMethods[name] = this._parent[name]
-    this._parent[name] = (...args) => {
+    const self = this
+    this._parent[name] = function (...args) {
+      const originalThis = this
       if (wrapSuper) {
         return handler.call(
-          this,
-          { args, callSuper: (...superArgs) => this._originalMethods[name].apply(this._parent, superArgs) }
+          self,
+          { args, originalThis, callSuper: (...superArgs) => self._originalMethods[name].apply(originalThis, superArgs) }
         )
       } else {
-        const result = handler.apply(this, args)
+        const result = handler.apply(self, args)
         if (typeof result !== 'undefined') {
           return result
         } else {
-          return this._originalMethods[name].apply(this._parent, args)
+          return self._originalMethods[name].apply(originalThis, args)
         }
       }
     }
