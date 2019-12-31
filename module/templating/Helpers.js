@@ -69,13 +69,13 @@ export function registerHelpers() {
     formatPercentage: val => `${Math.round(val)}%`,
     formatCheckView: ({ hash: { check, label } }) => new Handlebars.SafeString(
       check.rolls.map(roll => `
-        <span title="${roll.label}">
+        <span title="${roll.label}" class="align-center">
           <strong>${formatAttrKey(roll.key)}</strong>
           ${roll.target}${roll.advantage ? formatCheckDiff(roll.advantage, 'small') : ''}
         </span>
       `).join('') + `
       <span>|</span>
-      <span title="Ausgleichspunkte">
+      <span title="Ausgleichspunkte" class="align-center">
         <strong>AgP</strong>
         ${check.AgP}
       </span>
@@ -108,6 +108,40 @@ export function registerHelpers() {
     `),
     damageIcon: ({ hash: { type, classes = '' } }) => type != null ? (
       new Handlebars.SafeString(`<img src="${type.icon}" alt="${type.label}" title="${type.label}" class="${classes}" />`)
-    ) : ''
+    ) : '',
+
+    // ----------------------------------------------------------------------------
+    // Tabs
+    // ----------------------------------------------------------------------------
+    tabGroup: function ({ hash: { id, minWidth = null }, fn }) {
+      return new Handlebars.SafeString(
+        `<nav class="tab-group" data-id="${id}" data-min-width="${minWidth || ''}">` +
+          `${fn({ tabGroup: this.tabGroups[id] || { active: {} } })}` +
+        `</nav>`
+      )
+    },
+
+    tabHeader: function ({ hash: { id, label } }) {
+      return new Handlebars.SafeString(
+        `<a class="tab-header ${this.tabGroup.active[id] ? 'active' : ''}" data-id="${id}">${label}</a>`
+      )
+    },
+
+    tabContents: function ({ fn }) {
+      return new Handlebars.SafeString(
+        `<section class="tab-contents flex-row multi-item flex-cross-start">${fn(this)}</section>`
+      )
+    },
+
+    tabContent: function ({ hash: { groupId, id, classes = '' }, fn }) {
+      const group = this.tabGroups[groupId] || { active: {} }
+      return new Handlebars.SafeString(
+        `<div class="tab-wrapper padded ${group.active[id] ? '' : HIDDEN_CLASS}" data-id="${id}">` +
+          `<div class="tab-content ${id} ${classes}">` +
+            `${fn(this)}` +
+          `</div>` +
+        `</div>`
+      )
+    },
   })
 }

@@ -112,19 +112,21 @@
   </header>
 
   {{!-- Sheet Tab Navigation --}}
-  <nav class="sheet-tabs tabs" data-group="primary">
-    <a class="item" data-tab="attributes">Attribute</a>
-    <a class="item" data-tab="skills">Fähigkeiten</a>
-    <a class="item {{hiddenClass unless=computed.forceSkills}}" data-tab="force-skills">Mächte</a>
-    <a class="item" data-tab="equipment">Ausrüstung</a>
-    <a class="item" data-tab="items">Inventar</a>
-    <a class="item" data-tab="other">Sonstiges</a>
-  </nav>
+  {{#tabGroup id='main' minWidth=600}}
+    {{tabHeader id='attributes' label='Attributes'}}
+    {{tabHeader id='skills' label='Fähigkeiten'}}
+    {{#if computed.forceSkills}}
+      {{tabHeader id='force-skills' label='Mächte'}}
+    {{/if}}
+    {{tabHeader id='equipment' label='Ausrüstung'}}
+    {{tabHeader id='items' label='Inventar'}}
+    {{tabHeader id='other' label='Sonstiges'}}
+  {{/tabGroup}}
 
   {{!-- Sheet Body --}}
-  <section class="sheet-body">
+  {{#tabContents}}
     {{!-- Attributes Tab --}}
-    <div class="tab attributes" data-group="primary" data-tab="attributes">
+    {{#tabContent groupId='main' id='attributes'}}
       <table class="attributes-table full-width">
         <thead>
           <tr>
@@ -191,12 +193,13 @@
           {{/each}}
         </tbody>
       </table>
-    </div>
+    {{/tabContent}}
 
     {{!-- Skills Tab --}}
-    <div class="tab skills multi-item" data-group="primary" data-tab="skills">
+    {{#tabContent groupId='main' id='skills' classes='multi-item'}}
       {{#each computed.skillCategories as |category|}}
-        <table>
+        <div class="padded">
+          <table>
           <thead>
             <tr>
               <th>{{category.label}}</th>
@@ -214,7 +217,7 @@
           </thead>
           <tbody>
             {{#each category.skills as |skill|}}
-              <tr {{class when=skill.data.isBasicSkill then='basic-skill'}} data-item-id="{{skill.id}}">
+              <tr {{class when=skill.isBasicSkill then='basic-skill'}} data-item-id="{{skill.id}}">
                 <td>
                   <div class="flex-row multi-item">
                     <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
@@ -269,82 +272,85 @@
             {{/each}}
           </tbody>
         </table>
+        </div>
       {{/each}}
-    </div>
+    {{/tabContent}}
 
     {{!-- Force Tab --}}
-    <div class="tab force-skills multi-item" data-group="primary" data-tab="force-skills">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Reichweite</th>
-            <th>Wirkungsdauer</th>
-            <th>Kosten</th>
-            <th>Effekt</th>
-            <th>Ausrichtung</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each computed.forceSkills as |skill|}}
-            <tr data-item-id="{{skill.id}}">
-              <td>
-                <div class="flex-row multi-item">
-                  <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
-                  <a class="flex-grow item-control item-edit">{{skill.name}}</a>
-                </div>
-              </td>
-              <td>{{skill.range.formatted}}</td>
-              <td>{{skill.duration.formatted}}</td>
-              <td>
-                <div class="multi-item">
-                  {{#each skill.costs as |entry|}}
-                    <div class="flex-row multi-item {{errorClass when=entry.evalError}}">
-                      <span>{{entry.value}} {{entry.postfix}}</span>
-                      <a class="modify-metrics" title="{{formatCosts ../../actor entry.diff}}" data-deduct="{{json entry.diff}}">
-                        <i class="fas fa-minus-square"></i>
-                      </a>
-                    </div>
-                    {{#each entry.variables as |var|}}
-                      <div class="flex-row multi-item">
-                        <span>{{var}}:</span>
-                        <input
-                            type="text"
-                            name="skills.{{skill.key}}.data.cost.{{entry.key}}.vars.{{var}}"
-                            value="{{resolve skill.cost entry.key 'vars' var}}"
-                            class="flex-grow"
-                            placeholder="{{var}}"
-                        />
-                      </div>
-                    {{/each}}
-                  {{/each}}
-                </div>
-              </td>
-              <td>
-                <div class="flex-row multi-item">
-                  <span>
-                    {{skill.effect.prefix}}
-                    {{skill.effect.value}}
-                    {{#if skill.effect.d6}}
-                      + {{skill.effect.d6}}w6
-                    {{/if}}
-                  </span>
-                  {{#if skill.effect.d6}}
-                    <a class="do-roll" title="Würfeln" data-formula="{{skill.effect.value}} + {{skill.effect.d6}}d6" data-label="{{skill.name}}">
-                      <i class="fas fa-dice-d20"></i>
-                    </a>
-                  {{/if}}
-                </div>
-              </td>
-              <td>{{skill.disposition.label}}</td>
+    {{#tabContent groupId='main' id='force-skills' classes='multi-item'}}
+      <div class="padded">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Reichweite</th>
+              <th>Wirkungsdauer</th>
+              <th>Kosten</th>
+              <th>Effekt</th>
+              <th>Ausrichtung</th>
             </tr>
-          {{/each}}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {{#each computed.forceSkills as |skill|}}
+              <tr data-item-id="{{skill.id}}">
+                <td>
+                  <div class="flex-row multi-item">
+                    <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
+                    <a class="flex-grow item-control item-edit">{{skill.name}}</a>
+                  </div>
+                </td>
+                <td>{{skill.range.formatted}}</td>
+                <td>{{skill.duration.formatted}}</td>
+                <td>
+                  <div class="multi-item">
+                    {{#each skill.costs as |entry|}}
+                      <div class="flex-row multi-item {{errorClass when=entry.evalError}}">
+                        <span>{{entry.value}} {{entry.postfix}}</span>
+                        <a class="modify-metrics" title="{{formatCosts ../../actor entry.diff}}" data-deduct="{{json entry.diff}}">
+                          <i class="fas fa-minus-square"></i>
+                        </a>
+                      </div>
+                      {{#each entry.variables as |var|}}
+                        <div class="flex-row multi-item">
+                          <span>{{var}}:</span>
+                          <input
+                              type="text"
+                              name="skills.{{skill.key}}.data.cost.{{entry.key}}.vars.{{var}}"
+                              value="{{resolve skill.cost entry.key 'vars' var}}"
+                              class="flex-grow"
+                              placeholder="{{var}}"
+                          />
+                        </div>
+                      {{/each}}
+                    {{/each}}
+                  </div>
+                </td>
+                <td>
+                  <div class="flex-row multi-item">
+                    <span>
+                      {{skill.effect.prefix}}
+                      {{skill.effect.value}}
+                      {{#if skill.effect.d6}}
+                        + {{skill.effect.d6}}w6
+                      {{/if}}
+                    </span>
+                    {{#if skill.effect.d6}}
+                      <a class="do-roll" title="Würfeln" data-formula="{{skill.effect.value}} + {{skill.effect.d6}}d6" data-label="{{skill.name}}">
+                        <i class="fas fa-dice-d20"></i>
+                      </a>
+                    {{/if}}
+                  </div>
+                </td>
+                <td>{{skill.disposition.label}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{/tabContent}}
 
     {{!-- Equipment Tab --}}
-    <div class="tab equipment" data-group="primary" data-tab="equipment">
+    {{#tabContent groupId='main' id='equipment'}}
       <div class="flex-row multi-item flex-cross-start">
         <div class="flex-grow flex-zero">
           <h3 class="align-center">Offensive</h3>
@@ -546,10 +552,10 @@
           </div>
         </div>
       </div>
-    </div>
+    {{/tabContent}}
 
     {{!-- Inventory Tab --}}
-    <div class="tab items multi-item" data-group="primary" data-tab="items">
+    {{#tabContent groupId='main' id='items'}}
       <div class="flex-row multi-item">
         <div class="flex-grow"></div>
         <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
@@ -560,7 +566,8 @@
         </div>
       </div>
       {{#each computed.inventory as |category|}}
-        <table>
+        <div class="padded">
+          <table>
           <thead>
             <tr>
               <th>
@@ -629,82 +636,84 @@
             {{/unless}}
           </tbody>
         </table>
+        </div>
       {{/each}}
-    </div>
+    {{/tabContent}}
 
     {{!-- Other Tab --}}
-    <div class="tab other multi-item" data-group="primary" data-tab="other">
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Metrik</th>
-            <th>Aktuell</th>
-            <th>Mod</th>
-            <th title="Steigerungsklasse">StK</th>
-            <th>XP</th>
-            <th>Gain</th>
-            <th>Buff</th>
-            <th>Max</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each actor.metrics.list as |metric|}}
+    {{#tabContent groupId='main' id='other'}}
+      <div class="padded">
+        <table>
+          <thead>
             <tr>
-              <td>{{metric.key}}</td>
-              <td title="{{metric.desc}}">{{metric.label}}</td>
-              <td>
-                {{metricView metric=metric linked=true}}
-              </td>
-              <td title="{{formatExplanation metric.mod.components}}">{{formatMod metric.mod.total}}</td>
-              <td>
-                {{#if metric.xpCategory}}
-                  <select name="data.metrics.{{metric.key}}.xpCategory">
-                    {{#select metric.xpCategory}}
-                      {{#each ../actor.dataSet.xpTable.categoryNames as |category|}}
-                        <option value="{{category}}">{{category}}</option>
-                      {{/each}}
-                    {{/select}}
-                  </select>
-                {{/if}}
-              </td>
-              <td>
-                {{#if metric.xpCategory}}{{metric.xp}}{{/if}}
-              </td>
-              <td>
-                {{#if metric.xpCategory}}
-                  <div class="flex-row multi-item">
-                    {{#if ../data.creationMode.enabled}}
-                      {{#if metric.gained.length}}
+              <th></th>
+              <th>Metrik</th>
+              <th>Aktuell</th>
+              <th>Mod</th>
+              <th title="Steigerungsklasse">StK</th>
+              <th>XP</th>
+              <th>Gain</th>
+              <th>Buff</th>
+              <th>Max</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each actor.metrics.list as |metric|}}
+              <tr>
+                <td>{{metric.key}}</td>
+                <td title="{{metric.desc}}">{{metric.label}}</td>
+                <td>
+                  {{metricView metric=metric linked=true}}
+                </td>
+                <td title="{{formatExplanation metric.mod.components}}">{{formatMod metric.mod.total}}</td>
+                <td>
+                  {{#if metric.xpCategory}}
+                    <select name="data.metrics.{{metric.key}}.xpCategory">
+                      {{#select metric.xpCategory}}
+                        {{#each ../actor.dataSet.xpTable.categoryNames as |category|}}
+                          <option value="{{category}}">{{category}}</option>
+                        {{/each}}
+                      {{/select}}
+                    </select>
+                  {{/if}}
+                </td>
+                <td>
+                  {{#if metric.xpCategory}}{{metric.xp}}{{/if}}
+                </td>
+                <td>
+                  {{#if metric.xpCategory}}
+                    <div class="flex-row multi-item">
+                      {{#if ../data.creationMode.enabled}}
+                        {{#if metric.gained.length}}
+                          <button type="button" class="small char change-metric-gained"
+                                  data-id="metrics.{{metric.key}}.-"
+                                  data-metric="{{metric.key}}" data-action="-">-</button>
+                        {{else}}
+                          <span class="char-button-placeholder"></span>
+                        {{/if}}
+                      {{/if}}
+                      <span class="metric-gained">{{metric.gained.length}}</span>
+                      {{#if metric.upgradeCost}}
                         <button type="button" class="small char change-metric-gained"
-                                data-id="metrics.{{metric.key}}.-"
-                                data-metric="{{metric.key}}" data-action="-">-</button>
+                                data-id="metrics.{{metric.key}}.+" title="{{metric.upgradeCost}} XP"
+                                data-metric="{{metric.key}}" data-action="+">+</button>
                       {{else}}
                         <span class="char-button-placeholder"></span>
                       {{/if}}
-                    {{/if}}
-                    <span class="metric-gained">{{metric.gained.length}}</span>
-                    {{#if metric.upgradeCost}}
-                      <button type="button" class="small char change-metric-gained"
-                              data-id="metrics.{{metric.key}}.+" title="{{metric.upgradeCost}} XP"
-                              data-metric="{{metric.key}}" data-action="+">+</button>
-                    {{else}}
-                      <span class="char-button-placeholder"></span>
-                    {{/if}}
-                  </div>
-                {{/if}}
-              </td>
-              <td>
-                <input type="text" name="data.metrics.{{metric.key}}.buff" value="{{metric.buff}}" />
-              </td>
-              <td title="{{formatExplanation metric.maxComponents}}">
-                {{metric.max}}
-              </td>
-            </tr>
-          {{/each}}
-        </tbody>
-      </table>
-      <div>
+                    </div>
+                  {{/if}}
+                </td>
+                <td>
+                  <input type="text" name="data.metrics.{{metric.key}}.buff" value="{{metric.buff}}" />
+                </td>
+                <td title="{{formatExplanation metric.maxComponents}}">
+                  {{metric.max}}
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+        <div>
         <label
             class="flex-row multi-item"
             title="Nur während der Charaktererstellungsmodus aktiv ist, ist es möglich, GP zu verteilen"
@@ -715,8 +724,9 @@
           <span>Charaktererstellungsmodus</span>
         </label>
       </div>
-    </div>
-  </section>
+      </div>
+    {{/tabContent}}
+  {{/tabContents}}
 </form>
 
 

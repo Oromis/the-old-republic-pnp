@@ -9,6 +9,7 @@ import Metrics from '../datasets/AllMetrics.js'
 export function defineDataAccessor(object, key, { configurable = false } = {}) {
   Object.defineProperty(object, key, {
     configurable,
+    enumerable: true,
     get() {
       return this.data.data[key]
     }
@@ -20,6 +21,7 @@ export function defineEnumAccessor(
 ) {
   Object.defineProperty(object, key, {
     configurable,
+    enumerable: true,
     get() {
       return this._cache.lookup(key, () => {
         const key = typeof getKey === 'function' ? getKey() : ObjectUtils.try(this.data.data, ...dataKey.split('.'))
@@ -44,6 +46,7 @@ export function defineEnumAccessor(
 export function defineGetter(object, key, getter, { configurable = false } = {}) {
   Object.defineProperty(object, key, {
     configurable,
+    enumerable: true,
     get() {
       return getter.call(this)
     }

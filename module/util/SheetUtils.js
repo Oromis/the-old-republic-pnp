@@ -68,3 +68,7 @@ export function onDropItem(callback) {
     return false;
   }
 }
+
+export function itemNameComparator(a, b) {
+  return a.name.localeCompare(b.name)
+}

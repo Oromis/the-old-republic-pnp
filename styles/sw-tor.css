@@ -8,6 +8,7 @@
 .sw-tor table {
     background-color: transparent;
     border: 0;
+    width: 100%;
 }
 
 .sw-tor table th {
@@ -30,6 +31,12 @@
 /*************************************************************************************
  * Charsheet
  *************************************************************************************/
+
+.sw-tor.sheet form {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
 
 .sw-tor.sheet .window-content {
     padding: 5px;
@@ -69,20 +76,37 @@
 }
 
 /* Navigation Tabs */
-.sw-tor.sheet .tabs {
+.sw-tor.sheet .tab-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     flex: 0 0 40px;
     border-top: 1px solid #AAA;
     border-bottom: 1px solid #AAA;
 }
 
-.sw-tor.sheet .tabs .item {
+.sw-tor.sheet .tab-group .tab-header {
     line-height: 40px;
     font-weight: bold;
+    text-align: center;
+    flex: 1;
 }
 
-.sw-tor.sheet .tabs .item.active {
+.sw-tor.sheet .tab-group .tab-header.active {
     text-decoration: underline;
-    text-shadow: none;
+    text-shadow: 0 0 4px #ff7a7a;
+}
+
+.sw-tor .tab-contents {
+    overflow: hidden;
+}
+
+.sw-tor .tab-wrapper {
+    overflow: auto;
+    height: 100%;
+    flex-basis: 0;
+    flex-grow: 1;
 }
 
 .sw-tor.sheet .training .label-col {
@@ -90,7 +114,7 @@
 }
 
 /* Content Tabs */
-.sw-tor.sheet .sheet-body .tab {
+.sw-tor.sheet .sheet-body {
     height: 100%;
 }
 .sw-tor.sheet .sheet-body .editor {

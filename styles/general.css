@@ -12,6 +12,9 @@
 .sw-tor .multi-item { margin: -4px; }
 .sw-tor .multi-item > * { margin: 4px; }
 .sw-tor .multi-item > .multi-item { margin: 0; }
+.sw-tor .multi-item > .padded { margin: 0; padding: 4px; }
+.sw-tor .multi-item > .multi-item { margin: 0; }
+.sw-tor .multi-item > .multi-item.padded { padding: 0; }
 
 .flex-grow { flex-grow: 1; }
 .flex-no-shrink { flex-shrink: 0; }

@@ -7,6 +7,7 @@ export default {
     defineGetter(this, 'label', function () { return this.name })
     defineDataAccessor(this, 'xpCategory')
     defineDataAccessor(this, 'category')
+    defineDataAccessor(this, 'isBasicSkill')
 
     defineGetter(this, 'actorDataSet', function () {
       if (this.actor != null) {

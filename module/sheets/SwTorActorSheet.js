@@ -3,6 +3,8 @@ import AutoSubmitSheet from './AutoSubmitSheet.js'
 import { calcPropertyBaseValue, calcUpgradeCost } from '../CharacterFormulas.js'
 import DamageTypes from '../DamageTypes.js'
 import ArrayUtils from '../util/ArrayUtils.js'
+import { itemNameComparator } from '../util/SheetUtils.js'
+import SheetWithTabs from './SheetWithTabs.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -59,17 +61,13 @@ export default class SwTorActorSheet extends ActorSheet {
   constructor(...args) {
     super(...args)
 
-    /**
-     * Keep track of the currently active sheet tab
-     * @type {string}
-     */
-    this._sheetTab = "attributes"
     this._inventoryHidden = {}
     this._damageIncoming = {
       type: DamageTypes.default,
       amount: 0,
     }
 
+    new SheetWithTabs(this)
     const autoSubmit = new AutoSubmitSheet(this)
 
     autoSubmit.addFilter('data.attributes.*.gp', this._processDeltaProperty)
@@ -152,18 +150,16 @@ export default class SwTorActorSheet extends ActorSheet {
   getData() {
     const data = super.getData()
 
-    const computedActorData = this.actor
-
     const skills = [...this.actor.skills.list]
     const forceSkills = this.actor.forceSkills.list
     data.computed = {
       skillCategories: [
         ...this.actor.dataSet.skillCategories.list.map(cat => ({
           label: cat.label,
-          skills: ArrayUtils.removeBy(skills, skill => skill.category === cat.key),
+          skills: ArrayUtils.removeBy(skills, skill => skill.category === cat.key).sort(itemNameComparator),
         })),
-        { label: 'Mächte', skills: ArrayUtils.removeBy(skills, skill => skill.isForceSkill) },
-        { label: 'Sonstige', skills },
+        { label: 'Mächte', skills: ArrayUtils.removeBy(skills, skill => skill.isForceSkill).sort(itemNameComparator) },
+        { label: 'Sonstige', skills: skills.sort(itemNameComparator) },
       ],
       forceSkills: forceSkills.length > 0 ? forceSkills : null,
       slots: this.actor.dataSet.slots.layout.map(row => row.map(slot => {
@@ -177,7 +173,7 @@ export default class SwTorActorSheet extends ActorSheet {
             options: [
               { id: null, name: '<Leer>', active: equippedItem == null },
               ...(equippedItem != null ? [{ id: equippedItem.id, name: equippedItem.name, active: true }] : []),
-              ...computedActorData.freeItems.filter(item => Array.isArray(item.slotTypes) && item.slotTypes.indexOf(slot.type) !== -1)
+              ...this.actor.freeItems.filter(item => Array.isArray(item.slotTypes) && item.slotTypes.indexOf(slot.type) !== -1)
             ]
           }
         }
@@ -214,12 +210,12 @@ export default class SwTorActorSheet extends ActorSheet {
     super.activateListeners(html);
 
     // Activate tabs
-    let tabs = html.find('.tabs');
-    let initial = this._sheetTab;
-    new Tabs(tabs, {
-      initial: initial,
-      callback: clicked => this._sheetTab = clicked.data("tab")
-    });
+    // let tabs = html.find('.tabs');
+    // let initial = this._sheetTab;
+    // new Tabs(tabs, {
+    //   initial: initial,
+    //   callback: clicked => this._sheetTab = clicked.data("tab")
+    // });
 
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return;
