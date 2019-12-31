@@ -1,0 +1,24 @@
+/****************************************************************************
+ * Overrides styles from FoundryVTT core
+ ****************************************************************************/
+
+#sidebar {
+  /* Remove sidebar's margins to the window border. Saves some screen real estate. */
+  height: 100vh;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+
+#chat-form {
+  /* Make the chat box smaller. Saves screen space. */
+  height: 50px;
+  flex-basis: 50px;
+}
+
+@media (min-height: 800px) {
+  .sidebar-tab.active + .sidebar-tab[data-tab="combat"] {
+    /* Always display the combat tracker when also viewing the chat */
+    display: flex;
+  }
+}
