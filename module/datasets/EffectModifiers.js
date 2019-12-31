@@ -1,7 +1,7 @@
 import ObjectUtils from '../util/ObjectUtils.js'
 
 const list = [
-  { key: null, label: 'None' },
+  { key: null, label: 'Flat' },
   { key: 'max', label: 'Max.' },
 ]
 

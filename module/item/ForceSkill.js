@@ -1,4 +1,4 @@
-import { defineDataAccessor, defineEnumAccessor, defineGetter, evalSkillExpression } from '../util/EntityUtils.js'
+import { defineDataAccessor, defineEnumAccessor } from '../util/EntityUtils.js'
 import { analyzeExpression } from '../util/SheetUtils.js'
 
 export default {

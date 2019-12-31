@@ -15,7 +15,9 @@
 
   {{!-- Sheet Body --}}
   <section class="sheet-body">
-    <table>
+    <div class="tab-wrapper">
+      <div class="tab-content">
+        <table>
       <tbody>
         {{#if item.isOwned}}
           <tr>
@@ -143,8 +145,10 @@
         {{/if}}
       </tbody>
     </table>
-    {{#if item.itemType.hasEffects}}
-      {{> "systems/sw-tor/templates/effects-editor.html" item=item newEffect=newEffect predefinedEffects=predefinedEffects}}
-    {{/if}}
+        {{#if item.itemType.hasEffects}}
+          {{> "systems/sw-tor/templates/effects-editor.html" item=item newEffect=newEffect predefinedEffects=predefinedEffects}}
+        {{/if}}
+      </div>
+    </div>
   </section>
 </form>

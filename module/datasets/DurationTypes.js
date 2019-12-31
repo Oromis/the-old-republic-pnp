@@ -1,11 +1,9 @@
 import ObjectUtils from '../util/ObjectUtils.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
-import Config from '../Config.js'
-import { explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
-import { analyzeExpression } from '../util/SheetUtils.js'
 import Property from '../properties/Property.js'
 import { evalSkillExpression } from '../util/EntityUtils.js'
 import DataCache from '../util/DataCache.js'
+import { analyzeExpression } from '../util/SheetUtils.js'
 
 class DurationType extends Property {
   constructor(...args) {
@@ -15,7 +13,15 @@ class DurationType extends Property {
   }
 
   get _expressionData() {
-    return this._cache.lookup('expressionData', () => evalSkillExpression(this.formula, this._entity, { round: 0 }))
+    return this._cache.lookup('expressionData', () => {
+      if (this.hasFormula) {
+        return this._entity.isOwned ?
+          evalSkillExpression(this.formula, this._entity, { round: 0 }) :
+          analyzeExpression({ expression: this.formula })
+      } else {
+        return {}
+      }
+    })
   }
 
   get value() {

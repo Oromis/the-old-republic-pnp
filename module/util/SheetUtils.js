@@ -2,7 +2,7 @@ import ObjectUtils from './ObjectUtils.js'
 import { Parser } from '../vendor/expr-eval/expr-eval.js'
 import { resolveGlobalProperty } from './EntityUtils.js'
 
-export function analyzeExpression({ expression, path, defaultExpr = '' }) {
+export function analyzeExpression({ expression, path = [], defaultExpr = '' }) {
   const text = expression || ObjectUtils.try(...path) || defaultExpr
   const result = { formula: text, formulaError: false, variables: [] }
   try {

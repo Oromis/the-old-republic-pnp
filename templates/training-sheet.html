@@ -15,7 +15,9 @@
 
   {{!-- Sheet Body --}}
   <section class="sheet-body training">
-    <table>
+    <div class="tab-wrapper">
+      <div class="tab-content">
+        <table>
       <thead>
         <tr>
           <th class="label-col">Allgemein</th>
@@ -70,7 +72,9 @@
           </td>
         </tr>
       </tbody>
-    </table>
-    {{> "systems/sw-tor/templates/effects-editor.html" item=item newEffect=newEffect predefinedEffects=predefinedEffects}}
+        </table>
+        {{> "systems/sw-tor/templates/effects-editor.html" item=item newEffect=newEffect predefinedEffects=predefinedEffects}}
+      </div>
+    </div>
   </section>
 </form>
