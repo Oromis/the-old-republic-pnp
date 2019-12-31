@@ -74,7 +74,8 @@ export default class SheetWithTabs extends Mixin {
     const groupElement = this.parent.form.querySelector(`.tab-group[data-id="${tabGroup.id}"]`)
     let maxActiveTabCount = 1
     if (tabGroup.minWidth != null) {
-      maxActiveTabCount = Math.max(Math.floor(groupElement.clientWidth / tabGroup.minWidth), 1)
+      const groupWidth = Math.min(groupElement.clientWidth, this.parent.position.width)
+      maxActiveTabCount = Math.max(Math.floor(groupWidth / tabGroup.minWidth), 1)
     }
     const minActiveTabCount = maxActiveTabCount
     if (tabGroup.active.length > maxActiveTabCount) {
