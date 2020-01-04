@@ -1,0 +1,35 @@
+{
+  "name": "sw-tor",
+  "version": "1.0.0",
+  "description": "A PnP game system set in the Star Wars Universe at around 4000 BBY",
+  "main": "src/StarWarsTheOldRepublicPnP.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cross-env NODE_ENV=development webpack --mode=development --watch --progress",
+    "build": "cross-env NODE_ENV=production webpack --mode=production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oromis/the-old-republic-pnp.git"
+  },
+  "author": "David Bauske <david.bauske@googlemail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Oromis/the-old-republic-pnp/issues"
+  },
+  "homepage": "https://github.com/Oromis/the-old-republic-pnp#readme",
+  "devDependencies": {
+    "@babel/core": "^7.7.7",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-transform-runtime": "^7.7.6",
+    "@babel/preset-env": "^7.7.7",
+    "babel-loader": "^8.0.6",
+    "cross-env": "^6.0.3",
+    "terser-webpack-plugin": "^2.3.1",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.7.7"
+  }
+}

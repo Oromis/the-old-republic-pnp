@@ -8,7 +8,7 @@ import SwTorItem from '../item/SwTorItem.js'
  * nothing to do with physical properties. E.g. an insectoid species like the Geonosians would be
  * classified as humanoid too.
  *
- * This is a mixin module. It's method will be called at the corresponding points in the actor's
+ * This is a mixin src. It's method will be called at the corresponding points in the actor's
  * lifecycle. `this` refers to the actor.
  *
  * This is done instead of an inheritance relationship because FoundryVTT doesn't support different
@@ -112,6 +112,20 @@ export default {
         type: 'melee-weapon',
         name: 'Faust'
       }, { actor: this, temporary: true })
+    }
+
+    const superCalcModifiers = this._calcModifiers
+    this._calcModifiers = function _calcModifiers() {
+      const result = superCalcModifiers.call(this)
+
+      // The actor's species can give modifiers
+      if (this.species != null) {
+        for (const [key, value] of Object.entries(this.species.mods || {})) {
+          result.getModifier(key).inject(value, { label: this.species.name })
+        }
+      }
+
+      return result
     }
   },
 }

@@ -19,11 +19,22 @@ export default {
     })
 
     defineGetter(this, 'currentXpCategory', function () {
-      return this.data.data.tmpXpCategory || this.data.data.xpCategory
+      return this.data.data.tmpXpCategory || this.effectiveXpCategory
+    })
+
+    defineGetter(this, 'effectiveXpCategory', function () {
+      // TODO include advantages due to race or training
+      return this.data.data.xpCategory
     })
 
     defineGetter(this, 'xp', function () {
-      return calcSkillXp(this.actor, this)
+      let result = (this.gained || [])
+        .reduce((acc, cur) => acc + (cur.xp == null || isNaN(cur.xp) ? 0 : cur.xp), 0)
+      if (!this.isBasicSkill && !this.actor.modifiers[this.key].explainXp().activationPaid) {
+        // Non-basic skills need to be activated (if not paid for by any bonus)
+        result += this.actorDataSet.xpTable.getActivationCost(this.xpCategory)
+      }
+      return result
     })
 
     defineGetter(this, 'value', function () {

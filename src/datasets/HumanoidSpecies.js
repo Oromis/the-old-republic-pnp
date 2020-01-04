@@ -1,4 +1,9 @@
 import ObjectUtils from '../util/ObjectUtils.js'
+import XpTable from './XpTable.js'
+
+function skillXp({ category, points, isBasic = false }) {
+  return { xp: XpTable.getUpgradeCost({ category, to: points }) }
+}
 
 const list = [
   {
@@ -15,7 +20,7 @@ const list = [
       kl: 10,
       kk: 5,
       sc: -10,
-      waf: 10,
+      waf: skillXp({ category: 'C', to: 10 }),
     },
   },
   {
@@ -25,7 +30,7 @@ const list = [
     mods: {
       ge: 10,
       ko: -10,
-      wge: 10,
+      wge: skillXp({ category: 'C', to: 10 }),
     },
   },
   {
@@ -36,7 +41,7 @@ const list = [
       ge: -10,
       in: 10,
       kl: 10,
-      ini: 2,
+      InI: 2,
     },
   },
   {
@@ -48,8 +53,8 @@ const list = [
       kl: 10,
       ko: -10,
       kk: -10,
-      mec: 5,
-      pil: 5,
+      mec: skillXp({ category: 'C', to: 5 }),
+      pil: skillXp({ category: 'D', to: 5 }),
     },
   },
   {
@@ -62,9 +67,9 @@ const list = [
       kl: -20,
       ko: 10,
       kk: 10,
-      har: 10,
-      lkl: 10,
-      sta: 5,
+      har: skillXp({ category: 'D', to: 10 }),
+      lkl: skillXp({ category: 'E', to: 10 }),
+      sta: skillXp({ category: 'D', to: 5 }),
     },
   },
   {
@@ -78,7 +83,7 @@ const list = [
       ko: 10,
       sc: -10,
       wk: 20,
-      lep: 50,
+      LeP: 50,
       r_armor: 3,
     },
   },
@@ -92,7 +97,7 @@ const list = [
       kl: 10,
       sc: -10,
       wk: 10,
-      üle: 15,
+      üle: skillXp({ category: 'B', to: 15 }),
     },
   },
   {
@@ -104,7 +109,7 @@ const list = [
       kl: 10,
       ko: -10,
       kk: 5,
-      ath: 5,
+      ath: skillXp({ category: 'D', to: 5 }),
     },
   },
   {
@@ -114,7 +119,7 @@ const list = [
     mods: {
       kl: 10,
       kk: -10,
-      sba: 10,
+      sba: skillXp({ category: 'C', to: 10 }),
     },
   },
   {
@@ -127,9 +132,9 @@ const list = [
       kl: -5,
       kk: -5,
       sc: 5,
-      sle: 10,
-      har: 10,
-      sin: 10,
+      sle: skillXp({ category: 'D', to: 10 }),
+      har: skillXp({ category: 'D', to: 10 }),
+      sin: skillXp({ category: 'D', to: 10 }),
     },
   },
   {
@@ -139,8 +144,8 @@ const list = [
     mods: {
       ge: 10,
       ko: -10,
-      sin: 10,
-      pil: 5,
+      sin: skillXp({ category: 'D', to: 10 }),
+      pil: skillXp({ category: 'D', to: 5 }),
     },
   },
   {
@@ -158,8 +163,8 @@ const list = [
     name: 'Togruta',
     gp: 2,
     mods: {
-      nav: 10,
-      ens: 10,
+      nav: skillXp({ category: 'C', to: 10 }),
+      ens: skillXp({ category: 'B', to: 10 }),
     },
   },
   {
@@ -192,8 +197,8 @@ const list = [
     mods: {
       kl: 10,
       r_armor: 1,
-      mec: 15,
-      waf: 15,
+      mec: skillXp({ category: 'C', to: 15 }),
+      waf: skillXp({ category: 'C', to: 15 }),
     },
   },
   {
@@ -205,7 +210,7 @@ const list = [
       ge: -10,
       kl: -10,
       kk: 20,
-      ens: 20,
+      ens: skillXp({ category: 'B', to: 20 }),
     },
   },
   {
@@ -215,8 +220,8 @@ const list = [
     mods: {
       kk: 10,
       wk: 10,
-      ath: 10,
-      har: 10,
+      ath: skillXp({ category: 'D', to: 10 }),
+      har: skillXp({ category: 'D', to: 10 }),
     },
   },
 ]

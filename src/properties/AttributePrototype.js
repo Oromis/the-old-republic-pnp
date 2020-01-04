@@ -1,5 +1,5 @@
 import PropertyPrototype from './PropertyPrototype.js'
-import { explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
+import { explainPropertyValue } from '../CharacterFormulas.js'
 import Property from './Property.js'
 
 export default class AttributePrototype extends PropertyPrototype {
@@ -9,7 +9,7 @@ export default class AttributePrototype extends PropertyPrototype {
       template,
       updaters: [
         (data, { entity, property }) => {
-          data.mod = explainEffect(entity, property)
+          data.mod = entity.modifiers[property.key].explainBonus()
           data.value = explainPropertyValue(entity, property)
         }
       ],

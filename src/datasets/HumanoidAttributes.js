@@ -1,10 +1,9 @@
 import Config from '../Config.js'
 import ObjectUtils from '../util/ObjectUtils.js'
-import PropertyPrototype from '../properties/PropertyPrototype.js'
-import { calcUpgradeCost, explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
+import { calcUpgradeCost } from '../CharacterFormulas.js'
 import Property from '../properties/Property.js'
 import AttributePrototype from '../properties/AttributePrototype.js'
-import { defineGetter, makeRoll } from '../util/EntityUtils.js'
+import { makeRoll } from '../util/EntityUtils.js'
 
 class HumanoidAttribute extends Property {
   get upgradeCost() {
@@ -15,6 +14,11 @@ class HumanoidAttribute extends Property {
     return {
       rolls: [makeRoll(this)],
     }
+  }
+
+  get effectiveXpCategory() {
+    // TODO include advantages due to race or training
+    return this._staticData.xpCategory
   }
 }
 

@@ -2,8 +2,8 @@
   <thead>
     <tr>
       <th>Effekte</th>
-      <th class="skill-key-col"></th>
-      <th class="value-col">Wert</th>
+      <th class="value-col"></th>
+      <th class="input-with-unit-col">Wert</th>
       <th class="icon-col"></th>
     </tr>
   </thead>
@@ -13,7 +13,18 @@
         <td>{{effect.label}}</td>
         <td>{{effect.key}}</td>
         <td>
-          <input type="text" name="data.effects.{{index}}.value" value="{{effect.value}}" />
+          <div class="flex-row flex-end multi-item">
+            {{#if (canBeNumeric effect.value)}}
+              <input type="text" name="data.effects.{{index}}.value" value="{{formatMod effect.value}}" data-dtype="Number" class="flex-grow" />
+            {{/if}}
+            {{#if (isNumeric effect.value.bonus)}}
+              <input type="text" name="data.effects.{{index}}.value.bonus" value="{{formatMod effect.value.bonus}}" data-dtype="Number" class="flex-grow" />
+            {{/if}}
+            {{#if (isNumeric effect.value.xp)}}
+              <input type="text" name="data.effects.{{index}}.value.xp" value="{{effect.value.xp}}" data-dtype="Number" class="flex-grow" />
+              <span>XP</span>
+            {{/if}}
+          </div>
         </td>
         <td>
           <a class="delete-effect" data-index="{{index}}" title="{{effect.label}} löschen">
@@ -22,6 +33,8 @@
         </td>
       </tr>
     {{/each}}
+  </tbody>
+  <tfoot>
     <tr>
       <td>
         <div class="flex-row multi-item">
@@ -40,20 +53,32 @@
               {{/each}}
             {{/select}}
           </select>
-          {{#unless newEffect.type}}
-            <input type="text" name="newEffect.label" value="{{newEffect.label}}" placeholder="Name" class="formula flex-no-shrink" />
-          {{/unless}}
         </div>
       </td>
-      <td>
-        {{#unless newEffect.type}}
-          <input type="text" name="newEffect.key" value="{{newEffect.key}}" placeholder="Key" class="submit-effect" />
-        {{/unless}}
-      </td>
-      <td>
-        <input type="text" name="newEffect.value" value="{{newEffect.value}}" placeholder="Wert" data-dtype="Number" class="submit-effect" />
+      <td colspan="2">
+        <label class="flex-row multi-item">
+          <span class="flex-grow align-right">Bonus</span>
+          <input type="text" name="newEffect.bonus" value="{{newEffect.bonus}}" placeholder="Wert" data-dtype="Number" class="submit-effect" />
+        </label>
       </td>
       <td><a class="new-effect" title="Effekt anlegen"><i class="fas fa-plus"></i></a></td>
     </tr>
-  </tbody>
+    <tr>
+      <td>
+        {{#unless newEffect.type}}
+          <div class="flex-row flex-end multi-item">
+            <input type="text" name="newEffect.label" value="{{newEffect.label}}" placeholder="Name" class="formula flex-no-shrink" />
+            <input type="text" name="newEffect.key" value="{{newEffect.key}}" placeholder="Key" class="submit-effect" />
+          </div>
+        {{/unless}}
+      </td>
+      <td colspan="2">
+        <label class="flex-row multi-item">
+          <span class="flex-grow align-right">XP</span>
+          <input type="text" name="newEffect.xp" value="{{newEffect.xp}}" placeholder="Wert" data-dtype="Number" class="submit-effect" />
+        </label>
+      </td>
+      <td></td>
+    </tr>
+  </tfoot>
 </table>

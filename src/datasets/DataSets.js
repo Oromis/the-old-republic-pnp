@@ -14,7 +14,7 @@ import ForceDispositions from './ForceDispositions.js'
 import ActorTypes from './ActorTypes.js'
 import OwnedSkill from '../item/OwnedSkill.js'
 import OwnedForceSkill from '../item/OwnedForceSkill.js'
-import { validObjectsFilter } from '../util/ObjectUtils.js'
+import { isObject } from '../util/ObjectUtils.js'
 import ItemTypes from '../ItemTypes.js'
 import PhysicalItem from '../item/PhysicalItem.js'
 import Weapon from '../item/Weapon.js'
@@ -53,7 +53,7 @@ export default Object.freeze({
     switch (type) {
       case 'skill':
         return {
-          delegates: [Skill, owned && OwnedSkill].filter(validObjectsFilter),
+          delegates: [Skill, owned && OwnedSkill].filter(isObject),
           actorTypes: ActorTypes,
         }
 
@@ -64,7 +64,7 @@ export default Object.freeze({
             owned && OwnedSkill,
             ForceSkill,
             owned && OwnedForceSkill,
-          ].filter(validObjectsFilter),
+          ].filter(isObject),
           actorTypes: ActorTypes,
           rangeTypes: RangeTypes,
           durationTypes: DurationTypes,
@@ -96,7 +96,7 @@ export default Object.freeze({
             itemType.isEquippable && EquippableItem,
             itemType.isEquippable && owned && OwnedEquippableItem,
             itemType.hasEffects && ItemWithEffects,
-          ].filter(validObjectsFilter),
+          ].filter(isObject),
           itemTypes: ItemTypes,
           damageTypes: DamageTypes,
           slotTypes: SlotTypes,

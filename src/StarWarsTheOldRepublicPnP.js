@@ -15,13 +15,11 @@ import ChatMessageMixin from './ChatMessageMixin.js'
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
 
-  await loadTemplates([
-    'systems/sw-tor/templates/check-roll.html',
-    'systems/sw-tor/templates/check-preview.html',
-    'systems/sw-tor/templates/effects-editor.html',
-  ])
-
   registerHelpers()
+
+  if (game.actors && game.actors.entities && game.actors.entities.length > 0) {
+    console.warn(`${game.actors.entities.length} actors exist before the actor class is overridden`)
+  }
 
 	/**
 	 * Set an initiative formula for the system
@@ -41,13 +39,21 @@ Hooks.once("init", async function() {
   Actors.unregisterSheet("core", ActorSheet)
   Actors.registerSheet("sw-tor", SwTorActorSheet, { makeDefault: true })
   Items.unregisterSheet("core", ItemSheet)
-  Items.registerSheet("sw-tor", PhysicalItemSheet, { makeDefault: true })
+  Items.registerSheet("sw-tor", PhysicalItemSheet, { types: ["congenital", "special-ability", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"], makeDefault: true })
   Items.registerSheet("sw-tor", SkillSheet, { types: ['skill', 'force-skill'], makeDefault: true })
   Items.registerSheet("sw-tor", TrainingSheet, { types: ['training'], makeDefault: true })
+
+  // We need to register actors & sheets before doing any async work. Otherwise Actors might be
+  // created before the class is overridden
+  await loadTemplates([
+    'systems/sw-tor/templates/check-roll.html',
+    'systems/sw-tor/templates/check-preview.html',
+    'systems/sw-tor/templates/effects-editor.html',
+  ])
 })
 
 Hooks.once("ready", function() {
-  const NEEDS_MIGRATION_VERSION = 0.2
+  const NEEDS_MIGRATION_VERSION = 0.3
   let needMigration = game.settings.get("sw-tor", "systemMigrationVersion") < NEEDS_MIGRATION_VERSION
   if ( needMigration && game.user.isGM ) return migrateWorld()
 })

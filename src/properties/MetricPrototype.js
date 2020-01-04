@@ -1,5 +1,5 @@
 import PropertyPrototype from './PropertyPrototype.js'
-import { explainEffect, explainPropertyValue } from '../CharacterFormulas.js'
+import { explainPropertyValue } from '../CharacterFormulas.js'
 import Metric from './Metric.js'
 
 export default class MetricPrototype extends PropertyPrototype {
@@ -9,7 +9,7 @@ export default class MetricPrototype extends PropertyPrototype {
       template,
       updaters: [
         (data, { entity, property }) => {
-          data.mod = explainEffect(entity, property)
+          data.mod = entity.modifiers[property.key].explainBonus()
           const maxExplanation = explainPropertyValue(entity, property, { target: 'max' })
           data.max = maxExplanation.total
           data.maxComponents = maxExplanation.components

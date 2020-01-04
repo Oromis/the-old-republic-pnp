@@ -8,6 +8,11 @@ class HumanoidMetric extends Metric {
   get upgradeCost() {
     return calcUpgradeCost(this._entity, this, { max: this._entity.xp.free })
   }
+
+  get effectiveXpCategory() {
+    // TODO include advantages due to race or training
+    return this._staticData.xpCategory
+  }
 }
 
 class HumanoidMetricPrototype extends MetricPrototype {

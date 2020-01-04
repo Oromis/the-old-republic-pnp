@@ -4,6 +4,8 @@ import ObjectUtils from '../util/ObjectUtils.js'
 import { roundDecimal } from '../util/MathUtils.js'
 import { defineGetter } from '../util/EntityUtils.js'
 import { measureDistance } from '../overrides/DistanceMeasurement.js'
+import { keyMissing } from '../util/ProxyUtils.js'
+import Modifier from '../util/Modifier.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
@@ -101,6 +103,14 @@ export default class SwTorActor extends Actor {
 
   get dataSet() {
     return this._cache.lookup('dataSet', () => DataSets.fromActorType(this.type))
+  }
+
+  get modifiers() {
+    return this._cache.lookup('modifiers', () => {
+      return new Proxy(this._calcModifiers(), {
+        get: keyMissing((_, key) => new Modifier(key))
+      })
+    })
   }
 
   get weight() {
@@ -419,6 +429,36 @@ export default class SwTorActor extends Actor {
   _getEmptySlotWeapon() {
     // The weapon that the actor uses if a weapon slot is empty. For humanoids, this would be something like a "fist".
     return null
+  }
+
+  _calcModifiers() {
+    const result = {}
+
+    /**
+     * @param key {string}
+     * @return {Modifier}
+     */
+    result.getModifier = function getModifier(key) {
+      if (result[key] == null) {
+        result[key] = new Modifier(key)
+      }
+      return result[key]
+    }
+
+    const sources = [
+      this.trainings,
+      this.equippedItems,
+    ]
+
+    for (const source of sources) {
+      for (const item of source) {
+        for (const effect of (item.effects || [])) {
+          result.getModifier(effect.key).inject(effect.value, { label: item.name })
+        }
+      }
+    }
+
+    return result
   }
 
   // ----------------------------------------------------------------------------

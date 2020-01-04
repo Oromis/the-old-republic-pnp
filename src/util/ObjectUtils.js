@@ -39,7 +39,7 @@ function mapValues(obj, func) {
     .reduce(zipEntries, {})
 }
 
-export function validObjectsFilter(arg) {
+export function isObject(arg) {
   return arg != null && typeof arg === 'object'
 }
 
@@ -90,6 +90,25 @@ export default Object.freeze({
     return val
   },
 
+  set(obj, path, value) {
+    const paths = path.split('.')
+
+    let parent = obj
+    for (let i = 0; i < paths.length; ++i) {
+      if (!isObject(parent)) {
+        throw new Error(`Expected object, found ${parent}`)
+      }
+
+      if (i < paths.length - 1) {
+        // Walk the path
+        parent = parent[paths[i]]
+      } else {
+        // Set the value
+        parent[paths[i]] = value
+      }
+    }
+  },
+
   sameValue(value, ...keys) {
     const result = {}
     for (const key of keys) {
@@ -100,5 +119,5 @@ export default Object.freeze({
 
   cloneDeep,
 
-  validObjectsFilter,
+  validObjectsFilter: isObject,
 })

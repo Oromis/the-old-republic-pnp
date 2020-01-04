@@ -14,7 +14,7 @@ export default class SheetWithTabs extends Mixin {
       data.tabGroups = ObjectUtils.mapValues(this._tabGroups, group => {
         return {
           active: group.tabs.reduce((acc, tab) => {
-            acc[tab] = !!group.active.indexOf(tab) !== -1
+            acc[tab] = group.active.indexOf(tab) !== -1
             return acc
           }, {})
         }

@@ -6,21 +6,36 @@ import ResistanceTypes from '../datasets/ResistanceTypes.js'
 import { timeout } from '../util/Timing.js'
 
 export default class SheetWithEffects extends Mixin {
-  constructor(parent, { autoSubmit }) {
+  /**
+   * Injects effect configuration logic into the sheet.
+   * @param parent The sheet instance to inject into
+   * @param {AutoSubmitSheet} autoSubmit The AutoSubmitSheet instance used by the sheet. Required.
+   * @param {boolean} paysForActivation True if the effects configured by this sheet pay for skill
+   *    activation costs. False otherwise.
+   */
+  constructor(parent, { autoSubmit, paysForActivation = false }) {
     super(parent)
+
+    this._options = {
+      paysForActivation
+    }
 
     autoSubmit.addFilter('data.effects.*.value', (obj, { name, path }) => {
       const effects = ObjectUtils.cloneDeep(parent.item.effects || [])
-      const index = +path[2]
-      if (effects.length >= index) {
-        effects[index].value = +obj[name]
+      const [_data, _effects, index, ...rest] = path
+      if (effects.length >= +index) {
+        ObjectUtils.set(effects[index], rest.join('.'), +obj[name])
         return { 'data.effects': effects }
       } else {
         return {}
       }
     })
 
-    this._newEffect = { key: null, label: null, value: null }
+    this._resetNewEffect = function () {
+      this._newEffect = { key: null, label: null, bonus: null, xp: null }
+    }
+
+    this._resetNewEffect()
     autoSubmit.addFilter('newEffect.*', (obj, { name, path }) => {
       // The "new effect" data isn't actually stored in the item, it's just kept in the UI until it is added
       // as a full effect
@@ -65,15 +80,28 @@ export default class SheetWithEffects extends Mixin {
           newEffect.key = newEffect.type
           newEffect.label = this._getPredefinedEffectByKey(newEffect.type).label
         }
-        if (newEffect.key && typeof newEffect.value === 'number') {
+        const hasBonus = typeof newEffect.bonus === 'number' && newEffect.bonus !== 0
+        const hasXp = typeof newEffect.xp === 'number' && newEffect.xp !== 0
+        if (newEffect.key && (hasBonus || hasXp)) {
           if (!newEffect.label) {
             newEffect.label = newEffect.key
           }
-          this._newEffect.key = ''
-          this._newEffect.label = ''
-          this._newEffect.value = ''
+
+          const toAdd = ObjectUtils.pick(newEffect, ['key', 'label'])
+          toAdd.value = {}
+          if (hasBonus) {
+            toAdd.value.bonus = newEffect.bonus
+          }
+          if (hasXp) {
+            toAdd.value.xp = newEffect.xp
+            toAdd.value.activationPaid = this._options.paysForActivation
+          }
+          this._resetNewEffect()
           this.parent.item.update({
-            'data.effects': [...(this.parent.item.effects || []), ObjectUtils.pick(newEffect, ['key', 'label', 'value'])],
+            'data.effects': [
+              ...(this.parent.item.effects || []),
+              toAdd,
+            ],
           })
         }
       }

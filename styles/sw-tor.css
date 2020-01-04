@@ -16,12 +16,16 @@
     border-bottom: 1px solid black;
 }
 
+.sw-tor table > tfoot > tr:first-of-type > td {
+    border-top: 1px solid black;
+}
+
 .sw-tor table th, .sw-tor table td {
     text-align: left;
     padding: 4px;
 }
 
-.sw-tor tr:nth-child(2n), .sw-tor .line-view > *:nth-child(2n) {
+.sw-tor tbody tr:nth-child(2n), .sw-tor .line-view > *:nth-child(2n) {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -145,6 +149,10 @@
 
 .sw-tor .value-col {
     width: 50px;
+}
+
+.sw-tor .input-with-unit-col {
+    width: 90px;
 }
 
 .sw-tor .gain-col, .sw-tor .encumberance-col {

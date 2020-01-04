@@ -7,7 +7,7 @@ export default class TrainingSheet extends ItemSheet {
     super(...args)
 
     const autoSubmit = new AutoSubmitSheet(this)
-    new SheetWithEffects(this, { autoSubmit })
+    new SheetWithEffects(this, { autoSubmit, paysForActivation: true })
   }
 
   /**
