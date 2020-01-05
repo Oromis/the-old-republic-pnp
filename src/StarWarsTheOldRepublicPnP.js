@@ -11,6 +11,7 @@ import {migrateWorld} from './migration/Migrations.js'
 import SwTorActor from './actor/SwTorActor.js'
 import SwTorItem from './item/SwTorItem.js'
 import ChatMessageMixin from './ChatMessageMixin.js'
+import { installCombatTrackerHook } from './overrides/CombatTrackerHook.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -25,7 +26,7 @@ Hooks.once("init", async function() {
 	 * Set an initiative formula for the system
 	 * @type {String}
 	 */
-	CONFIG.initiative.formula = "1d6 + (@attributes.in.value + @attributes.sc.value) / 10"
+	CONFIG.initiative.formula = "1d6 + (@attributes.in.value.total + @attributes.sc.value.total) / 10"
   CONFIG.Actor.entityClass = SwTorActor
   CONFIG.Item.entityClass = SwTorItem
 
@@ -56,6 +57,8 @@ Hooks.once("ready", function() {
   const NEEDS_MIGRATION_VERSION = 0.3
   let needMigration = game.settings.get("sw-tor", "systemMigrationVersion") < NEEDS_MIGRATION_VERSION
   if ( needMigration && game.user.isGM ) return migrateWorld()
+
+  installCombatTrackerHook()
 })
 
 Hooks.on("canvasInit", function() {

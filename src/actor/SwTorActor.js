@@ -328,6 +328,43 @@ export default class SwTorActor extends Actor {
     return { key, ...data, diff, factor }
   }
 
+  /**
+   * Changes the actor's metrics' values by the diff provided.
+   */
+  modifyMetrics(diff, { dryRun = false } = {}) {
+    const metrics = {}
+    for (const [key, val] of Object.entries(diff)) {
+      if (this.metrics[key] != null && typeof this.metrics[key].value === 'number') {
+        metrics[key] = { value: this.metrics[key].value + val }
+      }
+    }
+
+    const payload = { data: { metrics } }
+    if (dryRun) {
+      return payload
+    } else {
+      return this.update(payload)
+    }
+  }
+
+  enterTurn({ round, combat }) {
+    // Apply turn regeneration
+    const diff = this.getRegeneration('turn').diff
+    const payload = this.modifyMetrics(diff, { dryRun: true })
+    payload.data.lastTurnRegeneration = diff
+    return this.update(payload)
+  }
+
+  undoEnterTurn({ round, combat }) {
+    // Undo the last turn regeneration
+    const reg = this.data.data.lastTurnRegeneration
+    if (reg != null && typeof reg === 'object') {
+      const payload = this.modifyMetrics(ObjectUtils.mapValues(reg, a => -a), { dryRun: true })
+      payload.data['-=lastTurnRegeneration'] = null
+      return this.update(payload)
+    }
+  }
+
   // ---------------------------------------------------------------------
   // Private stuff
   // ---------------------------------------------------------------------

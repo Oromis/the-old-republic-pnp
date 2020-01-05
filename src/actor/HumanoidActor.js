@@ -84,19 +84,6 @@ export default {
       return result
     }
 
-    /**
-     * Changes the actor's metrics' values by the diff provided.
-     */
-    this.modifyMetrics = function modifyMetrics(diff) {
-      const metrics = {}
-      for (const [key, val] of Object.entries(diff)) {
-        if (this.metrics[key] != null && typeof this.metrics[key].value === 'number') {
-          metrics[key] = { value: this.metrics[key].value + val }
-        }
-      }
-      this.update({ data: { metrics } })
-    }
-
     this._getEmptySlotWeapon = function _getEmptySlotWeapon(slotKey) {
       const skillRating = this.skillValue('fau')
       return new SwTorItem({
