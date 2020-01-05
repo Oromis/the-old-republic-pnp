@@ -14,6 +14,7 @@ export default class AutoSubmitSheet extends Mixin {
     this._filters = []
     this._focusSelector = null
     this._focusSelectorTimeout = null
+    this._scrollPositions = {}
   }
 
   activateListeners(html) {
@@ -32,6 +33,23 @@ export default class AutoSubmitSheet extends Mixin {
 
     // Support Image updates
     html.find('img[data-editable]').click(this._onEditImage)
+
+    // Listen for scroll events to restore scroll position after an update
+    html.find('.tab-wrapper').on('scroll', e => {
+      let key = ''
+      const dataId = e.currentTarget.getAttribute('data-id')
+      if (dataId) {
+        key = dataId
+      }
+      this._scrollPositions[key] = e.currentTarget.scrollTop
+    })
+    for (const [key, scrollTop] of Object.entries(this._scrollPositions)) {
+      let selector = '.tab-wrapper'
+      if (key) {
+        selector += `[data-id="${key}"]`
+      }
+      html.find(selector).scrollTop(scrollTop)
+    }
 
     if (this._focusSelector != null) {
       const elements = html.find(this._focusSelector)
