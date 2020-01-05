@@ -8,6 +8,7 @@ export default {
     defineDataAccessor(this, 'xpCategory')
     defineDataAccessor(this, 'category')
     defineDataAccessor(this, 'isBasicSkill')
+    defineEnumAccessor(this, 'actorType')
 
     defineGetter(this, 'actorDataSet', function () {
       if (this.actor != null) {
@@ -19,6 +20,7 @@ export default {
 
     defineGetter(this, 'isRegularSkill', function () { return this.type === 'skill' })
     defineGetter(this, 'isForceSkill', function () { return this.type === 'force-skill' })
+    defineGetter(this, 'isSkill', function () { return true })
 
     defineEnumAccessor(this, 'attribute1', { getEnumData: () => this.actorDataSet.attributes, configurable: true })
     defineEnumAccessor(this, 'attribute2', { getEnumData: () => this.actorDataSet.attributes, configurable: true })

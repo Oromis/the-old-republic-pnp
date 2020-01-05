@@ -41,7 +41,7 @@
                     {{/select}}
                   </select>
                 {{else}}
-                  <span>{{computed.speciesName}}</span>
+                  <span>{{actor.species.name}}</span>
                 {{/if}}
               </div>
             {{/if}}
@@ -50,16 +50,15 @@
               <span>Ausbildungen:</span>
               <div class="trainings flex-row multi-item">
                 {{#each actor.trainings as |training|}}
-                  <div data-item-id="{{training.id}}">
+                  <div data-item-id="{{training.id}}" class="flex-row">
                     <a class="item-control item-edit" title="{{training.summary}}">
                       {{training.name}}
                     </a>
                     {{#if ../data.creationMode.enabled}}
+                      &nbsp;
                       <a class="item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
                     {{/if}}
-                    {{#unless @last}}
-                      <span>, </span>
-                    {{/unless}}
+                    {{#unless @last}},{{/unless}}
                   </div>
                 {{/each}}
               </div>
@@ -217,80 +216,94 @@
       {{#each computed.skillCategories as |category|}}
         <div class="padded">
           <table>
-          <thead>
-            <tr>
-              <th>{{category.label}}</th>
-              <th class="attr-key-col" title="Primärattribut">A1</th>
-              <th class="attr-key-col" title="Sekundärattribut">A2</th>
-              <th class="xp-category-col" title="Steigerungsklasse">StK</th>
-              <th class="xp-col">XP</th>
-              <th class="gain-col">Gain</th>
-              <th class="buff-col">Buff</th>
-              <th class="value-col">Wert</th>
-              {{#if ../data.creationMode.enabled}}
-                <th class="icon-col"></th>
-              {{/if}}
-            </tr>
-          </thead>
-          <tbody>
-            {{#each category.skills as |skill|}}
-              <tr {{class when=skill.isBasicSkill then='basic-skill'}} data-item-id="{{skill.id}}">
-                <td>
-                  <div class="flex-row multi-item">
-                    <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
-                    <span class="skill-key-col">{{formatAttrKey skill.key}}</span>
-                    <a class="flex-grow item-control item-edit" title="{{skill.name}} bearbeiten">{{skill.name}}</a>
-                    <a class="roll-check" title="Probe werfen" data-path="skills.{{skill.key}}.check" data-label="{{skill.name}}">
-                      <i class="fas fa-dice-d20"></i>
-                    </a>
-                  </div>
-                </td>
-                <td title="{{skill.attribute1.label}}">{{formatAttrKey skill.attribute1.key}}</td>
-                <td title="{{skill.attribute2.label}}">{{formatAttrKey skill.attribute2.key}}</td>
-                <td>
-                  <select name="skills.{{skill.key}}.data.tmpXpCategory">
-                    {{#select skill.currentXpCategory}}
-                      {{#each actor.dataSet.xpTable.categoryNames as |category|}}
-                        <option value="{{category}}">{{category}}</option>
-                      {{/each}}
-                    {{/select}}
-                  </select>
-                </td>
-                <td>{{skill.xp}}</td>
-                <td>
-                  <div class="flex-row multi-item">
-                    {{#if ../../data.creationMode.enabled}}
-                      {{#if skill.gained.length}}
-                        <button type="button" class="small char change-skill-gained" data-id="skill.{{skill.key}}.-"
-                                data-skill="{{skill.key}}" data-action="-">-</button>
+            <thead>
+              <tr>
+                <th>{{category.label}}</th>
+                <th class="attr-key-col" title="Primärattribut">A1</th>
+                <th class="attr-key-col" title="Sekundärattribut">A2</th>
+                <th class="xp-category-col" title="Steigerungsklasse">StK</th>
+                <th class="xp-col">XP</th>
+                <th class="gain-col">Gain</th>
+                <th class="buff-col">Buff</th>
+                <th class="value-col">Wert</th>
+                {{#if ../data.creationMode.enabled}}
+                  <th class="icon-col"></th>
+                {{/if}}
+              </tr>
+            </thead>
+            <tbody>
+              {{#each category.skills as |skill|}}
+                <tr {{class when=skill.isBasicSkill then='basic-skill'}} data-item-id="{{skill.id}}">
+                  <td>
+                    <div class="flex-row multi-item">
+                      <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
+                      <span class="skill-key-col">{{formatAttrKey skill.key}}</span>
+                      <a class="flex-grow item-control item-edit" title="{{skill.name}} bearbeiten">{{skill.name}}</a>
+                      <a class="roll-check" title="Probe werfen" data-path="skills.{{skill.key}}.check" data-label="{{skill.name}}">
+                        <i class="fas fa-dice-d20"></i>
+                      </a>
+                    </div>
+                  </td>
+                  <td title="{{skill.attribute1.label}}">{{formatAttrKey skill.attribute1.key}}</td>
+                  <td title="{{skill.attribute2.label}}">{{formatAttrKey skill.attribute2.key}}</td>
+                  <td>
+                    <select name="skills.{{skill.key}}.data.tmpXpCategory">
+                      {{#select skill.currentXpCategory}}
+                        {{#each actor.dataSet.xpTable.categoryNames as |category|}}
+                          <option value="{{category}}">{{category}}</option>
+                        {{/each}}
+                      {{/select}}
+                    </select>
+                  </td>
+                  <td>{{skill.xp}}</td>
+                  <td>
+                    <div class="flex-row multi-item">
+                      {{#if ../../data.creationMode.enabled}}
+                        {{#if skill.gained.length}}
+                          <button type="button" class="small char change-skill-gained" data-id="skill.{{skill.key}}.-"
+                                  data-skill="{{skill.key}}" data-action="-">-</button>
+                        {{else}}
+                          <span class="char-button-placeholder"></span>
+                        {{/if}}
+                      {{/if}}
+                      <span class="skill-gained">{{fallback skill.gained.length 0}}</span>
+                      {{#if skill.upgradeCost}}
+                        <button type="button" class="small char change-skill-gained" data-id="skill.{{skill.key}}.+"
+                                title="{{skill.upgradeCost}} XP" data-skill="{{skill.key}}" data-action="+">+</button>
                       {{else}}
                         <span class="char-button-placeholder"></span>
                       {{/if}}
-                    {{/if}}
-                    <span class="skill-gained">{{fallback skill.gained.length 0}}</span>
-                    {{#if skill.upgradeCost}}
-                      <button type="button" class="small char change-skill-gained" data-id="skill.{{skill.key}}.+"
-                              title="{{skill.upgradeCost}} XP" data-skill="{{skill.key}}" data-action="+">+</button>
-                    {{else}}
-                      <span class="char-button-placeholder"></span>
-                    {{/if}}
-                  </div>
-                </td>
-                <td>
-                  <input type="text" name="skills.{{skill.key}}.data.buff" value="{{skill.buff}}" />
-                </td>
-                <td title="{{formatExplanation skill.value.components}}">{{skill.value.total}}</td>
-                {{#if ../../data.creationMode.enabled}}
-                  <td>
-                    <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+                    </div>
                   </td>
-                {{/if}}
-              </tr>
-            {{/each}}
-          </tbody>
-        </table>
+                  <td>
+                    <input type="text" name="skills.{{skill.key}}.data.buff" value="{{skill.buff}}" />
+                  </td>
+                  <td title="{{formatExplanation skill.value.components}}">{{skill.value.total}}</td>
+                  {{#if ../../data.creationMode.enabled}}
+                    <td>
+                      <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+                    </td>
+                  {{/if}}
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
         </div>
       {{/each}}
+      {{#if actor.missingSkills.length}}
+        <div>
+          <hr />
+          <h3>Fehlende Fähigkeiten</h3>
+          <p>
+            {{#each actor.missingSkills as |skill|}}
+              {{skill.name}}{{#unless @last}},{{/unless}}
+            {{/each}}
+          </p>
+          <div class="flex-row multi-item">
+            <button type="button" class="auto-width add-missing-skills">Hinzufügen</button>
+          </div>
+        </div>
+      {{/if}}
     {{/tabContent}}
 
     {{!-- Force Tab --}}
@@ -743,16 +756,16 @@
           </tbody>
         </table>
         <div>
-        <label
-            class="flex-row multi-item"
-            title="Nur während der Charaktererstellungsmodus aktiv ist, ist es möglich, GP zu verteilen"
-        >
-          <span>
-            <input type="checkbox" name="data.creationMode.enabled" {{checked data.creationMode.enabled}} />
-          </span>
-          <span>Charaktererstellungsmodus</span>
-        </label>
-      </div>
+          <label
+              class="flex-row multi-item"
+              title="Nur während der Charaktererstellungsmodus aktiv ist, ist es möglich, GP zu verteilen"
+          >
+            <span>
+              <input type="checkbox" name="data.creationMode.enabled" {{checked data.creationMode.enabled}} />
+            </span>
+            <span>Charaktererstellungsmodus</span>
+          </label>
+        </div>
       </div>
     {{/tabContent}}
   {{/tabContents}}

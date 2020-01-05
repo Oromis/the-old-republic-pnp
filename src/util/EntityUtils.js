@@ -106,14 +106,18 @@ export function resolveGlobalProperty(key) {
   const type = detectPropertyType({ key }, { throwOnError: false })
   switch (type) {
     case 'skill':
-      // Look for a global skill item with the given key
-      return game.items.entities.find(entity => entity.key === key && (entity.type || '').indexOf('skill') !== -1)
+      return resolveGlobalSkill(key)
     case 'attribute':
       return Attributes.map[key.toLowerCase()]
     case 'metric':
       return Metrics.map[key.toLowerCase()]
   }
   return null
+}
+
+export function resolveGlobalSkill(key) {
+  // Look for a global skill item with the given key
+  return game.items.entities.find(entity => entity.key === key && (entity.type || '').indexOf('skill') !== -1)
 }
 
 export function explainComputedValue({ value, label, bonusExplanation }) {

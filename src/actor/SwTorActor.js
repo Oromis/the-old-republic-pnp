@@ -6,6 +6,8 @@ import { defineGetter } from '../util/EntityUtils.js'
 import { measureDistance } from '../overrides/DistanceMeasurement.js'
 import { keyMissing } from '../util/ProxyUtils.js'
 import Modifier from '../util/Modifier.js'
+import ActorTypes from '../datasets/ActorTypes.js'
+import Skill from '../item/Skill.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
@@ -365,6 +367,33 @@ export default class SwTorActor extends Actor {
     }
   }
 
+  get missingSkills() {
+    return this._cache.lookup('missingSkills', () => game.items.entities.filter(item => {
+      if (item.isSkill && item.actorType === this.actorType) {
+        // Potential match
+        if (this.skills[item.key] != null) {
+          // We already have this skill => not missing
+          return false
+        } else {
+          if (item.isBasicSkill) {
+            // Yes, we're lacking this basic skill
+            return true
+          } else {
+            // Check if this skill was acquired through some kind of bonus
+            return this.modifiers[item.key].explainXp().activationPaid
+          }
+        }
+      } else {
+        // Different actor type or no skill => no match
+        return false
+      }
+    }))
+  }
+
+  get actorType() {
+    return ActorTypes.map[ActorTypes.default]
+  }
+
   // ---------------------------------------------------------------------
   // Private stuff
   // ---------------------------------------------------------------------
@@ -503,19 +532,14 @@ export default class SwTorActor extends Actor {
   // ----------------------------------------------------------------------------
 
   createOwnedItem(data, ...rest) {
-    let promise = this._checkValidItem(data, () => super.createOwnedItem(data, ...rest))
-
-    if (this.isToken) {
-      // This is done to work around a FoundryVTT-bug that causes token actors to not update automatically when
-      // an item is changed.
-      promise = promise.then(res => {
-        this._cache.clearKey('categorizedItems')
+    return this._checkValidItem(data, () => super.createOwnedItem(data, ...rest))
+      .then(res => {
+        // This is done to work around a FoundryVTT-bug that causes token actors to not update automatically when
+        // an item is changed.
+        this._cache.clear()
         this.render(false)
         return res
       })
-    }
-
-    return promise
   }
 
   updateOwnedItem(data, ...rest) {
@@ -554,7 +578,7 @@ export default class SwTorActor extends Actor {
       // data.data can be absent if we're updating something outside the data object, like the name.
       // Don't do anything in this case as it's never harmful.
       const newActorType = data.data.actorType
-      if (newActorType != null && newActorType !== this.type) {
+      if (newActorType != null && ActorTypes.map[newActorType] !== this.actorType) {
         const msg = `Bad actor type: ${newActorType}`
         return Promise.reject(msg)
       }

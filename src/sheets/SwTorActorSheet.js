@@ -236,6 +236,7 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('.do-roll').click(this._onDoRoll)
     html.find('.roll-check').click(this._onRollCheck)
     html.find('.item-create').click(this._onCreateItem)
+    html.find('.add-missing-skills').click(this._onAddMissingSkills)
 
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
@@ -380,6 +381,12 @@ export default class SwTorActorSheet extends ActorSheet {
     const label = event.currentTarget.getAttribute('data-label') || undefined
 
     await RollUtils.rollCheck(check, { actor: this.actor.id, label })
+  }
+
+  _onAddMissingSkills = async () => {
+    for (const skill of this.actor.missingSkills) {
+      await this.actor.createOwnedItem(skill.data)
+    }
   }
 
   _processDeltaProperty = (formData, { name }) => {
