@@ -26,4 +26,7 @@ const character = {
 export default Object.freeze({
   system,
   character,
+  energy: {
+    wrongModeEfficiency: 0.25,
+  }
 })

@@ -108,6 +108,19 @@
               </a>
             {{/each}}
           </div>
+          {{#if actor.metrics.EnP.max}}
+            <label class="flex-row multi-item">
+              <div class="flex-grow"></div>
+              <img src="icons/svg/lightning.svg" alt="Energiezellen-Modus" title="Energiezellen-Modus" class="table-icon" />
+              <select name="data.metrics.EnP.mode">
+                {{#select actor.metrics.EnP.mode}}
+                  <option value="off">Deaktiviert</option>
+                  <option value="discharge">Entladen</option>
+                  <option value="charge">Laden</option>
+                {{/select}}
+              </select>
+            </label>
+          {{/if}}
         </div>
       </div>
       <div class="flex-row multi-item">

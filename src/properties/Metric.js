@@ -34,4 +34,18 @@ export default class Metric extends Property {
       }
     }
   }
+
+  calcDeltaFactor(delta) {
+    if (typeof this._staticData.calcDeltaFactor === 'function') {
+      return this._staticData.calcDeltaFactor.call(this, delta)
+    }
+  }
+
+  getModifiedValue(delta) {
+    let deltaFactor = 1
+    if (typeof this._staticData.calcDeltaFactor === 'function') {
+      deltaFactor = this._staticData.calcDeltaFactor.call(this, delta)
+    }
+    return this.value + (delta * deltaFactor)
+  }
 }

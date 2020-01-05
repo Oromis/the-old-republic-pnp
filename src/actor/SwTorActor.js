@@ -324,7 +324,9 @@ export default class SwTorActor extends Actor {
     }, {})
     const factor = ObjectUtils.try(this.data.data.regeneration, key, 'factor', { default: 1 })
     diff = ObjectUtils.omitZero(ObjectUtils.mapValues(diff, (val, mk) => {
-      const delta = Math.floor(val * factor)
+      let delta = Math.floor(val * factor)
+      const newVal = this.metrics[mk].getModifiedValue(delta)
+      delta = newVal - this.metrics[mk].value
       return Math.min(delta, this.metrics[mk].missing)
     }))
     return { key, ...data, diff, factor }
@@ -335,9 +337,9 @@ export default class SwTorActor extends Actor {
    */
   modifyMetrics(diff, { dryRun = false } = {}) {
     const metrics = {}
-    for (const [key, val] of Object.entries(diff)) {
+    for (const [key, delta] of Object.entries(diff)) {
       if (this.metrics[key] != null && typeof this.metrics[key].value === 'number') {
-        metrics[key] = { value: this.metrics[key].value + val }
+        metrics[key] = { value: this.metrics[key].value + delta }
       }
     }
 

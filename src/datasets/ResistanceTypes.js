@@ -2,6 +2,7 @@ import ObjectUtils from '../util/ObjectUtils.js'
 import PropertyPrototype from '../properties/PropertyPrototype.js'
 import Property from '../properties/Property.js'
 import { explainPropertyValue } from '../CharacterFormulas.js'
+import Config from '../Config.js'
 
 function resistFlat(damage) {
   return { damage: Math.max(0, damage - this.value.total) }
@@ -16,8 +17,18 @@ function resistEnergy(damage, type, actor) {
     damageMulti = 4
   }
 
-  const reduced = Math.min(EnP, damage * damageMulti, this.value.total)
-  return { damage: damage - (reduced / damageMulti), cost: { EnP: reduced }}
+  const energyCellMode = actor.metrics.EnP.mode || 'discharge'
+  let reduced
+  if (energyCellMode === 'off') {
+    reduced = 0
+  } else {
+    if (energyCellMode !== 'discharge') {
+      // Discharging in charge mode => 75% losses => 4 times the energy usage
+      damageMulti *= (1 / Config.energy.wrongModeEfficiency)
+    }
+    reduced = Math.floor(Math.min(EnP, damage * damageMulti, this.value.total) / damageMulti)
+  }
+  return { damage: damage - reduced, cost: { EnP: reduced * damageMulti }}
 }
 
 function resistPercentage(damage) {

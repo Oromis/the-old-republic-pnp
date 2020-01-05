@@ -75,7 +75,21 @@ const EnP = new HumanoidMetricPrototype('EnP', {
   backgroundColor: '#c7d6ff',
   regen: {
     day: 'missing',
-    turn: 4,  // TODO adjust depending on energy generator
+    turn(actor) {
+      // Energy regeneration is governed by items through the "EgL" effect (Energiegenerator-Leistung)
+      return actor.modifiers.EgL.bonus
+    },
+  },
+  calcDeltaFactor(delta) {
+    if (this.mode === 'off') {
+      return 0
+    } else if (delta > 0 && this.mode !== 'charge') {
+      return Config.energy.wrongModeEfficiency
+    } else if (delta < 0 && this.mode !== 'discharge') {
+      return 1 / Config.energy.wrongModeEfficiency
+    } else {
+      return 1
+    }
   },
   calcBaseValue() {
     return 0 // Energy pool is governed by equipment alone
