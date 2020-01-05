@@ -6,7 +6,7 @@ export default {
     })
   },
 
-  async rollCheck(check, { actor = undefined, label = undefined } = {}) {
+  async rollCheck(check, { actor = undefined, label = undefined, isConfirmation = false } = {}) {
     const die = new Die(20)
     die.roll(check.rolls.length)
 
@@ -27,7 +27,7 @@ export default {
         diff: check.AgP - payload.rolls.reduce((acc, cur) => acc + (cur.diff < 0 ? -cur.diff : 0), 0)
       }
     }
-    if (Math.abs(critical) === 1) {
+    if (!isConfirmation && Math.abs(critical) === 1) {
       // An unconfirmed critical result - either critical success or critical failure.
       // We need to confirm the result before the critical outcome becomes effective
       payload.needsConfirmation = true
@@ -41,7 +41,7 @@ export default {
       speaker: { actor },
       sound: CONFIG.sounds.dice,
       content: await renderTemplate('systems/sw-tor/templates/check-roll.html', payload),
-      check: payload,
+      flags: { 'sw-tor': { check: payload } },
     }
     // Handle type
     if ( ["gmroll", "blindroll"].includes(chatData.rollMode) ) {
