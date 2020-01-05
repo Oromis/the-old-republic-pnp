@@ -26,12 +26,47 @@
 
 .sw-tor button.char,
 .sw-tor .char-button-placeholder {
-  width: 22px;
+  width: 26px;
+}
+
+.sw-tor .icon-button {
+  height: 24px;
+  width: auto;
+  min-width: 26px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
 }
 
 .sw-tor button:focus:not(:hover) {
   box-shadow: 0 0 3px red;
   outline: none;
+}
+
+.sw-tor .button-group {
+  display: flex;
+  flex-direction: row;
+}
+
+.sw-tor .button-group > button {
+  margin: 0;
+  border-radius: 0;
+}
+
+.sw-tor .button-group > button:not(:first-of-type) {
+  border-left: 0;
+}
+
+.sw-tor .button-group > button:first-of-type {
+  border-bottom-left-radius: 3px;
+  border-top-left-radius: 3px;
+}
+
+.sw-tor .button-group > button:last-of-type {
+  border-bottom-right-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
 .sw-tor select:focus {

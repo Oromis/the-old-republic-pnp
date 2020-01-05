@@ -12,22 +12,38 @@ function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
   const gainLog = property.gained || []
   let newGainLog, newXp
-  if (action === '+') {
-    const xpCategory = property.currentXpCategory || property.xpCategory || defaultXpCategory
-    const xpCost = calcUpgradeCost(actor, property)
-    newXp = prevXp + xpCost
-    newGainLog = [...gainLog, { xpCategory, xp: xpCost }]
-  } else {
-    const baseVal = calcPropertyBaseValue(actor, property)
-    newGainLog = gainLog.slice(0, gainLog.length - 1)
-    const removed = gainLog[gainLog.length - 1]
-    const xpCost = removed.xp || actor.dataSet.xpTable.getUpgradeCost({
-      category: removed.xpCategory,
-      from: baseVal + newGainLog.length,
-      to: baseVal + gainLog.length
-    })
-    newXp = prevXp - xpCost
+  switch (action) {
+    case 'buy': {
+      // Buy a point with XP
+      const xpCategory = property.currentXpCategory || property.xpCategory || defaultXpCategory
+      const xpCost = calcUpgradeCost(actor, property)
+      newXp = prevXp + xpCost
+      newGainLog = [...gainLog, { xpCategory, xp: xpCost }]
+      break
+    }
+
+    case 'grant': {
+      // The GM grants a point
+      newXp = prevXp
+      newGainLog = [...gainLog, { xpCategory: null, xp: 0 }]
+      break
+    }
+
+    case 'remove': {
+      // Remove the last added point
+      const baseVal = calcPropertyBaseValue(actor, property)
+      newGainLog = gainLog.slice(0, gainLog.length - 1)
+      const removed = gainLog[gainLog.length - 1]
+      const xpCost = typeof removed.xp === 'number' ? removed.xp : actor.dataSet.xpTable.getUpgradeCost({
+        category: removed.xpCategory,
+        from: baseVal + newGainLog.length,
+        to: baseVal + gainLog.length
+      })
+      newXp = prevXp - xpCost
+      break
+    }
   }
+
   return { xp: newXp, gainLog: newGainLog }
 }
 
@@ -337,12 +353,21 @@ export default class SwTorActorSheet extends ActorSheet {
     const key = event.currentTarget.getAttribute('data-skill')
     const skill = this.actor.skills[key]
 
-    const { gainLog } = calcGainChange(this.actor, skill, { action })
+    let go = true
+    if (action === 'grant' && !game.user.isGM) {
+      if (!confirm(`Hat dir der GM einen ${skill.name}-Punkt zugestanden?`)) {
+        go = false
+      }
+    }
 
-    skill.update({
-      'data.gained': gainLog,
-      'data.tmpXpCategory': skill.xpCategory, // Reset after every skill point
-    })
+    if (go) {
+      const { gainLog } = calcGainChange(this.actor, skill, { action })
+
+      skill.update({
+        'data.gained': gainLog,
+        'data.tmpXpCategory': skill.xpCategory, // Reset after every skill point
+      })
+    }
   }
 
   _onChangeMetricGained = event => {

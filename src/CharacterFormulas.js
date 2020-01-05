@@ -87,10 +87,23 @@ export function explainPropertyValue(actor, property, options) {
       result.components.push({ label: xpComponent.label, value: result.total - totalBefore })
     }
   }
-  const gained = ObjectUtils.try(property, 'gained', { default: [] }).length
-  if (gained !== 0) {
-    result.total += gained
-    result.components.push({ label: 'XP', value: gained })
+  const gainLog = ObjectUtils.try(property, 'gained', { default: [] })
+  if (gainLog.length > 0) {
+    result.total += gainLog.length
+    let fromXp = 0, granted = 0
+    for (const entry of gainLog) {
+      if (entry.xp > 0) {
+        ++fromXp
+      } else {
+        ++granted
+      }
+    }
+    if (fromXp > 0) {
+      result.components.push({ label: 'XP', value: fromXp })
+    }
+    if (granted > 0) {
+      result.components.push({ label: 'Verdient', value: granted })
+    }
   }
   const buff = ObjectUtils.try(property, 'buff', { default: 0 })
   if (buff !== 0) {
