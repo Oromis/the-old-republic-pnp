@@ -26,7 +26,7 @@ Hooks.once("init", async function() {
 	 * Set an initiative formula for the system
 	 * @type {String}
 	 */
-	CONFIG.initiative.formula = "1d6 + (@attributes.in.value.total + @attributes.sc.value.total) / 10"
+	CONFIG.initiative.formula = "@initiativeFormula"
   CONFIG.Actor.entityClass = SwTorActor
   CONFIG.Item.entityClass = SwTorItem
 

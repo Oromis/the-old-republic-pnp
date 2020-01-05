@@ -17,6 +17,16 @@
               </div>
             {{/each}}
             <div class="flex-grow"></div>
+            <div title="Basis-Initiative: {{formatExplanation actor.baseInitiativeExplanation.components}}" class="flex-row">
+              <i class="fas fa-bell"></i>&nbsp;
+              {{actor.baseInitiativeExplanation.total}}
+            </div>
+            <div class="flex-row">
+              <i class="fas fa-shoe-prints" title="Laufweg"></i>&nbsp;
+              <span title="Laufweg 1: {{formatExplanation actor.speed1Explanation.components}}">{{actor.speed1Explanation.total}}</span>
+              &nbsp;|&nbsp;
+              <span title="Laufweg 2: {{formatExplanation actor.speed2Explanation.components}}">{{actor.speed2Explanation.total}}</span>
+            </div>
           </div>
           <div class="flex-row multi-item">
             {{#if actor.species}}

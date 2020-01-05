@@ -4,6 +4,7 @@ import Attributes from '../datasets/AllAttributes.js'
 import Metrics from '../datasets/AllMetrics.js'
 import ResistanceTypes from '../datasets/ResistanceTypes.js'
 import { timeout } from '../util/Timing.js'
+import SpecialProperties from '../datasets/SpecialProperties.js'
 
 export default class SheetWithEffects extends Mixin {
   /**
@@ -127,6 +128,7 @@ export default class SheetWithEffects extends Mixin {
         { label: 'Attribute', properties: Attributes.list },
         { label: 'Metriken', properties: Metrics.list },
         { label: 'Resistenzen', properties: ResistanceTypes.list },
+        { label: 'Sonstiges', properties: SpecialProperties.list },
       ]
     }
     return this._predefinedEffectsStore

@@ -53,6 +53,12 @@ export function defineGetter(object, key, getter, { configurable = false } = {})
   })
 }
 
+export function defineCachedGetter(object, key, getter, { configurable = false } = {}) {
+  return defineGetter(object, key, function () {
+    return this._cache.lookup(key, getter)
+  }, { configurable })
+}
+
 export function makeRoll(property) {
   const result = {
     key: property.key,
@@ -108,4 +114,16 @@ export function resolveGlobalProperty(key) {
       return Metrics.map[key.toLowerCase()]
   }
   return null
+}
+
+export function explainComputedValue({ value, label, bonusExplanation }) {
+  const result = {
+    total: value,
+    components: [{ label, value }]
+  }
+  if (bonusExplanation.total) {
+    result.total += bonusExplanation.total
+    result.components.push(...bonusExplanation.components)
+  }
+  return result
 }

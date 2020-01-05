@@ -38,7 +38,8 @@
         },
         "creationMode": {
           "enabled": true
-        }
+        },
+        "initiativeFormula": "1d12"
       }
     },
     "pc": {

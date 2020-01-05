@@ -1,7 +1,14 @@
 import { calcFreeXp, calcGp, calcTotalXp } from '../CharacterFormulas.js'
 import Config from '../Config.js'
-import { defineDataAccessor, defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
+import {
+  defineCachedGetter,
+  defineDataAccessor,
+  defineEnumAccessor,
+  defineGetter,
+  explainComputedValue
+} from '../util/EntityUtils.js'
 import SwTorItem from '../item/SwTorItem.js'
+import { roundDecimal } from '../util/MathUtils.js'
 
 /**
  * Functionality for humanoid characters. "humanoid" refers to intelligent life forms, it has
@@ -114,6 +121,38 @@ export default {
 
       return result
     }
+
+    defineCachedGetter(this, 'baseInitiativeExplanation', () => explainComputedValue({
+      value: Math.round((this.attrValue('in') + this.attrValue('sc')) / 5),
+      label: `Attribute (IN+SC)/5`,
+      bonusExplanation: this.modifiers.InI.explainBonus(),
+    }))
+
+    defineCachedGetter(this, 'speed1Explanation', () => {
+      const result = explainComputedValue({
+        value: roundDecimal(this.attrValue('sc') / 10, 2),
+        label: `Sprintstärke (SC/10)`,
+        bonusExplanation: this.modifiers.LaW.explainBonus(),
+      })
+      result.total += 2
+      result.components.unshift({ label: 'Basis', value: 2 })
+      return result
+    })
+
+    defineCachedGetter(this, 'speed2Explanation', () => {
+      const result = explainComputedValue({
+        value: roundDecimal((this.attrValue('sc') / 10) * (this.attrValue('ko') / 100), 2),
+        label: `Ausdauer (SC/10)*(KO/100)`,
+        bonusExplanation: this.modifiers.LaW.explainBonus(),
+      })
+      result.total += 2
+      result.components.unshift({ label: 'Basis', value: 2 })
+      return result
+    })
   },
+
+  afterPrepareData(actorData) {
+    actorData.data.initiativeFormula = `${this.baseInitiativeExplanation.total} + 1d12`
+  }
 }
 
