@@ -49,7 +49,7 @@ export function calcFreeXp(actor) {
   return actor.xp.total -
     actor.attributes.list.reduce((acc, cur) => acc + cur.xp || 0, 0) -
     actor.skills.list.reduce((acc, skill) => acc + skill.xp, 0) -
-    actor.metrics.list.reduce((acc, cur) => cur.xp || 0, 0)
+    actor.metrics.list.reduce((acc, cur) => acc + cur.xp || 0, 0)
 }
 
 export function calcTotalXp(actor) {
