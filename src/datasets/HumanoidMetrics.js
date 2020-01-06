@@ -15,8 +15,14 @@ class HumanoidMetric extends Metric {
   }
 }
 
+class HumanoidEnergyMetric extends HumanoidMetric {
+  get mode() {
+    return this._data.mode || 'discharge'
+  }
+}
+
 class HumanoidMetricPrototype extends MetricPrototype {
-  constructor(key, staticData) {
+  constructor(key, staticData, PropertyClass = HumanoidMetric) {
     super(key, {
       staticData,
       template: {
@@ -25,7 +31,7 @@ class HumanoidMetricPrototype extends MetricPrototype {
         gained: [],
         buff: 0,
       },
-      PropertyClass: HumanoidMetric,
+      PropertyClass,
     })
   }
 }
@@ -94,7 +100,7 @@ const EnP = new HumanoidMetricPrototype('EnP', {
   calcBaseValue() {
     return 0 // Energy pool is governed by equipment alone
   }
-})
+}, HumanoidEnergyMetric)
 
 const list = [LeP, AuP, MaP, EnP]
 const map = ObjectUtils.asObject(list, 'key')
