@@ -1,8 +1,15 @@
 <form class="{{cssClass}} multi-item charsheet-form" autocomplete="off">
 
   {{!-- Sheet Header --}}
-  <header class="sheet-header flex-row multi-item">
-    <img class="profile-img" src="{{actor.img}}" data-editable title="{{actor.name}}" height="100" width="100" />
+  <header class="sheet-header flex-row multi-item flex-cross-start">
+    <div class="multi-item">
+      <img class="profile-img" src="{{actor.img}}" data-editable title="{{actor.name}}" height="100" width="100" />
+      {{#if actor.encumberance}}
+        <div title="Behinderung: {{formatExplanation actor.encumberanceExplanation.components}}">
+          <i class="fas fa-long-arrow-alt-down"></i> {{actor.encumberance}}
+        </div>
+      {{/if}}
+    </div>
     <div class="header-fields flex-grow flex-self-start">
       <div class="flex-row multi-item flex-cross-start">
         <div class="multi-item flex-grow">
@@ -66,18 +73,18 @@
           </div>
         </div>
         <div class="multi-item">
-          <div class="flex-row multi-item">
-            <span title="Generierungspunkte">GP</span>
-            <span class="flex-grow">{{actor.gp.value}}</span>
-            {{#if data.creationMode.enabled}}
+          {{#if data.creationMode.enabled}}
+            <div class="flex-row multi-item">
+              <span title="Generierungspunkte">GP</span>
+              <span class="flex-grow">{{actor.gp.value}}</span>
               {{#if actor.gp.value}}
                 <button type="button" class="small gp-to-xp" data-id="gp-to-xp">GP → XP</button>
               {{/if}}
               {{#if actor.xp.gp}}
                 <button type="button" class="small xp-to-gp" data-id="xp-to-gp">GP ← XP</button>
               {{/if}}
-            {{/if}}
-          </div>
+            </div>
+          {{/if}}
           <label class="flex-row multi-item">
             <span title="Erfahrungspunkte">XP</span>
             <span>{{actor.xp.free}}</span>

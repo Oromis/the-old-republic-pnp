@@ -150,6 +150,50 @@ export default {
       result.components.unshift({ label: 'Basis', value: 2 })
       return result
     })
+
+    defineCachedGetter(this, 'encumberanceExplanation', () => {
+      const result = {
+        total: 0,
+        components: [],
+      }
+
+      // Encumberance from low life
+      const lifePercentage = this.metrics.LeP.value / this.metrics.LeP.max
+      if (lifePercentage < 0.3) {
+        const encumberance = Math.ceil((((0.3 - lifePercentage) * (10/3)) ** 2) * 10)
+        result.total += encumberance
+        result.components.push({ label: 'Gesundheitszustand', value: encumberance })
+      }
+
+      // Encumberance from low stamina
+      const staminaPercentage = this.metrics.AuP.value / this.metrics.AuP.max
+      if (staminaPercentage < 0.3) {
+        const encumberance = Math.ceil((((0.3 - staminaPercentage) * (10/3)) ** 2) * 5)
+        result.total += encumberance
+        result.components.push({ label: 'Erschöpfung', value: encumberance })
+      }
+
+      // Encumberance from inventory weight
+      if (this.weight.isOverloaded) {
+        const encumberance = Math.ceil(((this.weight.value / this.weight.max) - 1) * 10)
+        result.total += encumberance
+        result.components.push({ label: 'Überladung', value: encumberance })
+      }
+
+      // Encumberance from armor & carried items
+      for (const item of this.equippedItems) {
+        if (item.encumberance) {
+          result.total += item.encumberance
+          result.components.push({ label: item.name, value: item.encumberance })
+        }
+      }
+
+      return result
+    })
+
+    defineGetter(this, 'encumberance', function () {
+      return this.encumberanceExplanation.total
+    })
   },
 
   afterPrepareData(actorData) {
