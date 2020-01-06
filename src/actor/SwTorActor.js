@@ -51,8 +51,19 @@ export default class SwTorActor extends Actor {
   _getItems(...args) {
     // _getItems() re-generates the array of owned items. Reset the cache in this case.
     const res = super._getItems(...args)
-    this._cache && this._cache.clearKey('categorizedItems')
+    this._cache && this._cache.clear()
     return res
+  }
+
+  render(force, context, ...rest) {
+    if (context != null) {
+      if (['createOwnedItem', 'updateOwnedItem', 'updateManyOwnedItem', 'deleteOwnedItem'].indexOf(context.renderContext) !== -1) {
+        this.items = this._getItems()
+        this._cache.clear()
+        this.prepareData({})
+      }
+    }
+    return super.render(force, context, ...rest)
   }
 
   get attributes() {
@@ -89,6 +100,10 @@ export default class SwTorActor extends Actor {
 
   get trainings() {
     return this._categorizedItems.trainings
+  }
+
+  get innateAbilities() {
+    return this._categorizedItems.innateAbilities
   }
 
   get inventory() {
@@ -396,6 +411,10 @@ export default class SwTorActor extends Actor {
     return ActorTypes.map[ActorTypes.default]
   }
 
+  clearCache() {
+    this._cache.clear()
+  }
+
   // ---------------------------------------------------------------------
   // Private stuff
   // ---------------------------------------------------------------------
@@ -414,6 +433,7 @@ export default class SwTorActor extends Actor {
         skills: [],
         forceSkills: [],
         trainings: [],
+        innateAbilities: [],
         inventory: [],
         freeItems: [],
         equippedItems: [],
@@ -426,6 +446,8 @@ export default class SwTorActor extends Actor {
           }
         } else if(item.type === 'training') {
           categories.trainings.push(item)
+        } else if (item.type === 'innate-ability') {
+          categories.innateAbilities.push(item)
         } else {
           categories.inventory.push(item)
           if (item.isEquipped) {
@@ -514,6 +536,7 @@ export default class SwTorActor extends Actor {
     }
 
     const sources = [
+      { items: this.innateAbilities, stage: STAGE_PERMANENT },
       { items: this.trainings, stage: STAGE_PERMANENT },
       { items: this.equippedItems, stage: STAGE_TEMPORARY },
     ]
@@ -535,13 +558,6 @@ export default class SwTorActor extends Actor {
 
   createOwnedItem(data, ...rest) {
     return this._checkValidItem(data, () => super.createOwnedItem(data, ...rest))
-      .then(res => {
-        // This is done to work around a FoundryVTT-bug that causes token actors to not update automatically when
-        // an item is changed.
-        this._cache.clear()
-        this.render(false)
-        return res
-      })
   }
 
   updateOwnedItem(data, ...rest) {
@@ -551,27 +567,12 @@ export default class SwTorActor extends Actor {
     } else {
       console.warn(`Updating item that does not exist: `, data)
     }
-    let promise = this._checkValidItem(data, () => super.updateOwnedItem(data, ...rest))
 
-    // This is done to work around a FoundryVTT-bug that causes token actors to miss an item update. I.e.
-    // updates are always delayed by one change
-    promise = promise.then(res => {
-      this._cache.clear()
-      if (this._cacheClearPending) {
-        this._cacheClearPending = false
-
-        // This has been added to force-update the actor's attributes and metrics when an equipped item changes
-        // (because bonuses will change in this case)
-        const data = this.prepareData({})
-        this.update(data)
-      }
-      this.render(false)
-      item = this.getOwnedItem(data.id)
-      item.sheet.render(false)
-      this._runPendingCalls()
-      return res
-    })
-    return promise
+    return this._checkValidItem(data, () => super.updateOwnedItem(data, ...rest))
+      .then(res => {
+        this._runPendingCalls()
+        return res
+      })
   }
 
   _checkValidItem(data, cb) {

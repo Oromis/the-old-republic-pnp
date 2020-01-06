@@ -632,162 +632,197 @@
     {{#tabContent groupId='main' id='items'}}
       <div class="flex-row multi-item">
         <div class="flex-grow"></div>
-        <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
-          <i class="fas fa-weight-hanging"></i>
-          <span>{{actor.weight.value}}</span>
-          <span>/</span>
-          <span>{{actor.weight.max}}</span>
+          <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
+            <i class="fas fa-weight-hanging"></i>
+            <span>{{actor.weight.value}}</span>
+            <span>/</span>
+            <span>{{actor.weight.max}}</span>
+          </div>
         </div>
-      </div>
-      {{#each computed.inventory as |category|}}
-        <div class="padded">
-          <table>
-          <thead>
-            <tr>
-              <th>
-                <div class="flex-row multi-item">
-                  <a class="toggle-inventory-view" data-category="{{category.key}}">
-                    {{#if (resolve ../ui.inventoryHidden category.key)}}
-                      <i class="fas fa-eye-slash"></i>
-                    {{else}}
-                      <i class="fas fa-eye"></i>
-                    {{/if}}
+        {{#each computed.inventory as |category|}}
+          <div class="padded">
+            <table>
+            <thead>
+              <tr>
+                <th>
+                  <div class="flex-row multi-item">
+                    <a class="toggle-inventory-view" data-category="{{category.key}}">
+                      {{#if (resolve ../ui.inventoryHidden category.key)}}
+                        <i class="fas fa-eye-slash"></i>
+                      {{else}}
+                        <i class="fas fa-eye"></i>
+                      {{/if}}
+                    </a>
+                    <span>{{category.label}}</span>
+                  </div>
+                </th>
+                {{#if category.isWeapon}}
+                  <th class="damage-col" title="Schaden">Schaden</th>
+                {{/if}}
+                {{#if category.isWearable}}
+                  <th class="damage-col" title="Rüstung">Rüstung</th>
+                  <th class="encumberance-col" title="Behinderung">Behinderung</th>
+                {{/if}}
+                {{#if category.isEquippable}}
+                  <th class="damage-col" title="Zustand">Zustand</th>
+                {{/if}}
+                <th class="price-col" title="Preis"><i class="fas fa-coins"></i></th>
+                <th class="weight-col" title="Gewicht"><i class="fas fa-weight-hanging"></i></th>
+                <th class="icon-col">
+                  <a class="item-create" data-type="{{category.key}}" title="{{category.label}} hinzufügen">
+                    <i class="fas fa-plus"></i>
                   </a>
-                  <span>{{category.label}}</span>
-                </div>
-              </th>
-              {{#if category.isWeapon}}
-                <th class="damage-col" title="Schaden">Schaden</th>
-              {{/if}}
-              {{#if category.isWearable}}
-                <th class="damage-col" title="Rüstung">Rüstung</th>
-                <th class="encumberance-col" title="Behinderung">Behinderung</th>
-              {{/if}}
-              {{#if category.isEquippable}}
-                <th class="damage-col" title="Zustand">Zustand</th>
-              {{/if}}
-              <th class="price-col" title="Preis"><i class="fas fa-coins"></i></th>
-              <th class="weight-col" title="Gewicht"><i class="fas fa-weight-hanging"></i></th>
-              <th class="icon-col">
-                <a class="item-create" data-type="{{category.key}}" title="{{category.label}} hinzufügen">
-                  <i class="fas fa-plus"></i>
-                </a>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#unless (resolve ../ui.inventoryHidden category.key)}}
-              {{#each category.items as |item|}}
-                <tr class="item" data-item-id="{{item.id}}">
-                  <td>
-                    <div class="flex-row multi-item">
-                      <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
-                      <a class="item-control item-edit" title="{{item.description}}">
-                        {{#if (isMultiple item.quantity)}}
-                          {{item.quantity}}x
-                        {{/if}}
-                        {{item.name}}
-                      </a>
-                    </div>
-                  </td>
-                  {{#if category.isWeapon}}
-                    <td title="Schaden">{{item.damage.formula}}</td>
-                  {{/if}}
-                  {{#if category.isWearable}}
-                    <td title="Rüstung">{{item.armor}}</td>
-                    <td title="Behinderung">{{item.encumberance}}</td>
-                  {{/if}}
-                  {{#if category.isEquippable}}
-                    <td class="damage-col" title="Zustand">{{formatPercentage item.condition}}</td>
-                  {{/if}}
-                  <td title="Preis">{{item.price}}</td>
-                  <td title="Gewicht">{{item.weight}}</td>
-                  <td>
-                    <a class="item-control item-delete" title="{{item.name}} löschen"><i class="fas fa-trash"></i></a>
-                  </td>
-                </tr>
-              {{/each}}
-            {{/unless}}
-          </tbody>
-        </table>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#unless (resolve ../ui.inventoryHidden category.key)}}
+                {{#each category.items as |item|}}
+                  <tr class="item" data-item-id="{{item.id}}">
+                    <td>
+                      <div class="flex-row multi-item">
+                        <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
+                        <a class="item-control item-edit" title="{{item.description}}">
+                          {{#if (isMultiple item.quantity)}}
+                            {{item.quantity}}x
+                          {{/if}}
+                          {{item.name}}
+                        </a>
+                      </div>
+                    </td>
+                    {{#if category.isWeapon}}
+                      <td title="Schaden">{{item.damage.formula}}</td>
+                    {{/if}}
+                    {{#if category.isWearable}}
+                      <td title="Rüstung">{{item.armor}}</td>
+                      <td title="Behinderung">{{item.encumberance}}</td>
+                    {{/if}}
+                    {{#if category.isEquippable}}
+                      <td class="damage-col" title="Zustand">{{formatPercentage item.condition}}</td>
+                    {{/if}}
+                    <td title="Preis">{{item.price}}</td>
+                    <td title="Gewicht">{{item.weight}}</td>
+                    <td>
+                      <a class="item-control item-delete" title="{{item.name}} löschen"><i class="fas fa-trash"></i></a>
+                    </td>
+                  </tr>
+                {{/each}}
+              {{/unless}}
+            </tbody>
+          </table>
         </div>
       {{/each}}
     {{/tabContent}}
 
     {{!-- Other Tab --}}
     {{#tabContent groupId='main' id='other'}}
-      <div class="padded">
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Metrik</th>
-              <th>Aktuell</th>
-              <th>Mod</th>
-              <th title="Steigerungsklasse">StK</th>
-              <th>XP</th>
-              <th>Gain</th>
-              <th>Buff</th>
-              <th>Max</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each actor.metrics.list as |metric|}}
+      <div class="multi-item">
+        <div class="padded">
+          <table>
+            <thead>
               <tr>
-                <td>{{metric.key}}</td>
-                <td title="{{metric.desc}}">{{metric.label}}</td>
-                <td>
-                  {{metricView metric=metric linked=true}}
-                </td>
-                <td title="{{formatExplanation metric.mod.components}}">{{formatMod metric.mod.total}}</td>
-                <td>
-                  {{#if metric.xpCategory}}
-                    <select name="data.metrics.{{metric.key}}.xpCategory">
-                      {{#select metric.xpCategory}}
-                        {{#each ../actor.dataSet.xpTable.categoryNames as |category|}}
-                          <option value="{{category}}">{{category}}</option>
-                        {{/each}}
-                      {{/select}}
-                    </select>
-                  {{/if}}
-                </td>
-                <td>
-                  {{#if metric.xpCategory}}{{metric.xp}}{{/if}}
-                </td>
-                <td>
-                  {{#if metric.xpCategory}}
-                    <div class="flex-row multi-item">
-                      {{#if ../data.creationMode.enabled}}
-                        {{#if metric.gained.length}}
+                <th></th>
+                <th>Metrik</th>
+                <th>Aktuell</th>
+                <th>Mod</th>
+                <th title="Steigerungsklasse">StK</th>
+                <th>XP</th>
+                <th>Gain</th>
+                <th>Buff</th>
+                <th>Max</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each actor.metrics.list as |metric|}}
+                <tr>
+                  <td>{{metric.key}}</td>
+                  <td title="{{metric.desc}}">{{metric.label}}</td>
+                  <td>
+                    {{metricView metric=metric linked=true}}
+                  </td>
+                  <td title="{{formatExplanation metric.mod.components}}">{{formatMod metric.mod.total}}</td>
+                  <td>
+                    {{#if metric.xpCategory}}
+                      <select name="data.metrics.{{metric.key}}.xpCategory">
+                        {{#select metric.xpCategory}}
+                          {{#each ../actor.dataSet.xpTable.categoryNames as |category|}}
+                            <option value="{{category}}">{{category}}</option>
+                          {{/each}}
+                        {{/select}}
+                      </select>
+                    {{/if}}
+                  </td>
+                  <td>
+                    {{#if metric.xpCategory}}{{metric.xp}}{{/if}}
+                  </td>
+                  <td>
+                    {{#if metric.xpCategory}}
+                      <div class="flex-row multi-item">
+                        {{#if ../data.creationMode.enabled}}
+                          {{#if metric.gained.length}}
+                            <button type="button" class="small char change-metric-gained"
+                                    data-id="metrics.{{metric.key}}.-"
+                                    data-metric="{{metric.key}}" data-action="remove">-</button>
+                          {{else}}
+                            <span class="char-button-placeholder"></span>
+                          {{/if}}
+                        {{/if}}
+                        <span class="metric-gained">{{metric.gained.length}}</span>
+                        {{#if metric.upgradeCost}}
                           <button type="button" class="small char change-metric-gained"
-                                  data-id="metrics.{{metric.key}}.-"
-                                  data-metric="{{metric.key}}" data-action="remove">-</button>
+                                  data-id="metrics.{{metric.key}}.+" title="{{metric.upgradeCost}} XP"
+                                  data-metric="{{metric.key}}" data-action="buy">+</button>
                         {{else}}
                           <span class="char-button-placeholder"></span>
                         {{/if}}
-                      {{/if}}
-                      <span class="metric-gained">{{metric.gained.length}}</span>
-                      {{#if metric.upgradeCost}}
-                        <button type="button" class="small char change-metric-gained"
-                                data-id="metrics.{{metric.key}}.+" title="{{metric.upgradeCost}} XP"
-                                data-metric="{{metric.key}}" data-action="buy">+</button>
-                      {{else}}
-                        <span class="char-button-placeholder"></span>
-                      {{/if}}
-                    </div>
-                  {{/if}}
-                </td>
-                <td>
-                  <input type="text" name="data.metrics.{{metric.key}}.buff" value="{{metric.buff}}" />
-                </td>
-                <td title="{{formatExplanation metric.maxComponents}}">
-                  {{metric.max}}
-                </td>
+                      </div>
+                    {{/if}}
+                  </td>
+                  <td>
+                    <input type="text" name="data.metrics.{{metric.key}}.buff" value="{{metric.buff}}" />
+                  </td>
+                  <td title="{{formatExplanation metric.maxComponents}}">
+                    {{metric.max}}
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+        <div class="padded">
+          <table>
+            <thead>
+              <tr>
+                <th>Vor- und Nachteile</th>
+                <th>GP</th>
+                <th>Effekte</th>
+                <th class="icon-col"></th>
               </tr>
-            {{/each}}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {{#each actor.innateAbilities as |ability|}}
+                <tr class="item" data-item-id="{{ability.id}}">
+                  <td>
+                    <div class="flex-row multi-item">
+                      <img src="{{ability.img}}" title="{{ability.name}}" width="24" height="24" alt="{{ability.name}}" />
+                      <a class="item-control item-edit">
+                        {{ability.name}}
+                      </a>
+                    </div>
+                  </td>
+                  <td>{{ability.gp}}</td>
+                  <td>{{ability.summary}}</td>
+                  <td>
+                    <a class="item-control item-delete" title="{{ability.name}} löschen"><i class="fas fa-trash"></i></a>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
         <div>
+          <hr />
+          <h3>Einstellungen</h3>
           <label
               class="flex-row multi-item"
               title="Nur während der Charaktererstellungsmodus aktiv ist, ist es möglich, GP zu verteilen"
@@ -797,6 +832,7 @@
             </span>
             <span>Charaktererstellungsmodus</span>
           </label>
+          <button type="button" class="auto-width clear-cache">Clear Cache</button>
         </div>
       </div>
     {{/tabContent}}

@@ -24,10 +24,10 @@
       "entity": "Item"
     },
     {
-      "name": "congenitals",
+      "name": "innate-abilities",
       "label": "Vor- und Nachteile",
       "system": "sw-tor",
-      "path": "./packs/congenitals.db",
+      "path": "./packs/innate-abilities.db",
       "entity": "Item"
     },
     {

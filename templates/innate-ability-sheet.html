@@ -1,0 +1,46 @@
+<form class="{{cssClass}} multi-item" autocomplete="off">
+  <header class="sheet-header flex-row multi-item">
+    <img class="profile-img" src="{{item.img}}" data-editable title="{{item.name}}"/>
+    <div class="header-fields flex-grow multi-item">
+      <div class="flex-row multi-item flex-cross-start">
+        <h1 class="char-name flex-grow">
+          <input name="name" class="full-width" type="text" value="{{item.name}}" placeholder="Name"/>
+        </h1>
+      </div>
+      <div class="flex-row">
+        <textarea placeholder="Beschreibung" name="data.description" class="flex-grow">{{data.description}}</textarea>
+      </div>
+    </div>
+  </header>
+
+  {{!-- Sheet Body --}}
+  <section class="sheet-body innate-ability">
+    <div class="tab-wrapper">
+      <div class="tab-content">
+        <table>
+          <thead>
+            <tr>
+              <th class="label-col">Allgemein</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GP</td>
+              <td>
+                <input type="text" name="data.gp" value="{{data.gp}}" />
+              </td>
+            </tr>
+            <tr>
+              <td>Voraussetzungen</td>
+              <td>
+                <textarea name="data.requirements.text" class="flex-grow">{{data.requirements.text}}</textarea>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        {{> "systems/sw-tor/templates/effects-editor.html" item=item newEffect=newEffect predefinedEffects=predefinedEffects}}
+      </div>
+    </div>
+  </section>
+</form>

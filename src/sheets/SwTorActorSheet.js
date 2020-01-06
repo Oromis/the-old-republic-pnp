@@ -233,14 +233,6 @@ export default class SwTorActorSheet extends ActorSheet {
 	activateListeners(html) {
     super.activateListeners(html);
 
-    // Activate tabs
-    // let tabs = html.find('.tabs');
-    // let initial = this._sheetTab;
-    // new Tabs(tabs, {
-    //   initial: initial,
-    //   callback: clicked => this._sheetTab = clicked.data("tab")
-    // });
-
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return;
 
@@ -253,6 +245,7 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('.roll-check').click(this._onRollCheck)
     html.find('.item-create').click(this._onCreateItem)
     html.find('.add-missing-skills').click(this._onAddMissingSkills)
+    html.find('.clear-cache').click(this._clearActorCache)
 
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
@@ -412,6 +405,11 @@ export default class SwTorActorSheet extends ActorSheet {
     for (const skill of this.actor.missingSkills) {
       await this.actor.createOwnedItem(skill.data)
     }
+  }
+
+  _clearActorCache = () => {
+    this.actor.clearCache()
+    this.actor.render(false)
   }
 
   _processDeltaProperty = (formData, { name }) => {

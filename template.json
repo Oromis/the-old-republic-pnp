@@ -50,7 +50,7 @@
     }
   },
   "Item": {
-    "types": ["skill", "force-skill", "training", "congenital", "special-ability", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"],
+    "types": ["skill", "force-skill", "training", "innate-ability", "special-ability", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"],
     "templates": {
       "described": {
         "description": ""
@@ -118,17 +118,17 @@
       "additionalInformation": "",
       "items": []
     },
-    "congenital": {
+    "innate-ability": {
       "templates": ["described"],
       "gp": 0,
-      "requirements": "",
-      "bonuses": {}
+      "requirements": {},
+      "effects": {}
     },
     "special-ability": {
       "templates": ["described"],
       "gp": 0,
       "xp": 0,
-      "bonuses": {},
+      "effects": {},
       "requirements": {}
     },
     "melee-weapon": {
