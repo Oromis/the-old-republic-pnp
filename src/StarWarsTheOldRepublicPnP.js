@@ -12,6 +12,8 @@ import SwTorActor from './actor/SwTorActor.js'
 import SwTorItem from './item/SwTorItem.js'
 import ChatMessageMixin from './ChatMessageMixin.js'
 import { installCombatTrackerHook } from './overrides/CombatTrackerHook.js'
+import { migrateItemPermissions } from './migration/v3/MigrateItemPermissions.js'
+import { injectDefaultItemPermissions } from './overrides/DefaultItemPermission.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -53,12 +55,19 @@ Hooks.once("init", async function() {
   ])
 })
 
-Hooks.once("ready", function() {
+Hooks.once("ready", async function() {
   const NEEDS_MIGRATION_VERSION = 0.3
   let needMigration = game.settings.get("sw-tor", "systemMigrationVersion") < NEEDS_MIGRATION_VERSION
-  if ( needMigration && game.user.isGM ) return migrateWorld()
+  if ( needMigration && game.user.isGM ) {
+    await migrateWorld()
+  }
 
   installCombatTrackerHook()
+  injectDefaultItemPermissions()
+
+  if (game.user.isGM) {
+    await migrateItemPermissions()
+  }
 })
 
 Hooks.on("canvasInit", function() {
