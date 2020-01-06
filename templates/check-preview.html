@@ -1,7 +1,7 @@
 {{#each check.rolls as |roll|}}
   <span title="{{roll.label}}" class="align-center">
     <strong>{{formatAttrKey roll.key}}</strong>
-    {{roll.target}}{{formatCheckDiff roll.advantage 'small'}}
+    {{roll.target}}{{#if roll.advantage}}{{formatCheckDiff roll.advantage 'small'}}{{/if}}
   </span>
 {{/each}}
 {{#if (isNumeric check.AgP)}}
