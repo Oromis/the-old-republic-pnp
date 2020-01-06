@@ -13,6 +13,7 @@ import SwTorItem from './item/SwTorItem.js'
 import ChatMessageMixin from './ChatMessageMixin.js'
 import { installCombatTrackerHook } from './overrides/CombatTrackerHook.js'
 import { injectDefaultItemPermissions } from './overrides/DefaultItemPermission.js'
+import { injectPrivateMeasurements } from './overrides/PrivateMeasurements.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -23,11 +24,9 @@ Hooks.once("init", async function() {
     console.warn(`${game.actors.entities.length} actors exist before the actor class is overridden`)
   }
 
-	/**
-	 * Set an initiative formula for the system
-	 * @type {String}
-	 */
 	CONFIG.initiative.formula = "@initiativeFormula"
+  CONFIG.initiative.decimals = 2
+
   CONFIG.Actor.entityClass = SwTorActor
   CONFIG.Item.entityClass = SwTorItem
 
@@ -63,6 +62,7 @@ Hooks.once("ready", async function() {
 
   installCombatTrackerHook()
   injectDefaultItemPermissions()
+  injectPrivateMeasurements()
 })
 
 Hooks.on("canvasInit", function() {

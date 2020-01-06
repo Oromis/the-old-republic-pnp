@@ -9,4 +9,13 @@ export const registerSystemSettings = function() {
     type: Number,
     default: 0
   })
+
+  game.settings.register("sw-tor", "rulerVisible", {
+    name: "Öffentliches Distanzmessen",
+    hint: "Zeigt deine Messvorgänge anderen Spielern an",
+    scope: "client",
+    config: true,
+    default: true,
+    type: Boolean,
+  })
 }
