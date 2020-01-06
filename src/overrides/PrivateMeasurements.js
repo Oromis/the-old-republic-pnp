@@ -1,6 +1,7 @@
 export function injectPrivateMeasurements() {
   const originalEmit = game.socket.emit
-  game.socket.emit = function emitOverride(command, userId, data, ...rest) {
+  game.socket.emit = function emitOverride(...args) {
+    const [command, userId, data] = args
     if (command === 'cursor') {
       const showCursors = game.settings.get('core', 'showCursors')
       const showRuler = game.settings.get('sw-tor', 'rulerVisible')
@@ -15,6 +16,6 @@ export function injectPrivateMeasurements() {
       }
     }
 
-    return originalEmit.call(this, command, userId, data, ...rest)
+    return originalEmit.call(this, ...args)
   }
 }
