@@ -124,7 +124,7 @@ export default {
     }
 
     defineCachedGetter(this, 'baseInitiativeExplanation', () => explainComputedValue({
-      value: Math.round((this.attrValue('in') + this.attrValue('sc')) / 5),
+      value: roundDecimal((this.attrValue('in') + this.attrValue('sc')) / 5, 2),
       label: `Attribute (IN+SC)/5`,
       bonusExplanation: this.modifiers.InI.explainBonus(),
     }))
