@@ -5,7 +5,7 @@ import { roundDecimal } from '../util/MathUtils.js'
 import { defineGetter } from '../util/EntityUtils.js'
 import { measureDistance } from '../overrides/DistanceMeasurement.js'
 import { keyMissing } from '../util/ProxyUtils.js'
-import Modifier from '../util/Modifier.js'
+import Modifier, { STAGE_PERMANENT, STAGE_TEMPORARY } from '../util/Modifier.js'
 import ActorTypes from '../datasets/ActorTypes.js'
 import Skill from '../item/Skill.js'
 
@@ -514,14 +514,14 @@ export default class SwTorActor extends Actor {
     }
 
     const sources = [
-      this.trainings,
-      this.equippedItems,
+      { items: this.trainings, stage: STAGE_PERMANENT },
+      { items: this.equippedItems, stage: STAGE_TEMPORARY },
     ]
 
     for (const source of sources) {
-      for (const item of source) {
+      for (const item of source.items) {
         for (const effect of (item.effects || [])) {
-          result.getModifier(effect.key).inject(effect.value, { label: item.name })
+          result.getModifier(effect.key).inject(effect.value, { label: item.name, stage: source.stage })
         }
       }
     }

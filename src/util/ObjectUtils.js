@@ -53,6 +53,13 @@ export default Object.freeze({
       .reduce(zipEntries, {})
   },
 
+  omit(obj, keys) {
+    keys = asArray(keys)
+    return Object.entries(obj)
+      .filter(entry => keys.indexOf(entry[0]) === -1)
+      .reduce(zipEntries, {})
+  },
+
   mapValues,
   omitBy,
   omitZero(obj) {

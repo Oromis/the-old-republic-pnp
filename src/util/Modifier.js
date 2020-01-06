@@ -1,5 +1,8 @@
 import ObjectUtils from './ObjectUtils.js'
 
+export const STAGE_PERMANENT = 'permanent'
+export const STAGE_TEMPORARY = 'temporary'
+
 export default class Modifier {
   constructor(key) {
     this._key = key
@@ -18,15 +21,15 @@ export default class Modifier {
    *    (or malus if negative).
    * @param label {string} The string to attach to the modifier
    */
-  inject(input, { label }) {
+  inject(input, { label, stage }) {
     if (typeof input === 'number' || (typeof input === 'string' && !isNaN(input))) {
-      this._addAspect('bonus', +input, label)
+      this._addAspect('bonus', +input, label, stage)
     } else if (typeof input === 'object' && input != null) {
-      this._addAspect('bonus', input.bonus, label)
+      this._addAspect('bonus', input.bonus, label, stage)
       if (typeof input.value === 'number') {
-        this._addAspect('value', input.value, label)
+        this._addAspect('value', input.value, label, stage)
       }
-      this._addAspect('xp', input.xp, label)
+      this._addAspect('xp', input.xp, label, stage)
       if (input.activationPaid) {
         // For skills: Modifiers can pay for the skill's activation cost
         this._aspects.xp.activationPaid = true
@@ -45,16 +48,16 @@ export default class Modifier {
     return value + this._bonus
   }
 
-  explainBonus() {
-    return ObjectUtils.cloneDeep(this._aspects.bonus)
+  explainBonus({ stage } = {}) {
+    return this._filterAspect(this._aspects.bonus, stage)
   }
 
   get bonus() {
     return this._aspects.bonus.total
   }
 
-  explainXp() {
-    return ObjectUtils.cloneDeep(this._aspects.xp)
+  explainXp({ stage } = {}) {
+    return this._filterAspect(this._aspects.xp, stage)
   }
 
   get xp() {
@@ -65,10 +68,23 @@ export default class Modifier {
   // Private methods
   // ----------------------------------------------------------------------------
 
-  _addAspect(aspect, value, label) {
+  _addAspect(aspect, value, label, stage) {
+    if (stage == null) {
+      throw new Error(`Stage is required`)
+    }
     if (value) {
       this._aspects[aspect].total += value
-      this._aspects[aspect].components.push({ label, value })
+      this._aspects[aspect].components.push({ label, value, stage })
+    }
+  }
+
+  _filterAspect(aspect, stage) {
+    const components = aspect.components.filter(c => stage == null || c.stage === stage)
+    const total = components.reduce((sum, com) => sum + com.value, 0)
+    return {
+      ...ObjectUtils.omit(aspect, ['total', 'components']),
+      total,
+      components,
     }
   }
 }

@@ -9,6 +9,7 @@ import {
 } from '../util/EntityUtils.js'
 import SwTorItem from '../item/SwTorItem.js'
 import { roundDecimal } from '../util/MathUtils.js'
+import { STAGE_PERMANENT } from '../util/Modifier.js'
 
 /**
  * Functionality for humanoid characters. "humanoid" refers to intelligent life forms, it has
@@ -115,7 +116,7 @@ export default {
       // The actor's species can give modifiers
       if (this.species != null) {
         for (const [key, value] of Object.entries(this.species.mods || {})) {
-          result.getModifier(key).inject(value, { label: this.species.name })
+          result.getModifier(key).inject(value, { label: this.species.name, stage: STAGE_PERMANENT })
         }
       }
 

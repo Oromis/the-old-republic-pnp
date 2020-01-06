@@ -1,5 +1,6 @@
 import Config from './Config.js'
 import ObjectUtils from './util/ObjectUtils.js'
+import { STAGE_PERMANENT, STAGE_TEMPORARY } from './util/Modifier.js'
 
 export function detectPropertyType(property, { throwOnError = true } = {}) {
   const key = property.key
@@ -74,9 +75,8 @@ export function calcPropertyBaseValue(actor, property, options) {
   return explainPropertyBaseValue(actor, property, options).total
 }
 
-export function explainPropertyValue(actor, property, options) {
-  const result = explainPropertyBaseValue(actor, property, options)
-  for (const xpComponent of actor.modifiers[property.key].explainXp().components) {
+function addXpComponents(result, components, { actor, property }) {
+  for (const xpComponent of components) {
     const totalBefore = result.total
     result.total += actor.dataSet.xpTable.getPointsFromXp({
       category: property.effectiveXpCategory,
@@ -87,6 +87,12 @@ export function explainPropertyValue(actor, property, options) {
       result.components.push({ label: xpComponent.label, value: result.total - totalBefore })
     }
   }
+}
+
+export function explainPermanentPropertyValue(actor, property, options) {
+  const result = explainPropertyBaseValue(actor, property, options)
+  addXpComponents(result, actor.modifiers[property.key].explainXp({ stage: STAGE_PERMANENT }).components, { actor, property })
+
   const gainLog = ObjectUtils.try(property, 'gained', { default: [] })
   if (gainLog.length > 0) {
     result.total += gainLog.length
@@ -105,6 +111,14 @@ export function explainPropertyValue(actor, property, options) {
       result.components.push({ label: 'Verdient', value: granted })
     }
   }
+
+  return result
+}
+
+export function explainPropertyValue(actor, property, options) {
+  const result = explainPermanentPropertyValue(actor, property, options)
+  addXpComponents(result, actor.modifiers[property.key].explainXp({ stage: STAGE_TEMPORARY }).components, { actor, property })
+
   const buff = ObjectUtils.try(property, 'buff', { default: 0 })
   if (buff !== 0) {
     result.total += buff
@@ -114,12 +128,11 @@ export function explainPropertyValue(actor, property, options) {
 }
 
 export function calcUpgradeCost(actor, property, { max } = {}) {
-  const baseVal = calcPropertyBaseValue(actor, property)
-  const gainLog = ObjectUtils.try(property, 'gained', { default: [] })
+  const currentVal = explainPermanentPropertyValue(actor, property).total
   const result = actor.dataSet.xpTable.getUpgradeCost({
     category: property.currentXpCategory || property.xpCategory,
-    from: baseVal + gainLog.length,
-    to: baseVal + gainLog.length + 1,
+    from: currentVal,
+    to: currentVal + 1,
   })
   if (max != null && result > max) {
     return null
