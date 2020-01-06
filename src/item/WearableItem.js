@@ -6,7 +6,15 @@ export default {
 
     defineGetter(this, 'armor', function () {
       const effect = this.effects.find(effect => effect.key === 'r_armor')
-      return effect != null ? effect.value : 0
+      if (effect != null) {
+        if (typeof effect.value === 'object') {
+          return effect.value.bonus
+        } else {
+          return effect.value
+        }
+      } else {
+        return 0
+      }
     })
   }
 }

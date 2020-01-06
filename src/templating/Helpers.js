@@ -1,8 +1,5 @@
 import ObjectUtils from '../util/ObjectUtils.js'
-
-function formatMod(val) {
-  return val > 0 ? `+${val}` : val
-}
+import { formatMod } from '../util/FormatUtils.js'
 
 const ERROR_CLASS = 'has-error'
 const HIDDEN_CLASS = 'hidden'
