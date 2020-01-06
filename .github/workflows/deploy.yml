@@ -19,4 +19,9 @@ jobs:
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        script: git -C /home/node/foundryvtt/DataDir/Data/systems/sw-tor pull
+        script: |
+          cd /home/node/foundryvtt/DataDir/Data/systems/sw-tor
+          git pull
+          npm install
+          npm run build
+          pm2 restart foundryvtt
