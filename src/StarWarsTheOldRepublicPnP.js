@@ -12,7 +12,6 @@ import SwTorActor from './actor/SwTorActor.js'
 import SwTorItem from './item/SwTorItem.js'
 import ChatMessageMixin from './ChatMessageMixin.js'
 import { installCombatTrackerHook } from './overrides/CombatTrackerHook.js'
-import { migrateItemPermissions } from './migration/v3/MigrateItemPermissions.js'
 import { injectDefaultItemPermissions } from './overrides/DefaultItemPermission.js'
 
 Hooks.once("init", async function() {
@@ -64,10 +63,6 @@ Hooks.once("ready", async function() {
 
   installCombatTrackerHook()
   injectDefaultItemPermissions()
-
-  if (game.user.isGM) {
-    await migrateItemPermissions()
-  }
 })
 
 Hooks.on("canvasInit", function() {
