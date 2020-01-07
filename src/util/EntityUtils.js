@@ -24,7 +24,7 @@ export function defineEnumAccessor(
     enumerable: true,
     get() {
       return this._cache.lookup(key, () => {
-        const key = typeof getKey === 'function' ? getKey() : ObjectUtils.try(this.data.data, ...dataKey.split('.'))
+        const key = typeof getKey === 'function' ? getKey() : ObjectUtils.try(this.data, 'data', ...dataKey.split('.'))
         const enumData = typeof getEnumData === 'function' ? getEnumData() : this.dataSet[dataSetKey]
         let result = enumData.map[key]
         if (result == null) {

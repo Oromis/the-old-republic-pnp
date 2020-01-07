@@ -7,7 +7,6 @@ import { measureDistance } from '../overrides/DistanceMeasurement.js'
 import { keyMissing } from '../util/ProxyUtils.js'
 import Modifier, { STAGE_PERMANENT, STAGE_TEMPORARY } from '../util/Modifier.js'
 import ActorTypes from '../datasets/ActorTypes.js'
-import Skill from '../item/Skill.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
@@ -438,7 +437,7 @@ export default class SwTorActor extends Actor {
         freeItems: [],
         equippedItems: [],
       }
-      this.items.forEach(item => {
+      for (const item of this.items || []) {
         if (item.type === 'skill' || item.type === 'force-skill') {
           categories.skills.push(item)
           if (item.type === 'force-skill') {
@@ -456,7 +455,7 @@ export default class SwTorActor extends Actor {
             categories.freeItems.push(item)
           }
         }
-      })
+      }
       return categories
     })
   }
