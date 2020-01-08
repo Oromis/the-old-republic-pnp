@@ -4,6 +4,7 @@ const list = [
   { key: 'InI', label: 'Initiative' },
   { key: 'LaW', label: 'Laufweg' },
   { key: 'EgL', label: 'Energiegenerator-Leistung' },
+  { key: 'McL', label: 'Midi-Clorianer-Level' },
 ]
 
 export default Object.freeze({
