@@ -72,7 +72,7 @@ const MaP = new HumanoidMetricPrototype('MaP', {
     turn: 2,
   },
   calcBaseValue(actor) {
-    return Math.round((actor.attrValue('ch') + actor.attrValue('in') + actor.attrValue('kl') + actor.attrValue('wk')) / 2)
+    return Math.round((actor.modifiers.McL.bonus / 10000) * (actor.attrValue('ch') + actor.attrValue('in') + actor.attrValue('kl') + actor.attrValue('wk')) / 2)
   }
 })
 const EnP = new HumanoidMetricPrototype('EnP', {
