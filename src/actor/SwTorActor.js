@@ -61,6 +61,10 @@ export default class SwTorActor extends Actor {
         this._cache.clear()
         this.prepareData({})
       }
+    } else if (this.isToken) {
+      this.items = this._getItems()
+      this._cache.clear()
+      this.prepareData({})
     }
     return super.render(force, context, ...rest)
   }
