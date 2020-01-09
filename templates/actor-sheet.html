@@ -30,9 +30,9 @@
             </div>
             <div class="flex-row">
               <i class="fas fa-shoe-prints" title="Laufweg"></i>&nbsp;
-              <span title="Laufweg 1: {{formatExplanation actor.speed1Explanation.components}}">{{actor.speed1Explanation.total}}</span>
+              <span title="Laufweg 1: {{formatExplanation actor.speed1Explanation.components}}">{{roundNumber actor.speed1Explanation.total 2}}</span>
               &nbsp;|&nbsp;
-              <span title="Laufweg 2: {{formatExplanation actor.speed2Explanation.components}}">{{actor.speed2Explanation.total}}</span>
+              <span title="Laufweg 2: {{formatExplanation actor.speed2Explanation.components}}">{{roundNumber actor.speed2Explanation.total 2}}</span>
             </div>
           </div>
           <div class="flex-row multi-item">
@@ -350,6 +350,7 @@
               <th>Kosten</th>
               <th>Effekt</th>
               <th>Ausrichtung</th>
+              <th class="icon-col"></th>
             </tr>
           </thead>
           <tbody>
@@ -403,6 +404,11 @@
                   </div>
                 </td>
                 <td>{{skill.disposition.label}}</td>
+                <td>
+                  <a class="roll-check" title="Probe werfen" data-path="skills.{{skill.key}}.check" data-label="{{skill.name}}">
+                    <i class="fas fa-dice-d20"></i>
+                  </a>
+                </td>
               </tr>
             {{/each}}
           </tbody>

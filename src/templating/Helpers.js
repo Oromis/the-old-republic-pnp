@@ -1,5 +1,6 @@
 import ObjectUtils from '../util/ObjectUtils.js'
 import { formatMod } from '../util/FormatUtils.js'
+import {roundDecimal} from '../util/MathUtils.js'
 
 const ERROR_CLASS = 'has-error'
 const HIDDEN_CLASS = 'hidden'
@@ -63,6 +64,7 @@ export function registerHelpers() {
     isOne: arg => arg === 1,
     isNumeric: arg => typeof arg === 'number',
     canBeNumeric: arg => typeof arg === 'number' || (typeof arg === 'string' && !isNaN(arg)),
+    roundNumber: (number, decimals) => roundDecimal(number, decimals),
     isRelevantFactor: num => typeof num === 'number' && num !== 1,
     formatList: list => list.join(', '),
     formatAttrKey,

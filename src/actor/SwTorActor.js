@@ -278,9 +278,9 @@ export default class SwTorActor extends Actor {
   get targetDistance() {
     if (ObjectUtils.try(this.data.data.targetDistance, 'type') === 'auto') {
       const token = this.token
-      // TODO this doesn't quite work yet. Need further digging or a Foundry update
-      if (token != null && token.target != null) {
-        return roundDecimal(measureDistance(token, token.target), 2)
+      const targets = Array.from(game.user.targets)
+      if (targets.length > 0) {
+        return roundDecimal(measureDistance(token, targets[0]), 2)
       }
     }
 
