@@ -15,6 +15,8 @@ import { installCombatTrackerHook } from './overrides/CombatTrackerHook.js'
 import { injectDefaultItemPermissions } from './overrides/DefaultItemPermission.js'
 import { injectPrivateMeasurements } from './overrides/PrivateMeasurements.js'
 import InnateAbilitySheet from './sheets/InnateAbilitySheet.js'
+import Shortcuts, {CTRL, SHIFT} from './shortcuts/Shortcuts.js'
+import {installGlobalShortcuts} from './shortcuts/GlobalShortcuts.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -65,6 +67,8 @@ Hooks.once("ready", async function() {
   installCombatTrackerHook()
   injectDefaultItemPermissions()
   injectPrivateMeasurements()
+
+  installGlobalShortcuts()
 })
 
 Hooks.on("canvasInit", function() {

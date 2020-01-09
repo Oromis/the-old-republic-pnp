@@ -388,3 +388,25 @@
 .sw-tor-confirm-button {
     margin-top: 4px;
 }
+
+/*************************************************************************************
+ * Controls
+ *************************************************************************************/
+
+.control-tool.active[data-tool=ruler]::after {
+    content: '';
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    left: calc(100% + 10px);
+    background-size: cover;
+    opacity: 0.7;
+}
+
+.setting-rulerVisible-true .control-tool[data-tool=ruler]::after {
+    background-image: url('../../../icons/svg/eye.svg');
+}
+
+.setting-rulerVisible-false .control-tool[data-tool=ruler]::after {
+    background-image: url('../../../icons/svg/blind.svg');
+}
