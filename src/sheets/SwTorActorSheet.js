@@ -7,6 +7,7 @@ import { itemNameComparator } from '../util/SheetUtils.js'
 import SheetWithTabs from './SheetWithTabs.js'
 import RollUtils from '../util/RollUtils.js'
 import SwTorActor from '../actor/SwTorActor.js'
+import Shortcuts, {CTRL} from '../shortcuts/Shortcuts.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -232,6 +233,13 @@ export default class SwTorActorSheet extends ActorSheet {
    */
 	activateListeners(html) {
     super.activateListeners(html);
+
+    const element = $(this.element)
+    if (element.length > 0 && !element.attr('tabindex')) {
+      element.attr('tabindex', '0')
+      Shortcuts.create(element[0])
+        .add(CTRL, '<', () => this._clearActorCache())
+    }
 
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return;
