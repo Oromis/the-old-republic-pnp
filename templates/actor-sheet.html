@@ -423,7 +423,7 @@
           <h3 class="align-center">Offensive</h3>
           <div class="multi-item">
             {{#each actor.equippedWeapons as |weapon index|}}
-              <div class="weapon-slot">
+              <div class="weapon-slot multi-item">
                 <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
                 {{#if weapon.skill}}
                   <div class="line-view multi-item">
@@ -433,6 +433,7 @@
                           check=weapon.attackCheck
                           path=(concat 'equippedWeapons.' index '.attackCheck')
                           label=(concat 'Attacke ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')
+                          energyCost=weapon.energyCost
                       }}
                     </div>
                     <div class="flex-row multi-item">
@@ -478,6 +479,12 @@
                         <i class="fas fa-dice-d6"></i>
                       </a>
                     </div>
+                    {{#if weapon.energyCost}}
+                      <div class="flex-row multi-item">
+                        <i class="fas fa-coins table-icon"></i>
+                        <span>{{weapon.energyCost}} EnP</span>
+                      </div>
+                    {{/if}}
                   </div>
                 {{/if}}
               </div>

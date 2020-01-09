@@ -5,6 +5,8 @@ export default {
   beforeConstruct() {
     defineDataAccessor(this, 'precision')
     defineDataAccessor(this, 'projectileEnergy')
+    defineDataAccessor(this, 'energyCost')
+    defineDataAccessor(this, 'burstSize')
 
     this._addUpdateFilter('data.precision.formula', data => {
       Object.assign(data.data.precision, analyzeExpression({ expression: data.data.precision.formula }))

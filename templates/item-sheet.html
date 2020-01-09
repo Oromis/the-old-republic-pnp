@@ -86,6 +86,18 @@
         {{/if}}
         {{#if item.itemType.isRangedWeapon}}
           <tr>
+            <td class="align-right">Energiekosten</td>
+            <td>
+              <input type="text" name="data.energyCost" value="{{data.energyCost}}" data-dtype="Number" />
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Schüsse pro Salve</td>
+            <td>
+              <input type="text" name="data.burstSize" value="{{data.burstSize}}" data-dtype="Number" />
+            </td>
+          </tr>
+          <tr>
             <td class="align-right">Präzision</td>
             <td>
               <div class="flex-row multi-item {{errorClass when=item.precision.formulaError}}">

@@ -142,7 +142,9 @@
       },
       "projectileEnergy": {
         "formula": ""
-      }
+      },
+      "energyCost": 0,
+      "burstSize": 1
     },
     "wearable": {
       "templates": ["described", "physical", "equippable"],

@@ -11,9 +11,10 @@
     {{check.AgP}}
   </span>
 {{/if}}
-<a class="roll-check" title="Probe werfen"
+<a class="roll-check {{#if energyCost}}modify-metrics{{/if}}" title="Probe werfen"
    {{#if path}}data-path="{{path}}" {{else}}data-check="{{json check}}"{{/if}}
    data-label="{{label}}"
+   {{#if energyCost}}data-deduct='{"EnP":{{energyCost}} }'{{/if}}
 >
   <i class="fas fa-dice-d20"></i>
 </a>
