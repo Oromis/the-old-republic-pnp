@@ -27,14 +27,16 @@ export default {
         diff: check.AgP - payload.rolls.reduce((acc, cur) => acc + (cur.diff < 0 ? -cur.diff : 0), 0)
       }
     }
-    if (!isConfirmation && Math.abs(critical) === 1) {
+
+    const confirmCriticals = !!check.confirmCriticals
+    if (confirmCriticals && !isConfirmation && Math.abs(critical) === 1) {
       // An unconfirmed critical result - either critical success or critical failure.
       // We need to confirm the result before the critical outcome becomes effective
       payload.needsConfirmation = true
       payload.criticalScore = critical
     }
     const chatData = {
-      user: game.user._id,
+      user: game.user.id,
       type: CONST.CHAT_MESSAGE_TYPES.ROLL,
       rollMode: game.settings.get("core", "rollMode"),
       flavor: label,
@@ -43,6 +45,10 @@ export default {
       content: await renderTemplate('systems/sw-tor/templates/check-roll.html', payload),
       flags: { 'sw-tor': { check: payload } },
     }
+    if (payload.needsConfirmation) {
+      chatData.permission = { default: 0, [game.user.id]: CONST.ENTITY_PERMISSIONS.OWNER }
+    }
+
     // Handle type
     if ( ["gmroll", "blindroll"].includes(chatData.rollMode) ) {
       chatData["whisper"] = game.users.entities.filter(u => u.isGM).map(u => u._id)

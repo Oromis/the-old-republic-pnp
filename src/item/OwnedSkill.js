@@ -15,6 +15,7 @@ export default {
           makeRoll(this),
         ],
         AgP: Math.floor(skillValue / 5),
+        confirmCriticals: true,
       }
     })
 
