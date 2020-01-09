@@ -26,5 +26,5 @@ export function installGlobalShortcuts() {
   syncSettingClass('rulerVisible')
 
   Shortcuts.create(document.body)
-    .add(CTRL, 'H', toggleRulerVisible)
+    .add(CTRL, 'Y', toggleRulerVisible)
 }
