@@ -826,6 +826,39 @@
             </tbody>
           </table>
         </div>
+        <div class="padded">
+          <table>
+            <thead>
+              <tr>
+                <th>Spezialfertigkeiten</th>
+                <th>GP</th>
+                <th>XP</th>
+                <th>Effekte</th>
+                <th class="icon-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each actor.specialAbilities as |ability|}}
+                <tr class="item" data-item-id="{{ability.id}}">
+                  <td>
+                    <div class="flex-row multi-item">
+                      <img src="{{ability.img}}" title="{{ability.name}}" width="24" height="24" alt="{{ability.name}}" />
+                      <a class="item-control item-edit">
+                        {{ability.name}}
+                      </a>
+                    </div>
+                  </td>
+                  <td>{{ability.gp}}</td>
+                  <td>{{ability.xp}}</td>
+                  <td>{{ability.summary}}</td>
+                  <td>
+                    <a class="item-control item-delete" title="{{ability.name}} löschen"><i class="fas fa-trash"></i></a>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
         <div>
           <hr />
           <h3>Einstellungen</h3>

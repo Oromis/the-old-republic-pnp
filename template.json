@@ -122,13 +122,13 @@
       "templates": ["described"],
       "gp": 0,
       "requirements": {},
-      "effects": {}
+      "effects": []
     },
     "special-ability": {
       "templates": ["described"],
       "gp": 0,
       "xp": 0,
-      "effects": {},
+      "effects": [],
       "requirements": {}
     },
     "melee-weapon": {

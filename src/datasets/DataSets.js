@@ -32,6 +32,7 @@ import OwnedEquippableItem from '../item/OwnedEquippableItem.js'
 import OwnedRangedWeapon from '../item/OwnedRangedWeapon.js'
 import OwnedMeleeWeapon from '../item/OwnedMeleeWeapon.js'
 import InnateAbility from '../item/InnateAbility.js'
+import SpecialAbility from '../item/SpecialAbility.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -86,6 +87,14 @@ export default Object.freeze({
         return {
           delegates: [
             InnateAbility,
+            ItemWithEffects,
+          ],
+        }
+
+      case 'special-ability':
+        return {
+          delegates: [
+            SpecialAbility,
             ItemWithEffects,
           ],
         }

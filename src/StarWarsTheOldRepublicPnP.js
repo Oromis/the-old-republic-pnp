@@ -17,6 +17,7 @@ import { injectPrivateMeasurements } from './overrides/PrivateMeasurements.js'
 import InnateAbilitySheet from './sheets/InnateAbilitySheet.js'
 import Shortcuts, {CTRL, SHIFT} from './shortcuts/Shortcuts.js'
 import {installGlobalShortcuts} from './shortcuts/GlobalShortcuts.js'
+import SpecialAbilitySheet from './sheets/SpecialAbilitySheet.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -43,10 +44,11 @@ Hooks.once("init", async function() {
   Actors.unregisterSheet("core", ActorSheet)
   Actors.registerSheet("sw-tor", SwTorActorSheet, { makeDefault: true })
   Items.unregisterSheet("core", ItemSheet)
-  Items.registerSheet("sw-tor", PhysicalItemSheet, { types: ["special-ability", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"], makeDefault: true })
+  Items.registerSheet("sw-tor", PhysicalItemSheet, { types: ["melee-weapon", "ranged-weapon", "wearable", "consumable", "other"], makeDefault: true })
   Items.registerSheet("sw-tor", SkillSheet, { types: ['skill', 'force-skill'], makeDefault: true })
   Items.registerSheet("sw-tor", TrainingSheet, { types: ['training'], makeDefault: true })
   Items.registerSheet("sw-tor", InnateAbilitySheet, { types: ['innate-ability'], makeDefault: true })
+  Items.registerSheet("sw-tor", SpecialAbilitySheet, { types: ['special-ability'], makeDefault: true })
 
   // We need to register actors & sheets before doing any async work. Otherwise Actors might be
   // created before the class is overridden

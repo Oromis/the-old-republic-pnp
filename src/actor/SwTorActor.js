@@ -109,6 +109,10 @@ export default class SwTorActor extends Actor {
     return this._categorizedItems.innateAbilities
   }
 
+  get specialAbilities() {
+    return this._categorizedItems.specialAbilities
+  }
+
   get inventory() {
     return this._categorizedItems.inventory
   }
@@ -437,6 +441,7 @@ export default class SwTorActor extends Actor {
         forceSkills: [],
         trainings: [],
         innateAbilities: [],
+        specialAbilities: [],
         inventory: [],
         freeItems: [],
         equippedItems: [],
@@ -451,6 +456,8 @@ export default class SwTorActor extends Actor {
           categories.trainings.push(item)
         } else if (item.type === 'innate-ability') {
           categories.innateAbilities.push(item)
+        } else if (item.type === 'special-ability') {
+          categories.specialAbilities.push(item)
         } else {
           categories.inventory.push(item)
           if (item.isEquipped) {
@@ -540,6 +547,7 @@ export default class SwTorActor extends Actor {
 
     const sources = [
       { items: this.innateAbilities, stage: STAGE_PERMANENT },
+      { items: this.specialAbilities, stage: STAGE_PERMANENT },
       { items: this.trainings, stage: STAGE_PERMANENT },
       { items: this.equippedItems, stage: STAGE_TEMPORARY },
     ]
