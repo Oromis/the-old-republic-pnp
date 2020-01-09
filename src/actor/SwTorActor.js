@@ -277,9 +277,9 @@ export default class SwTorActor extends Actor {
 
   get targetDistance() {
     if (ObjectUtils.try(this.data.data.targetDistance, 'type') === 'auto') {
-      const token = this.token
+      const token = this.token || this.getActiveTokens()[0]
       const targets = Array.from(game.user.targets)
-      if (targets.length > 0) {
+      if (token != null && targets.length > 0) {
         return roundDecimal(measureDistance(token, targets[0]), 2)
       }
     }
