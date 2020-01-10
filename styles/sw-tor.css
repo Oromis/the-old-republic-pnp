@@ -2,6 +2,8 @@
  * General classes
  *************************************************************************************/
 
+@import "./vendor/radial-menu-js/radial-menu.css";
+
 @import "general.css";
 @import "inputs.css";
 @import "overrides.css";

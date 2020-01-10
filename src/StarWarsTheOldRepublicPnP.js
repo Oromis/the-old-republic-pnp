@@ -18,6 +18,7 @@ import InnateAbilitySheet from './sheets/InnateAbilitySheet.js'
 import Shortcuts, {CTRL, SHIFT} from './shortcuts/Shortcuts.js'
 import {installGlobalShortcuts} from './shortcuts/GlobalShortcuts.js'
 import SpecialAbilitySheet from './sheets/SpecialAbilitySheet.js'
+import {installTokenInputHandler} from './overrides/TokenInputHandler.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -71,6 +72,7 @@ Hooks.once("ready", async function() {
   injectPrivateMeasurements()
 
   installGlobalShortcuts()
+  installTokenInputHandler()
 })
 
 Hooks.on("canvasInit", function() {
