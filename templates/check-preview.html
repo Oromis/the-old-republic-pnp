@@ -4,11 +4,11 @@
     {{roll.target}}{{#if roll.advantage}}{{formatCheckDiff roll.advantage 'small'}}{{/if}}
   </span>
 {{/each}}
-{{#if (isNumeric check.AgP)}}
+{{#if (isNumeric check.AgP.value)}}
   <span>|</span>
   <span title="Ausgleichspunkte" class="align-center">
   <strong>AgP</strong>
-    {{check.AgP}}
+    {{check.AgP.value}}
   </span>
 {{/if}}
 {{#if action}}

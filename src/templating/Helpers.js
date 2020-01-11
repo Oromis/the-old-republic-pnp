@@ -69,7 +69,9 @@ export function registerHelpers() {
     formatList: list => list.join(', '),
     formatAttrKey,
     formatPercentage: val => `${Math.round(val)}%`,
-    formatCheckDiff: (diff, classes = '') => new Handlebars.SafeString(diff != null ? formatCheckDiff(diff, classes) : ''),
+    formatCheckDiff: (diff, classes = '') => new Handlebars.SafeString(diff != null ? (
+      formatCheckDiff(diff, typeof classes === 'string' ? classes : '')
+    ) : ''),
     formatD20Result: result => new Handlebars.SafeString(
       `<span class="roll d20 ${categorizeD20Result(result)}">${result}</span>`
     ),

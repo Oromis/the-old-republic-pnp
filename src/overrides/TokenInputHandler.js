@@ -73,11 +73,11 @@ function getMenuStructure(actor) {
 
   // Fill evasion / defensive rolls into the radial menu
   const availableDefensiveSlots = [3, 4, 5]
-  if (actor.skills.aus) {
+  if (actor.evasionCheck) {
     result[availableDefensiveSlots.shift()] = {
       label: 'Ausweichen',
       icon: { image: 'icons/svg/daze.svg' },
-      action: () => actor.skills.aus.rollCheck(),
+      action: () => actor.rollEvasion(),
     }
   }
   fillWithOverflow({

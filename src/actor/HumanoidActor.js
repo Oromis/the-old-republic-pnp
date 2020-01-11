@@ -10,6 +10,7 @@ import {
 import SwTorItem from '../item/SwTorItem.js'
 import { roundDecimal } from '../util/MathUtils.js'
 import { STAGE_PERMANENT } from '../util/Modifier.js'
+import RollUtils from '../util/RollUtils.js'
 
 /**
  * Functionality for humanoid characters. "humanoid" refers to intelligent life forms, it has
@@ -195,6 +196,25 @@ export default {
     defineGetter(this, 'encumberance', function () {
       return this.encumberanceExplanation.total
     })
+
+    defineGetter(this, 'evasionCheck', function () {
+      const evasion = this.skills.aus
+      if (evasion) {
+        const check = evasion.check
+        check.calcEffectiveness = true
+        check.criticalBonus = Config.combat.criticalBonus
+        return check
+      } else {
+        return null
+      }
+    })
+
+    this.rollEvasion = function rollEvasion() {
+      return RollUtils.rollCheck(this.evasionCheck, {
+        actor: this.id,
+        label: this.skills.aus.name,
+      })
+    }
   },
 
   afterPrepareData(actorData) {

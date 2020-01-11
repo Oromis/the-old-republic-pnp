@@ -1,0 +1,8 @@
+{{> "systems/sw-tor/templates/check-roll.html" check }}
+{{#if check.needsConfirmation}}
+  <button type="button" class="sw-tor-confirm-button"><i class="fas fa-dice-d20"></i> Bestätigen</button>
+{{/if}}
+{{#if confirmation}}
+  <div class="sw-tor-confirmation-label">Bestätigung</div>
+  {{> "systems/sw-tor/templates/check-roll.html" confirmation }}
+{{/if}}

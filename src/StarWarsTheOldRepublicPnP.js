@@ -54,6 +54,7 @@ Hooks.once("init", async function() {
   // We need to register actors & sheets before doing any async work. Otherwise Actors might be
   // created before the class is overridden
   await loadTemplates([
+    'systems/sw-tor/templates/check-message.html',
     'systems/sw-tor/templates/check-roll.html',
     'systems/sw-tor/templates/check-preview.html',
     'systems/sw-tor/templates/effects-editor.html',

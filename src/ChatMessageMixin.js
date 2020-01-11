@@ -16,19 +16,43 @@ export default class ChatMessageMixin extends Mixin {
     } else {
       let html = await callSuper(...args)
       if (originalThis.isAuthor && ObjectUtils.try(originalThis.data.flags, 'sw-tor', 'check', 'needsConfirmation')) {
-        // Unfortunately, this doesn't seem to work due to the fact that we cannot add custom
-        // properties to a ChatMessage's data object
-        const button = $(`<button type="button" class="sw-tor-confirm-button"><i class="fas fa-dice-d20"></i> Bestätigen</button>`)
-        button.on('click', () => {
+        // Critical result needs to be confirmed
+        html.find('.sw-tor-confirm-button').on('click', async () => {
           const originalCheck = originalThis.data.flags['sw-tor'].check
-          RollUtils.rollCheck({ rolls: originalCheck.rolls, AgP: originalCheck.AgP.value }, {
-            actor: originalThis.data.speaker.actor,
-            label: `Bestätigung ${originalThis.data.flavor}`,
-            isConfirmation: true
+          const confirmation = await RollUtils.rollCheck(originalCheck, {
+            isConfirmation: true,
+            sendToChat: false,
           })
-          originalThis.update({ 'flags.sw-tor.check.needsConfirmation': false })
+          let confirmed
+          const combinedScore = originalCheck.criticalScore + confirmation.criticalScore
+          if (Math.abs(combinedScore) >= 2) {
+            // Another critical roll of the same type => definitely confirmed
+            confirmed = true
+          } else if (combinedScore === 0) {
+            // Another critical roll, but this one neutralized the first critical
+            confirmed = false
+          } else {
+            // Undecided. Let's see whether we succeeded the roll
+            if (originalCheck.criticalScore > 0) {
+              // Attempting to confirm a "1", the confirmation needs to succeed
+              confirmed = confirmation.success
+            } else {
+              // Attempting to confirm a "20", the confirmation must not succeed to confirm
+              confirmed = !confirmation.success
+            }
+          }
+
+          originalCheck.confirmed = confirmed
+
+          RollUtils.processCheck(originalCheck)
+          originalThis.update({
+            'flags.sw-tor.check.needsConfirmation': false,
+            content: await renderTemplate('systems/sw-tor/templates/check-message.html', {
+              check: originalCheck,
+              confirmation,
+            }),
+          })
         })
-        html.find('.message-content').append(button)
       }
       return html
     }

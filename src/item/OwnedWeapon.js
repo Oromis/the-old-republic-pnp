@@ -1,6 +1,7 @@
 import { defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
 import ObjectUtils from '../util/ObjectUtils.js'
 import RollUtils from '../util/RollUtils.js'
+import Config from '../Config.js'
 
 export default {
   beforeConstruct() {
@@ -33,8 +34,30 @@ export default {
       for (const roll of result.rolls) {
         roll.advantage = attackAdvantage
       }
+      result.calcEffectiveness = true
+      result.criticalBonus = Config.combat.criticalBonus
       return result
     })
+
+    defineGetter(this, 'paradeCheck', function () {
+      if (this.skill == null) {
+        return null
+      }
+      const paradeAdvantage = this.calcBaseParadeAdvantage()
+      const result = this.skill.check
+      for (const roll of result.rolls) {
+        roll.advantage = paradeAdvantage
+      }
+      result.calcEffectiveness = true
+      result.criticalBonus = Config.combat.criticalBonus
+      return result
+    })
+
+    this.calcBaseParadeAdvantage = function () {
+      const primarySlot = this.primaryEquippedSlot
+      return ((primarySlot && primarySlot.coordination) || 0) +
+        (this.data.data.paradeAdvantage || 0)
+    }
 
     defineGetter(this, 'currentDamageFormula', function () {
       let result = this.damage.formula

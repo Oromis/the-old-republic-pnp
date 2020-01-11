@@ -28,5 +28,8 @@ export default Object.freeze({
   character,
   energy: {
     wrongModeEfficiency: 0.25,
+  },
+  combat: {
+    criticalBonus: 50,
   }
 })

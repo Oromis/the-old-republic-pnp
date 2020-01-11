@@ -575,15 +575,15 @@
                 </div>
               {{/if}}
             {{/each}}
-            {{#if actor.skills.aus}}
+            {{#if actor.evasionCheck}}
               <div class="weapon-slot">
                 <h4><strong>Ausweichen</strong></h4>
                 <div class="line-view multi-item">
                   <div class="flex-row multi-item flex-end">
                     <img src="icons/svg/daze.svg" class="table-icon" alt="Ausweichen" title="Ausweichen" />
                     {{> "systems/sw-tor/templates/check-preview.html"
-                        check=actor.skills.aus.check
-                        action=(concat 'skills.aus.rollCheck')
+                        check=actor.evasionCheck
+                        action='rollEvasion'
                     }}
                   </div>
                 </div>

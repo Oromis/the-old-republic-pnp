@@ -15,8 +15,13 @@
   {{#if AgP}}
     <div class="multi-item check-AgP flex-col flex-space-between">
       <div title="Ausgleichspunkte"><strong>AgP</strong></div>
-      <strong class="align-center">{{AgP.value}}</strong>
+      <strong class="align-center">{{AgP.value}}{{#if AgP.bonus}}{{formatCheckDiff AgP.bonus 'small'}}{{/if}}</strong>
       <div class="align-center">{{formatCheckDiff AgP.diff}}</div>
     </div>
   {{/if}}
 </div>
+{{#if (isNumeric effectiveness)}}
+  <div class="sw-tor-effectiveness sw-tor">
+    Effektivität: {{formatCheckDiff effectiveness}}
+  </div>
+{{/if}}
