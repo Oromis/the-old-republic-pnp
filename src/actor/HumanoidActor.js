@@ -105,7 +105,8 @@ export default {
           slots: [slotKey],
         },
         type: 'melee-weapon',
-        name: 'Faust'
+        name: 'Faust',
+        img: 'systems/sw-tor/icons/ui/fist-raised-solid.svg',
       }, { actor: this, temporary: true })
     }
 

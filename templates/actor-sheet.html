@@ -431,9 +431,7 @@
                       <img src="icons/svg/sword.svg" class="table-icon" alt="Attacke" title="Attacke" />
                       {{> "systems/sw-tor/templates/check-preview.html"
                           check=weapon.attackCheck
-                          path=(concat 'equippedWeapons.' index '.attackCheck')
-                          label=(concat 'Attacke ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')
-                          energyCost=weapon.energyCost
+                          action=(concat 'equippedWeapons.' index '.rollAttack')
                       }}
                     </div>
                     <div class="flex-row multi-item">
@@ -471,10 +469,9 @@
                         {{/if}}
                       </span>
                       <a
-                        class="do-roll"
+                        class="run-actor-action"
                         title="Schaden auswürfeln"
-                        data-formula="equippedWeapons.{{index}}.currentDamageFormula"
-                        data-label="Schaden {{weapon.primaryEquippedSlot.label}} ({{weapon.name}})"
+                        data-action="equippedWeapons.{{index}}.rollDamage"
                       >
                         <i class="fas fa-dice-d6"></i>
                       </a>
@@ -557,8 +554,7 @@
                         <img src="icons/svg/shield.svg" class="table-icon" alt="Parade" title="Parade" />
                         {{> "systems/sw-tor/templates/check-preview.html"
                             check=weapon.paradeCheck
-                            path=(concat 'equippedWeapons.' index '.paradeCheck')
-                            label=(concat 'Parade ' weapon.primaryEquippedSlot.label ' (' weapon.name ')')
+                            action=(concat 'equippedWeapons.' index '.rollParade')
                         }}
                       </div>
                       <div class="flex-row multi-item flex-end">
@@ -587,8 +583,7 @@
                     <img src="icons/svg/daze.svg" class="table-icon" alt="Ausweichen" title="Ausweichen" />
                     {{> "systems/sw-tor/templates/check-preview.html"
                         check=actor.skills.aus.check
-                        path=(concat 'skills.aus.check')
-                        label='Ausweichen'
+                        action=(concat 'skills.aus.rollCheck')
                     }}
                   </div>
                 </div>

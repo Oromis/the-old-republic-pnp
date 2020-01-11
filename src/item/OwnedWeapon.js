@@ -1,5 +1,6 @@
 import { defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
 import ObjectUtils from '../util/ObjectUtils.js'
+import RollUtils from '../util/RollUtils.js'
 
 export default {
   beforeConstruct() {
@@ -47,5 +48,32 @@ export default {
       }
       return result
     })
+
+    this.rollAttack = function rollAttack() {
+      const promises = [
+        RollUtils.rollCheck(this.attackCheck, {
+          actor: this.actor.id,
+          label: `Attacke ${this.primaryEquippedSlot.label} (${this.name})`
+        }),
+      ]
+      if (this.energyCost) {
+        promises.push(this.actor.modifyMetrics(this.actor.calculateMetricsCosts({ EnP: this.energyCost })))
+      }
+      return Promise.all(promises)
+    }
+
+    this.rollParade = function rollParade() {
+      return RollUtils.rollCheck(this.paradeCheck, {
+        actor: this.actor.id,
+        label: `Parade ${this.primaryEquippedSlot.label} (${this.name})`
+      })
+    }
+
+    this.rollDamage = function rollDamage() {
+      return RollUtils.rollFormula(this.currentDamageFormula, {
+        actor: this.actor.id,
+        label: `Schaden ${this.primaryEquippedSlot.label} (${this.name})`
+      })
+    }
   }
 }

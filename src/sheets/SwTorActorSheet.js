@@ -251,6 +251,7 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('button.change-metric-gained').click(this._onChangeMetricGained)
     html.find('.do-roll').click(this._onDoRoll)
     html.find('.roll-check').click(this._onRollCheck)
+    html.find('.run-actor-action').click(this._onRunActorAction)
     html.find('.item-create').click(this._onCreateItem)
     html.find('.add-missing-skills').click(this._onAddMissingSkills)
     html.find('.clear-cache').click(this._clearActorCache)
@@ -300,7 +301,7 @@ export default class SwTorActorSheet extends ActorSheet {
 
   _onModifyMetrics = event => {
     const target = event.currentTarget
-    let diff, factor = 1
+    let diff
     const raw = target.getAttribute('data-deduct')
     if (raw != null) {
       diff = this.actor.calculateMetricsCosts(JSON.parse(raw))
@@ -407,6 +408,17 @@ export default class SwTorActorSheet extends ActorSheet {
     const label = event.currentTarget.getAttribute('data-label') || undefined
 
     await RollUtils.rollCheck(check, { actor: this.actor.id, label })
+  }
+
+  _onRunActorAction = event => {
+    const actionPath = event.currentTarget.getAttribute('data-action')
+    const parentPath = actionPath.split('.')
+    const funcPath = parentPath.pop()
+    const parent = ObjectUtils.try(this.actor, ...parentPath)
+    const func = ObjectUtils.try(parent, funcPath)
+    if (typeof func === 'function') {
+      return func.call(parent)
+    }
   }
 
   _onAddMissingSkills = async () => {

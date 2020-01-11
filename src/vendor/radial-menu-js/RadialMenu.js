@@ -1,5 +1,7 @@
 'use strict'
 
+import ObjectUtils from '../../util/ObjectUtils.js'
+
 var DEFAULT_SIZE = 100
 var MIN_SECTORS = 2
 
@@ -12,7 +14,7 @@ function RadialMenu(params) {
   self.position = params.position || null
   self.size = params.size || DEFAULT_SIZE
   self.onClick = params.onClick || null
-  self.menuItems = params.menuItems ? params.menuItems : [{ id: 'one', title: 'One' }, { id: 'two', title: 'Two' }]
+  self.menuItems = params.menuItems ? params.menuItems : [{ id: 'one', label: 'One' }, { id: 'two', label: 'Two' }]
 
   self.radius = 50
   self.innerRadius = self.radius * 0.4
@@ -158,7 +160,7 @@ RadialMenu.prototype.handleCenterClick = function () {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RadialMenu.prototype.createCenter = function (svg, title, icon, size) {
+RadialMenu.prototype.createCenter = function (svg, label, icon, size) {
   var self = this
   size = size || 8
   var g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
@@ -167,12 +169,12 @@ RadialMenu.prototype.createCenter = function (svg, title, icon, size) {
   var centerCircle = self.createCircle(0, 0, self.innerRadius - self.sectorSpace / 3)
   g.appendChild(centerCircle)
   if (text) {
-    var text = self.createText(0, 0, title)
+    var text = self.createText(0, 0, label)
     g.appendChild(text)
   }
 
   if (icon) {
-    var use = self.createUseTag(0, 0, icon)
+    var use = self.createIconTag(0, 0, icon)
     use.setAttribute('width', size)
     use.setAttribute('height', size)
     use.setAttribute('transform', 'translate(-' + RadialMenu.numberToString(size / 2) + ',-' + RadialMenu.numberToString(size / 2) + ')')
@@ -258,7 +260,7 @@ RadialMenu.prototype.createMenu = function (classValue, levelItems, nested) {
   })
 
   svg.addEventListener('click', function (event) {
-    var className = event.target.parentNode.getAttribute('class').split(' ')[0]
+    const className = event.target.parentNode.getAttribute('class').split(' ')[0]
     switch (className) {
       case 'sector':
         self.handleClick()
@@ -269,6 +271,17 @@ RadialMenu.prototype.createMenu = function (classValue, levelItems, nested) {
       default:
     }
   })
+  svg.addEventListener('mouseup', function (event) {
+    if (event.button === 1) {
+      const className = event.target.parentNode.getAttribute('class').split(' ')[0]
+      if (className === 'sector') {
+        self.handleClick()
+        event.preventDefault()
+        return false
+      }
+    }
+  })
+
   return svg
 }
 
@@ -370,15 +383,25 @@ RadialMenu.prototype.setSelectedIndex = function (index) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RadialMenu.prototype.createUseTag = function (x, y, link) {
-  var icon = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+RadialMenu.prototype.createIconTag = function (x, y, link) {
+  let icon
+  if (typeof link === 'string') {
+    icon = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    icon.setAttribute('fill', 'white')
+    icon.setAttribute('class', 'fas-icon')
+    icon.textContent = link
+  } else if (typeof link === 'object' && link != null && typeof link.image === 'string') {
+    icon = document.createElementNS('http://www.w3.org/2000/svg', 'image')
+    icon.setAttribute('href', link.image)
+  } else {
+    throw new Error(`Bad icon format: ${link}`)
+  }
+
+  let size = 10 * ObjectUtils.try(link, 'scale', { default: 1 })
   icon.setAttribute('x', RadialMenu.numberToString(x))
   icon.setAttribute('y', RadialMenu.numberToString(y))
-  icon.setAttribute('width', '10')
-  icon.setAttribute('height', '10')
-  icon.setAttribute('fill', 'white')
-  icon.setAttribute('class', 'fas-icon')
-  icon.textContent = link
+  icon.setAttribute('width', `${size}`)
+  icon.setAttribute('height', `${size}`)
   return icon
 }
 
@@ -401,14 +424,13 @@ RadialMenu.prototype.appendSectorPath = function (startAngleDeg, endAngleDeg, sv
 
   if (item) {
     g.setAttribute('class', 'sector')
-    if (index == 0) {
+    if (index === 0) {
       g.setAttribute('class', 'sector selected')
     }
-    g.setAttribute('data-id', item.id)
     g.setAttribute('data-index', index)
 
-    if (item.title) {
-      var text = self.createText(centerPoint.x, centerPoint.y, item.title)
+    if (item.label) {
+      var text = self.createText(centerPoint.x, centerPoint.y, item.label)
       if (item.icon) {
         text.setAttribute('transform', 'translate(0,8)')
       } else {
@@ -419,16 +441,19 @@ RadialMenu.prototype.appendSectorPath = function (startAngleDeg, endAngleDeg, sv
     }
 
     if (item.icon) {
-      var use = self.createUseTag(centerPoint.x, centerPoint.y, item.icon)
-      if (item.title) {
-        use.setAttribute('transform', 'translate(-5,-8)')
-      } else {
-        use.setAttribute('transform', 'translate(-5,-5)')
-      }
+      const icon = self.createIconTag(centerPoint.x, centerPoint.y, item.icon)
+      let size = +icon.getAttribute('width')
+      const offsetY = item.label ? -3 : 0
+      icon.setAttribute('transform', `translate(${(-size / 2)},${(-size / 2) + offsetY})`)
 
-      g.appendChild(use)
+      g.appendChild(icon)
     }
 
+    if (item.title) {
+      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title')
+      title.textContent = item.title
+      g.appendChild(title)
+    }
   } else {
     g.setAttribute('class', 'dummy')
   }
@@ -457,13 +482,13 @@ RadialMenu.prototype.createSectorCmds = function (startAngleDeg, endAngleDeg) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RadialMenu.prototype.createText = function (x, y, title) {
+RadialMenu.prototype.createText = function (x, y, label) {
   var text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
   text.setAttribute('text-anchor', 'middle')
   text.setAttribute('x', RadialMenu.numberToString(x))
   text.setAttribute('y', RadialMenu.numberToString(y))
   text.setAttribute('font-size', '38%')
-  text.innerHTML = title
+  text.innerHTML = label
   return text
 }
 

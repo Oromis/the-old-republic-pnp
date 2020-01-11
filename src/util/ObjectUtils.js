@@ -82,14 +82,15 @@ export default Object.freeze({
       }
       return isString
     })
+    const segments = paths
 
     if (obj == null) {
       return defaultValue
     }
 
     let val = obj
-    for (const path of paths) {
-      val = val[path]
+    for (const segment of segments) {
+      val = val[segment]
       if (val == null) {
         return defaultValue
       }

@@ -1,5 +1,6 @@
 import { defineDataAccessor, defineGetter, makeRoll } from '../util/EntityUtils.js'
 import { calcSkillXp, calcUpgradeCost, explainPropertyValue } from '../CharacterFormulas.js'
+import RollUtils from '../util/RollUtils.js'
 
 export default {
   beforeConstruct() {
@@ -52,5 +53,12 @@ export default {
     defineGetter(this, 'upgradeCost', function () {
       return calcUpgradeCost(this.actor, this, { max: this.actor.xp.free })
     })
+
+    this.rollCheck = function rollCheck() {
+      return RollUtils.rollCheck(this.check, {
+        actor: this.actor.id,
+        label: this.name,
+      })
+    }
   }
 }
