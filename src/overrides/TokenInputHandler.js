@@ -129,8 +129,12 @@ function getMenuStructure(actor) {
   return result
 }
 
+let activeRadialMenu = null
 function launchRadialMenu(event) {
-  // Middle click
+  if (activeRadialMenu != null) {
+    activeRadialMenu.close()
+  }
+
   const menu = new RadialMenu({
     parent: document.body,
     size: 300,
@@ -145,6 +149,7 @@ function launchRadialMenu(event) {
     }
   })
   menu.open()
+  activeRadialMenu = menu
 }
 
 export function installTokenInputHandler() {
@@ -152,6 +157,7 @@ export function installTokenInputHandler() {
   Token.prototype._onMouseDown = function onMouseDownOverride(...args) {
     const [event] = args
     if (ObjectUtils.try(event.data, 'button') === 1) {
+      // Middle click
       launchRadialMenu(event)
       event.data.originalEvent.preventDefault()
       return false

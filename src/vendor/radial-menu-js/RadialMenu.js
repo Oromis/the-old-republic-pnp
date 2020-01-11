@@ -7,34 +7,35 @@ var MIN_SECTORS = 2
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function RadialMenu(params) {
-  var self = this
+  this.parent = params.parent || []
 
-  self.parent = params.parent || []
+  this.position = params.position || null
+  this.size = params.size || DEFAULT_SIZE
+  this.onClick = params.onClick || null
+  this.menuItems = params.menuItems ? params.menuItems : [{ id: 'one', label: 'One' }, { id: 'two', label: 'Two' }]
 
-  self.position = params.position || null
-  self.size = params.size || DEFAULT_SIZE
-  self.onClick = params.onClick || null
-  self.menuItems = params.menuItems ? params.menuItems : [{ id: 'one', label: 'One' }, { id: 'two', label: 'Two' }]
+  this.radius = 50
+  this.innerRadius = this.radius * 0.4
+  this.sectorSpace = this.radius * 0.06
+  this.sectorCount = Math.max(this.menuItems.length, MIN_SECTORS)
+  this.closeOnClick = params.closeOnClick !== undefined ? !!params.closeOnClick : false
+  this.destroyOnClose = params.destroyOnClose !== false
 
-  self.radius = 50
-  self.innerRadius = self.radius * 0.4
-  self.sectorSpace = self.radius * 0.06
-  self.sectorCount = Math.max(self.menuItems.length, MIN_SECTORS)
-  self.closeOnClick = params.closeOnClick !== undefined ? !!params.closeOnClick : false
-  self.destroyOnClose = params.destroyOnClose !== false
+  this.scale = 1
+  this.holder = null
+  this.parentMenu = []
+  this.parentItems = []
+  this.levelItems = null
 
-  self.scale = 1
-  self.holder = null
-  self.parentMenu = []
-  self.parentItems = []
-  self.levelItems = null
+  this.createHolder()
 
-  self.createHolder()
-  // self.addIconSymbols()
-
-  self.currentMenu = null
-  document.addEventListener('wheel', self.onMouseWheel.bind(self))
-  document.addEventListener('keydown', self.onKeyDown.bind(self))
+  this.currentMenu = null
+  this.onMouseWheel = this.onMouseWheel.bind(this)
+  this.onKeyDown = this.onKeyDown.bind(this)
+  this.onClickOutside = this.onClickOutside.bind(this)
+  document.addEventListener('wheel', this.onMouseWheel)
+  document.addEventListener('keydown', this.onKeyDown)
+  document.addEventListener('click', this.onClickOutside)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,17 +91,23 @@ RadialMenu.prototype.createHolder = function () {
   this.holder.style.width = this.size + 'px'
   this.holder.style.height = this.size + 'px'
   if (this.position != null) {
-    this.holder.style.position = 'absolute'
     this.holder.style.left = `${this.position.x}px`
     this.holder.style.top = `${this.position.y}px`
-    this.holder.style.transform = 'translate(-50%, -50%)'
   }
+  this.holder.addEventListener('click', e => {
+    e.stopPropagation()
+    return false
+  })
 
   this.parent.appendChild(this.holder)
 }
 
 RadialMenu.prototype.destroy = function () {
   this.parent.removeChild(this.holder)
+
+  document.removeEventListener('wheel', this.onMouseWheel)
+  document.removeEventListener('keydown', this.onKeyDown)
+  document.removeEventListener('click', this.onClickOutside)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -343,6 +350,10 @@ RadialMenu.prototype.onMouseWheel = function (event) {
       self.selectDelta(-1)
     }
   }
+}
+
+RadialMenu.prototype.onClickOutside = function () {
+  this.close()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
