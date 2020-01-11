@@ -98,6 +98,34 @@ function getMenuStructure(actor) {
     generateAvailableSlots: () => [3, 4, 5, 6, 7, 0, 1, 2],
   })
 
+  // Handle force powers
+  const forceSkills = actor.forceSkills.list
+  if (forceSkills.length > 0) {
+    result[2] = {
+      label: 'Mächte ...',
+      icon: '\uf669',
+      items: Array(8).fill(null),
+    }
+
+    fillWithOverflow({
+      menu: result[2].items,
+      availableSlots: [2, 3, 4, 5, 6, 7, 0, 1],
+      objects: forceSkills,
+      generateItem: forceSkill => ({
+        label: forceSkill.shortName,
+        icon: { image: forceSkill.img },
+        title: `${forceSkill.name} (${forceSkill.key.toUpperCase()}) wirken`,
+        action: () => forceSkill.rollCheck(),
+      }),
+      generateSubMenuItem: ({
+        label: 'Mehr ...',
+        icon: '\uf669',
+        items: Array(8).fill(null),
+      }),
+      generateAvailableSlots: [2, 3, 4, 5, 6, 7, 0, 1],
+    })
+  }
+
   return result
 }
 

@@ -12,7 +12,7 @@ svg.icons {
 svg.menu {
   position: absolute;
   overflow: visible;
-  transition: 0.2s;
+  transition: 0.15s;
   transition-timing-function: ease-out;
 }
 
@@ -34,7 +34,7 @@ svg.menu > g > path {
 
 svg.menu > g.sector > path {
   cursor: pointer;
-  transition: fill 0.3s;
+  transition: fill 0.1s;
 }
 
 svg.menu > g.sector > text,
@@ -70,9 +70,4 @@ svg.menu .fas-icon {
   font-family: 'Font Awesome 5 Free';
   font-weight: 900;
   font-size: 10px;
-  transform: translate(-3px, -1px);
-}
-
-svg.menu .fas-icon.center {
-  transform: translate(-3px, 3px);
 }

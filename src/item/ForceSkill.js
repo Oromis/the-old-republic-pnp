@@ -1,5 +1,6 @@
 import { defineDataAccessor, defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
 import { analyzeExpression } from '../util/SheetUtils.js'
+import StringUtils from '../util/StringUtils.js'
 
 export default {
   beforeConstruct() {
@@ -18,6 +19,14 @@ export default {
       } else {
         return ''
       }
+    })
+
+    defineGetter(this, 'shortName', function () {
+      let name = this.name
+      if (name.startsWith('Macht')) {
+        name = name.substr('Macht'.length)
+      }
+      return StringUtils.capitalize(name)
     })
 
     this._addUpdateFilter('data.cost.oneTime.formula', data => {

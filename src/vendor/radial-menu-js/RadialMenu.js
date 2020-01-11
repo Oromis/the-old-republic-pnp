@@ -174,12 +174,13 @@ RadialMenu.prototype.createCenter = function (svg, label, icon, size) {
   }
 
   if (icon) {
-    var use = self.createIconTag(0, 0, icon)
-    use.setAttribute('width', size)
-    use.setAttribute('height', size)
-    use.setAttribute('transform', 'translate(-' + RadialMenu.numberToString(size / 2) + ',-' + RadialMenu.numberToString(size / 2) + ')')
-    use.setAttribute('class', 'fas-icon center')
-    g.appendChild(use)
+    const iconElement = self.createIconTag(0, 0, icon)
+    iconElement.setAttribute('width', size)
+    iconElement.setAttribute('height', size)
+    iconElement.setAttribute('text-anchor', 'middle')
+    iconElement.setAttribute('alignment-baseline', 'central')
+    iconElement.setAttribute('class', 'fas-icon center')
+    g.appendChild(iconElement)
   }
 
   svg.appendChild(g)
@@ -443,7 +444,10 @@ RadialMenu.prototype.appendSectorPath = function (startAngleDeg, endAngleDeg, sv
     if (item.icon) {
       const icon = self.createIconTag(centerPoint.x, centerPoint.y, item.icon)
       let size = +icon.getAttribute('width')
-      const offsetY = item.label ? -3 : 0
+      let offsetY = item.label ? -3 : 0
+      if (icon instanceof SVGTextElement) {
+        offsetY += 8
+      }
       icon.setAttribute('transform', `translate(${(-size / 2)},${(-size / 2) + offsetY})`)
 
       g.appendChild(icon)
