@@ -122,7 +122,7 @@ function getMenuStructure(actor) {
         icon: '\uf669',
         items: Array(8).fill(null),
       }),
-      generateAvailableSlots: [2, 3, 4, 5, 6, 7, 0, 1],
+      generateAvailableSlots: () => [2, 3, 4, 5, 6, 7, 0, 1],
     })
   }
 
