@@ -9,9 +9,19 @@ class HumanoidMetric extends Metric {
     return calcUpgradeCost(this._entity, this, { max: this._entity.xp.free })
   }
 
+  get currentXpCategory() {
+    return this.xpCategory || this.effectiveXpCategory
+  }
+
   get effectiveXpCategory() {
-    // TODO include advantages due to race or training
-    return this._staticData.xpCategory
+    return this.entity.dataSet.xpTable.modifyCategory(
+      this._staticData.xpCategory,
+      this.entity.modifiers[this.key].xpCategoryBonus
+    )
+  }
+
+  get canBuyPoints() {
+    return this._staticData.xpCategory != null
   }
 }
 

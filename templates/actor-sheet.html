@@ -186,7 +186,7 @@
               <td title="{{formatExplanation attr.mod.components}}">{{formatMod attr.mod.total}}</td>
               <td>
                 <select name="data.attributes.{{attr.key}}.xpCategory" data-dtype="String">
-                  {{#select attr.xpCategory}}
+                  {{#select attr.currentXpCategory}}
                     {{#each ../actor.dataSet.xpTable.categoryNames as |category|}}
                       <option value="{{category}}">{{category}}</option>
                     {{/each}}
@@ -750,9 +750,9 @@
                   </td>
                   <td title="{{formatExplanation metric.mod.components}}">{{formatMod metric.mod.total}}</td>
                   <td>
-                    {{#if metric.xpCategory}}
+                    {{#if metric.canBuyPoints}}
                       <select name="data.metrics.{{metric.key}}.xpCategory">
-                        {{#select metric.xpCategory}}
+                        {{#select metric.currentXpCategory}}
                           {{#each ../actor.dataSet.xpTable.categoryNames as |category|}}
                             <option value="{{category}}">{{category}}</option>
                           {{/each}}
@@ -761,10 +761,10 @@
                     {{/if}}
                   </td>
                   <td>
-                    {{#if metric.xpCategory}}{{metric.xp}}{{/if}}
+                    {{#if metric.canBuyPoints}}{{metric.xp}}{{/if}}
                   </td>
                   <td>
-                    {{#if metric.xpCategory}}
+                    {{#if metric.canBuyPoints}}
                       <div class="flex-row multi-item">
                         {{#if ../data.creationMode.enabled}}
                           {{#if metric.gained.length}}

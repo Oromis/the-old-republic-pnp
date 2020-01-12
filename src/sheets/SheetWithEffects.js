@@ -33,7 +33,7 @@ export default class SheetWithEffects extends Mixin {
     })
 
     this._resetNewEffect = function () {
-      this._newEffect = { key: null, label: null, bonus: null, xp: null }
+      this._newEffect = { key: null, label: null, bonus: null, xp: null, xpCategoryBonus: null }
     }
 
     this._resetNewEffect()
@@ -83,7 +83,8 @@ export default class SheetWithEffects extends Mixin {
         }
         const hasBonus = typeof newEffect.bonus === 'number' && newEffect.bonus !== 0
         const hasXp = typeof newEffect.xp === 'number' && newEffect.xp !== 0
-        if (newEffect.key && (hasBonus || hasXp)) {
+        const hasXpCategoryBonus = typeof newEffect.xpCategoryBonus === 'number' && newEffect.xpCategoryBonus !== 0
+        if (newEffect.key && (hasBonus || hasXp || hasXpCategoryBonus)) {
           if (!newEffect.label) {
             newEffect.label = newEffect.key
           }
@@ -96,6 +97,9 @@ export default class SheetWithEffects extends Mixin {
           if (hasXp) {
             toAdd.value.xp = newEffect.xp
             toAdd.value.activationPaid = this._options.paysForActivation
+          }
+          if (hasXpCategoryBonus) {
+            toAdd.value.xpCategoryBonus = newEffect.xpCategoryBonus
           }
           this._resetNewEffect()
           this.parent.item.update({

@@ -133,7 +133,7 @@ export function explainPropertyValue(actor, property, options) {
 export function calcUpgradeCost(actor, property, { max } = {}) {
   const currentVal = explainPermanentPropertyValue(actor, property).total
   const result = actor.dataSet.xpTable.getUpgradeCost({
-    category: property.currentXpCategory || property.xpCategory,
+    category: property.currentXpCategory || property.effectiveXpCategory,
     from: currentVal,
     to: currentVal + 1,
   })

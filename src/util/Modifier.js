@@ -9,6 +9,7 @@ export default class Modifier {
     this._aspects = {
       bonus: { total: 0, components: [] },
       xp: { total: 0, components: [], activationPaid: false },
+      xpCategoryBonus: { total: 0, components: [] },
     }
   }
 
@@ -20,6 +21,7 @@ export default class Modifier {
    *    At the moment, only numeric inputs are supported, which will be interpreted as a bonus
    *    (or malus if negative).
    * @param label {string} The string to attach to the modifier
+   * @param stage {string} Assigns a "category" to the modifier. Should be one of the STAGE_ constants (see above)
    */
   inject(input, { label, stage }) {
     if (typeof input === 'number' || (typeof input === 'string' && !isNaN(input))) {
@@ -30,6 +32,7 @@ export default class Modifier {
         this._addAspect('value', input.value, label, stage)
       }
       this._addAspect('xp', input.xp, label, stage)
+      this._addAspect('xpCategoryBonus', input.xpCategoryBonus, label, stage)
       if (input.activationPaid) {
         // For skills: Modifiers can pay for the skill's activation cost
         this._aspects.xp.activationPaid = true
@@ -62,6 +65,14 @@ export default class Modifier {
 
   get xp() {
     return this._aspects.xp.total
+  }
+
+  explainXpCategoryBonus({ stage } = {}) {
+    return this._filterAspect(this._aspects.xpCategoryBonus, stage)
+  }
+
+  get xpCategoryBonus() {
+    return this._aspects.xpCategoryBonus.total
   }
 
   // ----------------------------------------------------------------------------

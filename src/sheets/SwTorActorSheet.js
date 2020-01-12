@@ -16,7 +16,7 @@ function calcGainChange(actor, property, { action, defaultXpCategory }) {
   switch (action) {
     case 'buy': {
       // Buy a point with XP
-      const xpCategory = property.currentXpCategory || property.xpCategory || defaultXpCategory
+      const xpCategory = property.currentXpCategory || property.effectiveXpCategory || defaultXpCategory
       const xpCost = calcUpgradeCost(actor, property)
       newXp = prevXp + xpCost
       newGainLog = [...gainLog, { xpCategory, xp: xpCost }]
@@ -342,14 +342,14 @@ export default class SwTorActorSheet extends ActorSheet {
   _onChangeAttrGained = event => {
     const action = event.currentTarget.getAttribute('data-action')
     const key = event.currentTarget.getAttribute('data-attr')
-    const defaultXpCategory = this.actor.dataSet.attributes.map[key].xpCategory
+    const defaultXpCategory = this.actor.dataSet.attributes.map[key].effectiveXpCategory
     const attribute = this.actor.attributes[key]
 
     const { xp, gainLog } = calcGainChange(this.actor, attribute, { action, defaultXpCategory })
     this.actor.update({
       [`data.attributes.${key}.gained`]: gainLog,
       [`data.attributes.${key}.xp`]: xp,
-      [`data.attributes.${key}.xpCategory`]: defaultXpCategory,  // Reset XP category after every change
+      [`data.attributes.${key}.xpCategory`]: null,  // Reset XP category after every change
     })
   }
 
@@ -370,7 +370,7 @@ export default class SwTorActorSheet extends ActorSheet {
 
       skill.update({
         'data.gained': gainLog,
-        'data.tmpXpCategory': skill.xpCategory, // Reset after every skill point
+        'data.tmpXpCategory': null, // Reset after every skill point
       })
     }
   }
@@ -378,14 +378,14 @@ export default class SwTorActorSheet extends ActorSheet {
   _onChangeMetricGained = event => {
     const action = event.currentTarget.getAttribute('data-action')
     const key = event.currentTarget.getAttribute('data-metric')
-    const defaultXpCategory = this.actor.dataSet.metrics.map[key].xpCategory
+    const defaultXpCategory = this.actor.dataSet.metrics.map[key].effectiveXpCategory
     const metric = this.actor.metrics[key]
 
     const { xp, gainLog } = calcGainChange(this.actor, metric, { action, defaultXpCategory })
     this.actor.update({
       [`data.metrics.${key}.gained`]: gainLog,
       [`data.metrics.${key}.xp`]: xp,
-      [`data.metrics.${key}.xpCategory`]: defaultXpCategory,  // Reset XP category after every change
+      [`data.metrics.${key}.xpCategory`]: null,  // Reset XP category after every change
     })
   }
 

@@ -96,5 +96,20 @@ export default {
 
   get categoryNames() {
     return categoryList.map(cat => cat.name)
-  }
+  },
+
+  /**
+   * Calculates the new category if a category is made cheaper or more expensive
+   * @param {string} category The source category to start with
+   * @param {number} delta The amount of steps to make cheaper (positive) or more expensive (negative)
+   * @return {string} The new category
+   */
+  modifyCategory(category, delta) {
+    const startIndex = categoryList.findIndex(entry => entry.name === category)
+    if (startIndex === -1) {
+      throw new Error(`Bad source category: ${category}`)
+    }
+    const newIndex = Math.max(0, Math.min(startIndex - delta, categoryList.length - 1))
+    return categoryList[newIndex].name
+  },
 }

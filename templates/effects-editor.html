@@ -24,6 +24,17 @@
               <input type="text" name="data.effects.{{index}}.value.xp" value="{{effect.value.xp}}" data-dtype="Number" class="flex-grow" />
               <span>XP</span>
             {{/if}}
+            {{#if (isNumeric effect.value.xpCategoryBonus)}}
+              <select name="data.effects.{{index}}.value.xpCategoryBonus" data-dtype="Number" class="flex-grow" title="Lernen">
+                {{#select effect.value.xpCategoryBonus}}
+                  <option value="-2">Um 2 Kategorien teurer</option>
+                  <option value="-1">Um 1 Kategorie teurer</option>
+                  <option value="0">Kein Bonus</option>
+                  <option value="1">Um 1 Kategorie billiger</option>
+                  <option value="2">Um 2 Kategorien billiger</option>
+                {{/select}}
+              </select>
+            {{/if}}
           </div>
         </td>
         <td>
@@ -79,6 +90,24 @@
         </label>
       </td>
       <td></td>
+    </tr>
+    <tr>
+      <td>
+        <div class="flex-grow align-right">Lernen</div>
+      </td>
+      <td colspan="2">
+        <label class="flex-row">
+          <select name="newEffect.xpCategoryBonus" data-dtype="Number" class="flex-grow small">
+            {{#select newEffect.xpCategoryBonus}}
+              <option value="-1">Um 2 Kategorien teurer</option>
+              <option value="-1">Um 1 Kategorie teurer</option>
+              <option value="">Kein Bonus</option>
+              <option value="1">Um 1 Kategorie billiger</option>
+              <option value="2">Um 2 Kategorien billiger</option>
+            {{/select}}
+          </select>
+        </label>
+      </td>
     </tr>
   </tfoot>
 </table>

@@ -10,5 +10,9 @@ export function formatEffectValue(value) {
   if (value.xp) {
     parts.push(`${value.xp} XP`)
   }
+  if (value.xpCategoryBonus) {
+    parts.push(`Lernen ${Math.abs(value.xpCategoryBonus)} Kategorie${Math.abs(value.xpCategoryBonus) > 1 ? 'n' : ''} ` +
+      `${value.xpCategoryBonus > 0 ? 'billiger' : 'teurer'}`)
+  }
   return parts.join(', ')
 }
