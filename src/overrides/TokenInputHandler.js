@@ -26,8 +26,10 @@ function getBaseMenuStructure() {
 function fillWithOverflow({ menu, availableSlots, objects, generateItem, generateSubMenuItem, generateAvailableSlots }) {
   generateItem = ObjectUtils.asArray(generateItem)
   let parent = menu
-  for (const object of objects) {
-    if (availableSlots.length < generateItem.length) {
+  for (let i = 0; i < objects.length; i++) {
+    const object = objects[i]
+    const last = i === objects.length - 1
+    if ((last ? availableSlots.length : availableSlots.length - 1) < generateItem.length) {
       // We need a new sub-menu
       const subMenuItem = generateSubMenuItem()
       parent[availableSlots[0]] = subMenuItem
