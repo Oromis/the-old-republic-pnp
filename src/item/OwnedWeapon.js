@@ -40,11 +40,15 @@ export default {
     })
 
     defineGetter(this, 'paradeCheck', function () {
-      if (this.skill == null) {
+      // If we use a weapon that is not fit for defense (such as using a blaster gun to parry a vibro blade), then
+      // the relevant skill is "Hand-to-hand" instead of the weapon skill
+      const skill = this.canDefend ? this.skill : this.actor.getFallbackCombatSkill()
+      if (skill == null) {
         return null
       }
+
       const paradeAdvantage = this.calcBaseParadeAdvantage()
-      const result = this.skill.check
+      const result = skill.check
       for (const roll of result.rolls) {
         roll.advantage = paradeAdvantage
       }

@@ -554,7 +554,7 @@ export default class SwTorActor extends Actor {
 
     for (const source of sources) {
       for (const item of source.items) {
-        for (const effect of (item.effects || [])) {
+        for (const effect of (Array.isArray(item.effects) ? item.effects : [])) {
           result.getModifier(effect.key).inject(effect.value, { label: item.name, stage: source.stage })
         }
       }

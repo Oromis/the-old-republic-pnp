@@ -125,6 +125,10 @@ export default {
       return result
     }
 
+    this.getFallbackCombatSkill = function getFallbackCombatSkill() {
+      return this.skills.fau
+    }
+
     defineCachedGetter(this, 'baseInitiativeExplanation', () => explainComputedValue({
       value: roundDecimal((this.attrValue('in') + this.attrValue('sc')) / 5, 2),
       label: `Attribute (IN+SC)/5`,
@@ -134,7 +138,7 @@ export default {
     defineCachedGetter(this, 'speed1Explanation', () => {
       const result = explainComputedValue({
         value: roundDecimal(this.attrValue('sc') / 12, 2),
-        label: `Sprintstärke (SC/10)`,
+        label: `Sprintstärke (SC/12)`,
         bonusExplanation: this.modifiers.LaW.explainBonus(),
       })
       result.total += 2
@@ -145,7 +149,7 @@ export default {
     defineCachedGetter(this, 'speed2Explanation', () => {
       const result = explainComputedValue({
         value: roundDecimal((this.attrValue('sc') / 12) * (this.attrValue('ko') / 100), 2),
-        label: `Ausdauer (SC/10)*(KO/100)`,
+        label: `Ausdauer (SC/12)*(KO/100)`,
         bonusExplanation: this.modifiers.LaW.explainBonus(),
       })
       result.total += 2
