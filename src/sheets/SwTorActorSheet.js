@@ -158,7 +158,7 @@ export default class SwTorActorSheet extends ActorSheet {
   	  classes: ["sw-tor", "sheet", "actor"],
   	  template: "systems/sw-tor/templates/actor-sheet.html",
       submitOnUnfocus: true,
-      width: 754,
+      width: 784,
       height: 600
     });
   }

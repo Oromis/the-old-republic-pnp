@@ -117,7 +117,7 @@ function getMenuStructure(actor) {
         title: `${forceSkill.name} (${forceSkill.key.toUpperCase()}) wirken`,
         action: () => forceSkill.rollCheck(),
       }),
-      generateSubMenuItem: ({
+      generateSubMenuItem: () => ({
         label: 'Mehr ...',
         icon: '\uf669',
         items: Array(8).fill(null),

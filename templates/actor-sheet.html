@@ -545,35 +545,33 @@
           <h3 class="align-center">Defensive</h3>
           <div class="multi-item align-right">
             {{#each actor.equippedWeapons as |weapon index|}}
-              {{#if weapon.canDefend}}
-                <div class="weapon-slot">
-                  <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
-                  {{#if weapon.skill}}
-                    <div class="line-view multi-item">
-                      <div class="flex-row multi-item flex-end">
-                        <img src="icons/svg/shield.svg" class="table-icon" alt="Parade" title="Parade" />
-                        {{> "systems/sw-tor/templates/check-preview.html"
-                            check=weapon.paradeCheck
-                            action=(concat 'equippedWeapons.' index '.rollParade')
-                        }}
-                      </div>
-                      <div class="flex-row multi-item flex-end">
-                        <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)"
-                             title="Erleichterung (>0) / Erschwernis (<0)"
-                        />
-                        <input type="text" name="items.{{weapon.id}}.data.paradeAdvantage"
-                               value="{{weapon.data.data.paradeAdvantage}}" data-dtype="Number"
-                               title="Erleichterung (>0) / Erschwernis (<0)"
-                        />
-                        {{#if weapon.primaryEquippedSlot.coordination}}
-                          <i class="fas fa-hand-paper table-icon"></i>
-                          <span title="Koordination">{{weapon.primaryEquippedSlot.coordination}}</span>
-                        {{/if}}
-                      </div>
+              <div class="weapon-slot">
+                <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
+                {{#if weapon.skill}}
+                  <div class="line-view multi-item">
+                    <div class="flex-row multi-item flex-end">
+                      <img src="icons/svg/shield.svg" class="table-icon" alt="Parade" title="Parade" />
+                      {{> "systems/sw-tor/templates/check-preview.html"
+                          check=weapon.paradeCheck
+                          action=(concat 'equippedWeapons.' index '.rollParade')
+                      }}
                     </div>
-                  {{/if}}
-                </div>
-              {{/if}}
+                    <div class="flex-row multi-item flex-end">
+                      <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)"
+                           title="Erleichterung (>0) / Erschwernis (<0)"
+                      />
+                      <input type="text" name="items.{{weapon.id}}.data.paradeAdvantage"
+                             value="{{weapon.data.data.paradeAdvantage}}" data-dtype="Number"
+                             title="Erleichterung (>0) / Erschwernis (<0)"
+                      />
+                      {{#if weapon.primaryEquippedSlot.coordination}}
+                        <i class="fas fa-hand-paper table-icon"></i>
+                        <span title="Koordination">{{weapon.primaryEquippedSlot.coordination}}</span>
+                      {{/if}}
+                    </div>
+                  </div>
+                {{/if}}
+              </div>
             {{/each}}
             {{#if actor.evasionCheck}}
               <div class="weapon-slot">
