@@ -7,7 +7,7 @@ export default {
     defineDataAccessor(this, 'gp')
 
     defineGetter(this, 'summary', function () {
-      return this.effects
+      return (Array.isArray(this.effects) ? this.effects : [])
         .map(effect => `${effect.label || resolveEffectLabel(effect.key)}: ${formatEffectValue(effect.value)}`)
         .join(', ')
     })
