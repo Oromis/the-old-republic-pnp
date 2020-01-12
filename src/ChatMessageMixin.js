@@ -1,6 +1,7 @@
 import Mixin from './sheets/Mixin.js'
 import ObjectUtils from './util/ObjectUtils.js'
 import RollUtils from './util/RollUtils.js'
+import CheckMessageEditor from './apps/CheckMessageEditor.js'
 
 export default class ChatMessageMixin extends Mixin {
   constructor(...args) {
@@ -18,41 +19,33 @@ export default class ChatMessageMixin extends Mixin {
       if (originalThis.isAuthor && ObjectUtils.try(originalThis.data.flags, 'sw-tor', 'check', 'needsConfirmation')) {
         // Critical result needs to be confirmed
         html.find('.sw-tor-confirm-button').on('click', async () => {
-          const originalCheck = originalThis.data.flags['sw-tor'].check
-          const confirmation = await RollUtils.rollCheck(originalCheck, {
+          const check = ObjectUtils.cloneDeep(originalThis.data.flags['sw-tor'].check)
+          const confirmation = await RollUtils.rollCheck(check, {
             isConfirmation: true,
             sendToChat: false,
           })
-          let confirmed
-          const combinedScore = originalCheck.criticalScore + confirmation.criticalScore
-          if (Math.abs(combinedScore) >= 2) {
-            // Another critical roll of the same type => definitely confirmed
-            confirmed = true
-          } else if (combinedScore === 0) {
-            // Another critical roll, but this one neutralized the first critical
-            confirmed = false
-          } else {
-            // Undecided. Let's see whether we succeeded the roll
-            if (originalCheck.criticalScore > 0) {
-              // Attempting to confirm a "1", the confirmation needs to succeed
-              confirmed = confirmation.success
-            } else {
-              // Attempting to confirm a "20", the confirmation must not succeed to confirm
-              confirmed = !confirmation.success
-            }
-          }
 
-          originalCheck.confirmed = confirmed
+          check.confirmation = confirmation
 
-          RollUtils.processCheck(originalCheck)
+          RollUtils.processCheck(check)
           originalThis.update({
-            'flags.sw-tor.check.needsConfirmation': false,
+            'flags.sw-tor.check': check,
             content: await renderTemplate('systems/sw-tor/templates/check-message.html', {
-              check: originalCheck,
+              check: check,
               confirmation,
             }),
           })
         })
+      }
+
+      if (originalThis.owner) {
+        // Turn the "flavor" text into a link that opens the roll editor
+        const originalFlavor = html.find('.flavor-text')
+        const flavorLink = $(`<a class="flavor-text">${originalFlavor.text()}</a>`)
+        flavorLink.on('click', () => {
+          new CheckMessageEditor(originalThis).render(true)
+        })
+        originalFlavor.replaceWith(flavorLink)
       }
       return html
     }

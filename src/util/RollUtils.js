@@ -1,30 +1,65 @@
 import ObjectUtils from './ObjectUtils.js'
 
 function processCheck(check, { isConfirmation = false } = {}) {
-  check.needsConfirmation = false
-  if (check.confirmCriticals && check.confirmed == null) {
-    let criticalScore = 0
-    for (const roll of check.rolls) {
-      if (roll.die === 1) {
-        ++criticalScore
-      } else if (roll.die === 20) {
-        --criticalScore
-      }
+  let criticalScore = 0
+  for (const roll of check.rolls) {
+    if (roll.die === 1) {
+      ++criticalScore
+    } else if (roll.die === 20) {
+      --criticalScore
     }
+  }
 
-    check.criticalScore = criticalScore
+  check.criticalScore = criticalScore
+
+  check.needsConfirmation = false
+  if (check.confirmCriticals) {
     if (Math.abs(criticalScore) === 1) {
-      // An unconfirmed critical result - either critical success or critical failure.
-      // We need to confirm the result before the critical outcome becomes effective
-      check.needsConfirmation = true
+      if (check.confirmation == null) {
+        // An unconfirmed critical result - either critical success or critical failure.
+        // We need to confirm the result before the critical outcome becomes effective
+        check.needsConfirmation = true
+      } else {
+        // A confirmation check has been rolled
+        let confirmed
+        const combinedScore = check.criticalScore + check.confirmation.criticalScore
+        if (Math.abs(combinedScore) >= 2) {
+          // Another critical roll of the same type => definitely confirmed
+          confirmed = true
+        } else if (combinedScore === 0) {
+          // Another critical roll, but this one neutralized the first critical
+          confirmed = false
+        } else {
+          // Undecided. Let's see whether we succeeded the roll
+          if (check.criticalScore > 0) {
+            // Attempting to confirm a "1", the confirmation needs to succeed
+            confirmed = check.confirmation.success
+          } else {
+            // Attempting to confirm a "20", the confirmation must not succeed to confirm
+            confirmed = !check.confirmation.success
+          }
+        }
+        check.confirmed = confirmed
+      }
     } else if (criticalScore !== 0) {
       // Roll is confirmed directly
       check.confirmed = true
     }
+  } else {
+    // No confirmation necessary => confirmed automatically
+    check.confirmed = true
   }
 
-  if (check.confirmed) {
-    check.AgP.bonus = check.criticalScore * (check.criticalBonus || 0)
+  if (check.AgP != null) {
+    if (check.confirmed != null) {
+      if (check.confirmed && check.criticalScore !== 0) {
+        check.AgP.bonus = check.criticalScore * (check.criticalBonus || 0)
+      } else {
+        check.AgP.bonus = null
+      }
+    } else if (check.AgP.bonus != null) {
+      check.AgP.bonus = null
+    }
   }
 
   for (const roll of check.rolls) {
@@ -37,15 +72,21 @@ function processCheck(check, { isConfirmation = false } = {}) {
   }
 
   if (check.calcEffectiveness && check.AgP && !check.needsConfirmation && !isConfirmation) {
+    // At the moment, we only know how to calculate effectiveness for rolls with AgP.
+    // Don't think this is a problem though...
     if (check.AgP.diff >= 0) {
       check.effectiveness = check.AgP.diff + check.rolls.reduce((acc, roll) => acc + Math.max(0, roll.diff), 0)
     } else {
       check.effectiveness = check.AgP.diff
     }
+  } else if (check.effectiveness != null) {
+    check.effectiveness = null
   }
 
   if (!check.needsConfirmation) {
     check.success = check.AgP ? check.AgP.diff >= 0 : check.rolls.every(roll => roll.diff >= 0)
+  } else if (check.success != null) {
+    check.success = null
   }
 }
 
@@ -80,9 +121,7 @@ export default {
         sound: CONFIG.sounds.dice,
         content: await renderTemplate('systems/sw-tor/templates/check-message.html', { check: result }),
         flags: { 'sw-tor': { check: result } },
-      }
-      if (result.needsConfirmation) {
-        chatData.permission = { default: 0, [game.user.id]: CONST.ENTITY_PERMISSIONS.OWNER }
+        permission: { default: 0, [game.user.id]: CONST.ENTITY_PERMISSIONS.OWNER },
       }
 
       // Handle type

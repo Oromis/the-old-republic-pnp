@@ -1,0 +1,99 @@
+<div class="flex-col">
+  <div class="flex-row multi-item sw-tor flex-cross-stretch flex-no-grow">
+    {{#each check.rolls as |roll index|}}
+      <div class="{{#if (isOne ../rolls.length)}}flex-row flex-space-between {{/if}}multi-item check-roll dice-tooltip">
+        <div title="{{roll.label}}"><strong>{{formatAttrKey roll.key}}</strong> {{roll.value}}</div>
+        <div class="flex-row multi-item dice-rolls flex-center">
+          {{formatD20Result roll.die}}
+          <span>/</span>
+          <span>
+            {{roll.target}}
+            <input type="text" name="rolls.{{index}}.advantage" value="{{formatMod roll.advantage}}" class="advantage-field" data-dtype="Number" />
+          </span>
+        </div>
+        <div class="align-center">
+          {{formatCheckDiff roll.diff}}
+        </div>
+      </div>
+    {{/each}}
+    {{#if check.AgP}}
+      <div class="multi-item check-AgP flex-col flex-space-between">
+        <div title="Ausgleichspunkte"><strong>AgP</strong></div>
+        <strong class="align-center">
+          {{check.AgP.value}}{{#if check.AgP.bonus}}{{formatCheckDiff check.AgP.bonus 'small'}}{{/if}}
+        </strong>
+        <div class="align-center">
+          {{formatCheckDiff check.AgP.diff}}
+        </div>
+      </div>
+    {{/if}}
+  </div>
+  {{#if (isNumeric check.effectiveness)}}
+    <div class="sw-tor-effectiveness sw-tor">
+      Effektivität: {{formatCheckDiff check.effectiveness}}
+    </div>
+  {{/if}}
+  {{#if check.confirmCriticals}}
+    {{#if check.confirmation}}
+      <div class="sw-tor-confirmation-label">Bestätigung</div>
+      <div class="flex-row multi-item sw-tor flex-cross-stretch flex-no-grow">
+        {{#each check.confirmation.rolls as |roll index|}}
+          <div class="{{#if (isOne ../rolls.length)}}flex-row flex-space-between {{/if}}multi-item check-roll dice-tooltip">
+            <div title="{{roll.label}}"><strong>{{formatAttrKey roll.key}}</strong> {{roll.value}}</div>
+            <div class="flex-row multi-item dice-rolls flex-center">
+              {{formatD20Result roll.die}}
+              <span>/</span>
+              <span>
+              {{roll.target}}
+                <input type="text" name="confirmation.rolls.{{index}}.advantage" value="{{formatMod roll.advantage}}" class="advantage-field" data-dtype="Number" />
+            </span>
+            </div>
+            <div class="align-center">
+              {{formatCheckDiff roll.diff}}
+            </div>
+          </div>
+        {{/each}}
+        {{#if check.confirmation.AgP}}
+          <div class="multi-item check-AgP flex-col flex-space-between">
+            <div title="Ausgleichspunkte"><strong>AgP</strong></div>
+            <strong class="align-center">
+              {{check.confirmation.AgP.value}}{{#if check.confirmation.AgP.bonus}}{{formatCheckDiff check.confirmation.AgP.bonus 'small'}}{{/if}}
+            </strong>
+            <div class="align-center">
+              {{formatCheckDiff check.confirmation.AgP.diff}}
+            </div>
+          </div>
+        {{/if}}
+      </div>
+      {{#if (isNumeric check.confirmation.effectiveness)}}
+        <div class="sw-tor-effectiveness sw-tor">
+          Effektivität: {{formatCheckDiff check.confirmation.effectiveness}}
+        </div>
+      {{/if}}
+    {{/if}}
+  {{/if}}
+
+  <div class="flex-grow"></div>
+
+  <div class="multi-item">
+    <label class="flex-row multi-item">
+      <span><input type="checkbox" name="ui.linkAdvantages" {{checked ui.linkAdvantages}} /></span>
+      <span>Erleichterungen verknüpfen</span>
+    </label>
+    <label class="flex-row multi-item">
+      <span><input type="checkbox" name="calcEffectiveness" {{checked check.calcEffectiveness}} /></span>
+      <span>Effektivität berechnen</span>
+    </label>
+    <label class="flex-row multi-item">
+      <span><input type="checkbox" name="confirmCriticals" {{checked check.confirmCriticals}} /></span>
+      <span>Kritische Ergebnisse bestätigen</span>
+    </label>
+    <label class="flex-row multi-item">
+      <span>Kritischer Bonus</span>
+      <span><input type="text" name="criticalBonus" value="{{check.criticalBonus}}" data-dtype="Number" /></span>
+    </label>
+    <div class="flex-row multi-item">
+      <button type="submit" class="submit-button">Speichern</button>
+    </div>
+  </div>
+</div>

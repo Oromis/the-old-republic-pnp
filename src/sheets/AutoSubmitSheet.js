@@ -2,7 +2,7 @@ import { timeout } from '../util/Timing.js'
 import Mixin from './Mixin.js'
 
 export default class AutoSubmitSheet extends Mixin {
-  constructor(parent) {
+  constructor(parent, { customUpdate } = {}) {
     super(parent)
 
     this.interceptMethod('activateListeners', this.activateListeners)
@@ -15,6 +15,7 @@ export default class AutoSubmitSheet extends Mixin {
     this._focusSelector = null
     this._focusSelectorTimeout = null
     this._scrollPositions = {}
+    this._customUpdate = customUpdate
   }
 
   activateListeners(html) {
@@ -62,10 +63,6 @@ export default class AutoSubmitSheet extends Mixin {
       path = path.split('.')
     }
     this._filters.push({ path, callback })
-  }
-
-  get focusSelector() {
-    return this._focusSelector
   }
 
   _onEditImage = (event) => {
@@ -155,7 +152,11 @@ export default class AutoSubmitSheet extends Mixin {
       }
 
       if (Object.keys(updateData).length > 0) {
-        await this.parent.entity.update(updateData)
+        if (typeof this._customUpdate === 'function') {
+          return this._customUpdate(updateData)
+        } else {
+          return this.parent.entity.update(updateData)
+        }
       }
     }
   }

@@ -221,4 +221,3 @@ export default {
     actorData.data.initiativeFormula = `${this.baseInitiativeExplanation.total} + 1d12`
   }
 }
-

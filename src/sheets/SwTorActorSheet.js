@@ -87,61 +87,64 @@ export default class SwTorActorSheet extends ActorSheet {
     }
 
     new SheetWithTabs(this)
-    const autoSubmit = new AutoSubmitSheet(this)
 
-    autoSubmit.addFilter('data.attributes.*.gp', this._processDeltaProperty)
-    autoSubmit.addFilter('data.attributes.*.buff', this._processDeltaProperty)
-    autoSubmit.addFilter('data.metrics.*.value', this._processDeltaProperty)
-    autoSubmit.addFilter('data.metrics.*.buff', this._processDeltaProperty)
-    autoSubmit.addFilter('data.combat.enemyDistance', this._processDeltaProperty)
+    if (this.isEditable) {
+      const autoSubmit = new AutoSubmitSheet(this)
 
-    autoSubmit.addFilter('skills.*', (obj, { name, path }) => {
-      const [_unused, key, ...rest] = path
-      const skill = this.actor.skills[key]
-      if (skill != null) {
-        let value = obj[name]
-        if (path.indexOf('buff') !== -1) {
-          value = processDeltaValue(value, skill.buff || 0)
-        } else if (path.indexOf('vars') !== -1) {
-          value = value === '' || isNaN(value) ? '' : +value
+      autoSubmit.addFilter('data.attributes.*.gp', this._processDeltaProperty)
+      autoSubmit.addFilter('data.attributes.*.buff', this._processDeltaProperty)
+      autoSubmit.addFilter('data.metrics.*.value', this._processDeltaProperty)
+      autoSubmit.addFilter('data.metrics.*.buff', this._processDeltaProperty)
+      autoSubmit.addFilter('data.combat.enemyDistance', this._processDeltaProperty)
+
+      autoSubmit.addFilter('skills.*', (obj, { name, path }) => {
+        const [_unused, key, ...rest] = path
+        const skill = this.actor.skills[key]
+        if (skill != null) {
+          let value = obj[name]
+          if (path.indexOf('buff') !== -1) {
+            value = processDeltaValue(value, skill.buff || 0)
+          } else if (path.indexOf('vars') !== -1) {
+            value = value === '' || isNaN(value) ? '' : +value
+          }
+          const payload = { [rest.join('.')]: value }
+          const oldValue = ObjectUtils.try(skill.data, ...rest)
+          if (value !== oldValue) {
+            skill.update(payload)
+          }
         }
-        const payload = { [rest.join('.')]: value }
-        const oldValue = ObjectUtils.try(skill.data, ...rest)
-        if (value !== oldValue) {
-          skill.update(payload)
+        // No actor update
+        return {}
+      })
+
+      autoSubmit.addFilter('items.*', (obj, { name, path }) => {
+        const [_unused, id, ...rest] = path
+        const item = this.actor.getOwnedItem(id)
+        if (item != null) {
+          const value = obj[name]
+          const payload = { [rest.join('.')]: value }
+          const oldValue = ObjectUtils.try(item.data, ...rest)
+          if (value !== oldValue) {
+            item.update(payload)
+          }
         }
-      }
-      // No actor update
-      return {}
-    })
+        // No actor update
+        return {}
+      })
 
-    autoSubmit.addFilter('items.*', (obj, { name, path }) => {
-      const [_unused, id, ...rest] = path
-      const item = this.actor.getOwnedItem(id)
-      if (item != null) {
-        const value = obj[name]
-        const payload = { [rest.join('.')]: value }
-        const oldValue = ObjectUtils.try(item.data, ...rest)
-        if (value !== oldValue) {
-          item.update(payload)
+      autoSubmit.addFilter('input.totalXp', (obj, { name }) => {
+        const newVal = Math.round(processDeltaValue(obj[name], this.actor.xp.total))
+        return {
+          'data.xp.gained': newVal - this.actor.xpFromGp
         }
-      }
-      // No actor update
-      return {}
-    })
+      })
 
-    autoSubmit.addFilter('input.totalXp', (obj, { name }) => {
-      const newVal = Math.round(processDeltaValue(obj[name], this.actor.xp.total))
-      return {
-        'data.xp.gained': newVal - this.actor.xpFromGp
-      }
-    })
-
-    autoSubmit.addFilter('input.damageIncoming.*', (obj, { name, path }) => {
-      this._damageIncoming[path[path.length - 1]] = obj[name]
-      this.render(false)
-      return {}
-    })
+      autoSubmit.addFilter('input.damageIncoming.*', (obj, { name, path }) => {
+        this._damageIncoming[path[path.length - 1]] = obj[name]
+        this.render(false)
+        return {}
+      })
+    }
   }
 
   /* -------------------------------------------- */

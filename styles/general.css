@@ -17,7 +17,7 @@
 .sw-tor .multi-item > .multi-item.padded { padding: 0; }
 
 .flex-grow { flex-grow: 1; }
-.flex-grow { flex-grow: 1; }
+.flex-no-grow { flex-grow: 0; }
 .flex-no-shrink { flex-shrink: 0; }
 .flex-wrap { flex-wrap: wrap; }
 .flex-cross-start { align-items: flex-start; }
