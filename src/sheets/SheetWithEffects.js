@@ -22,7 +22,7 @@ export default class SheetWithEffects extends Mixin {
     }
 
     autoSubmit.addFilter('data.effects.*.value', (obj, { name, path }) => {
-      const effects = ObjectUtils.cloneDeep(parent.item.effects || [])
+      const effects = ObjectUtils.cloneDeep(this.itemEffects)
       const [_data, _effects, index, ...rest] = path
       if (effects.length >= +index) {
         ObjectUtils.set(effects[index], rest.join('.'), +obj[name])
@@ -104,7 +104,7 @@ export default class SheetWithEffects extends Mixin {
           this._resetNewEffect()
           this.parent.item.update({
             'data.effects': [
-              ...(this.parent.item.effects || []),
+              ...this.itemEffects,
               toAdd,
             ],
           })
@@ -114,7 +114,7 @@ export default class SheetWithEffects extends Mixin {
     html.find('.delete-effect').click(e => {
       const targetKey = +e.currentTarget.getAttribute('data-index')
       this.parent.item.update({
-        'data.effects': (this.parent.item.effects || []).filter((v, i) => i !== targetKey),
+        'data.effects': this.itemEffects.filter((v, i) => i !== targetKey),
       })
     })
 
@@ -147,5 +147,9 @@ export default class SheetWithEffects extends Mixin {
       }
     }
     return null
+  }
+
+  get itemEffects() {
+    return Array.isArray(this.parent.item.effects) ? this.parent.item.effects : []
   }
 }
