@@ -6,7 +6,6 @@ export default {
     defineDataAccessor(this, 'quantity')
     defineDataAccessor(this, 'weight')
     defineDataAccessor(this, 'price')
-    defineDataAccessor(this, 'condition')
     defineEnumAccessor(this, 'itemType', { getKey: () => this.data.type, dataSetKey: 'itemTypes' })
 
     this._addUpdateFilter('data.skill', data => {

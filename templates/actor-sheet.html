@@ -467,6 +467,13 @@
                             (<i class="fas fa-fist-raised table-icon small"></i>)
                           </span>
                         {{/if}}
+                        {{#if (isLessThan weapon.condition 100)}}
+                          *&nbsp;
+                          <span title="Zustand" class="flex-row">
+                            {{weapon.condition}}%
+                            (<i class="fas fa-unlink table-icon small"></i>)
+                          </span>
+                        {{/if}}
                       </span>
                       <a
                         class="run-actor-action"

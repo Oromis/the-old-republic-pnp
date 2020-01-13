@@ -2,6 +2,7 @@ import { defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
 import ObjectUtils from '../util/ObjectUtils.js'
 import RollUtils from '../util/RollUtils.js'
 import Config from '../Config.js'
+import {roundDecimal} from '../util/MathUtils.js'
 
 export default {
   beforeConstruct() {
@@ -72,6 +73,9 @@ export default {
       const strengthModifier = this.currentStrengthModifier
       if (!isNaN(strengthModifier) && strengthModifier !== 1) {
         result = `(${result}*${strengthModifier})`
+      }
+      if (this.condition < 100) {
+        result = `(${result}*${roundDecimal(this.condition / 100, 2)})`
       }
       return result
     })

@@ -4,6 +4,7 @@ export default {
   beforeConstruct() {
     defineDataAccessor(this, 'slots')
     defineDataAccessor(this, 'slotTypes')
+    defineDataAccessor(this, 'condition')
 
     defineGetter(this, 'isEquipped', function () {
       return Array.isArray(this.slots) && this.slots.length > 0

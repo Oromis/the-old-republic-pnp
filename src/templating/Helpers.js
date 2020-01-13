@@ -65,6 +65,7 @@ export function registerHelpers() {
     isNumeric: arg => typeof arg === 'number',
     canBeNumeric: arg => typeof arg === 'number' || (typeof arg === 'string' && !isNaN(arg)),
     roundNumber: (number, decimals) => roundDecimal(number, decimals),
+    isLessThan: (number, threshold) => number < threshold,
     isRelevantFactor: num => typeof num === 'number' && num !== 1,
     formatList: list => list.join(', '),
     formatAttrKey,
