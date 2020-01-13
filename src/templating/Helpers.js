@@ -105,6 +105,8 @@ export function registerHelpers() {
     damageIcon: ({ hash: { type, classes = '' } }) => type != null ? (
       new Handlebars.SafeString(`<img src="${type.icon}" alt="${type.label}" title="${type.label}" class="${classes}" />`)
     ) : '',
+    calcCoordination: (slot, actor) => slot.explainCoordination(actor).total,
+    explainCoordination: (slot, actor) => slot.explainCoordination(actor).components,
 
     // ----------------------------------------------------------------------------
     // Tabs

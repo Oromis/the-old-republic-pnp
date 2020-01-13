@@ -29,4 +29,8 @@ export default class PropertyPrototype {
   applyTemplate(data) {
     return Object.assign({}, this._template, data)
   }
+
+  get staticData() {
+    return this._staticData
+  }
 }

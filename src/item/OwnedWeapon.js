@@ -20,7 +20,7 @@ export default {
 
     this.calcBaseAttackAdvantage = () => {
       const primarySlot = this.primaryEquippedSlot
-      return ((primarySlot && primarySlot.coordination) || 0) +
+      return ((primarySlot && primarySlot.explainCoordination(this.actor).total) || 0) +
         (this.data.data.attackAdvantage || 0)
     }
 

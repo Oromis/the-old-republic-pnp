@@ -444,9 +444,14 @@
                         <img src="icons/svg/target.svg" class="table-icon" alt="Genauigkeit" title="Genauigkeit" />
                         <span title="Genauigkeit">{{weapon.currentPrecision}}</span>
                       {{/if}}
-                      {{#if weapon.primaryEquippedSlot.coordination}}
-                        <i class="fas fa-hand-paper table-icon"></i>
-                        <span title="Koordination">{{weapon.primaryEquippedSlot.coordination}}</span>
+                      {{#if (calcCoordination weapon.primaryEquippedSlot actor)}}
+                        <span
+                            title="Koordination: {{formatExplanation (explainCoordination weapon.primaryEquippedSlot actor)}}"
+                            class="flex-row multi-item"
+                        >
+                          <i class="fas fa-hand-paper table-icon"></i>
+                          <span>{{calcCoordination weapon.primaryEquippedSlot actor}}</span>
+                        </span>
                       {{/if}}
                     </div>
                     <div class="flex-row multi-item">
@@ -571,9 +576,14 @@
                              value="{{weapon.data.data.paradeAdvantage}}" data-dtype="Number"
                              title="Erleichterung (>0) / Erschwernis (<0)"
                       />
-                      {{#if weapon.primaryEquippedSlot.coordination}}
-                        <i class="fas fa-hand-paper table-icon"></i>
-                        <span title="Koordination">{{weapon.primaryEquippedSlot.coordination}}</span>
+                      {{#if (calcCoordination weapon.primaryEquippedSlot actor)}}
+                        <span
+                            title="Koordination: {{formatExplanation (explainCoordination weapon.primaryEquippedSlot actor)}}"
+                            class="flex-row multi-item"
+                        >
+                          <i class="fas fa-hand-paper table-icon"></i>
+                          <span>{{calcCoordination weapon.primaryEquippedSlot actor}}</span>
+                        </span>
                       {{/if}}
                     </div>
                   </div>

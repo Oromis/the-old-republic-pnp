@@ -196,7 +196,8 @@ export default class SwTorActorSheet extends ActorSheet {
         } else {
           const equippedItem = this.actor.equippedItems.find(item => item.isEquippedInSlot(slot.key))
           return {
-            ...slot,
+            key: slot.key,
+            ...slot.staticData,
             item: equippedItem,
             options: [
               { id: null, name: '<Leer>', active: equippedItem == null },
