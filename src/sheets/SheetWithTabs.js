@@ -22,7 +22,10 @@ export default class SheetWithTabs extends Mixin {
       return data
     }, { wrapSuper: true })
 
+    window.addEventListener('resize', this._onResize)
+
     this.interceptMethod('_onResize', this._onResize)
+    this.interceptMethod('close', this._onClose)
   }
 
   activateListeners(html) {
@@ -55,6 +58,7 @@ export default class SheetWithTabs extends Mixin {
       }
 
       this._deriveActiveCount(this._tabGroups[id])
+      setTimeout(() => this._deriveActiveCount(this._tabGroups[id]), 0)
     }
   }
 
@@ -74,7 +78,10 @@ export default class SheetWithTabs extends Mixin {
     const groupElement = this.parent.form.querySelector(`.tab-group[data-id="${tabGroup.id}"]`)
     let maxActiveTabCount = 1
     if (tabGroup.minWidth != null) {
-      const groupWidth = Math.min(groupElement.clientWidth, this.parent.position.width)
+      const parentWidth = this.parent.element.attr('id').startsWith('popout') ?
+        this.parent.element.width() :
+        this.parent.position.width
+      const groupWidth = Math.min(groupElement.clientWidth, parentWidth)
       maxActiveTabCount = Math.max(Math.floor(groupWidth / tabGroup.minWidth), 1)
     }
     const minActiveTabCount = maxActiveTabCount
@@ -128,5 +135,10 @@ export default class SheetWithTabs extends Mixin {
     for (const group of Object.values(this._tabGroups)) {
       this._deriveActiveCount(group)
     }
+  }
+
+  _onClose = () => {
+    console.log('Removing resize handler')
+    window.removeEventListener('resize', this._onResize)
   }
 }
