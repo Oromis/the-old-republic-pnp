@@ -219,6 +219,10 @@ export default {
         label: this.skills.aus.name,
       })
     }
+
+    this._getMaxInventoryWeight = function () {
+      return (this.attrValue('kk', { prop: 'permanentValue' }) + this.attrValue('ko', { prop: 'permanentValue' })) / 2
+    }
   },
 
   afterPrepareData(actorData) {

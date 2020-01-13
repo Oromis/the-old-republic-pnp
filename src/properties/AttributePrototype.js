@@ -1,5 +1,5 @@
 import PropertyPrototype from './PropertyPrototype.js'
-import { explainPropertyValue } from '../CharacterFormulas.js'
+import {explainPermanentPropertyValue, explainPropertyValue} from '../CharacterFormulas.js'
 import Property from './Property.js'
 
 export default class AttributePrototype extends PropertyPrototype {

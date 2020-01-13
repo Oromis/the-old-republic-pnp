@@ -217,7 +217,7 @@
                 <input type="text" name="data.attributes.{{attr.key}}.buff" value="{{attr.buff}}" />
               </td>
               <td title="{{formatExplanation attr.value.components}}">
-                {{attr.value.total}}
+                {{formatBuffedValue attr.value}}
               </td>
               <td>
                 <a class="roll-check" title="Probe werfen" data-path="attributes.{{attr.key}}.check"
@@ -310,7 +310,7 @@
                   <td>
                     <input type="text" name="skills.{{skill.key}}.data.buff" value="{{skill.buff}}" />
                   </td>
-                  <td title="{{formatExplanation skill.value.components}}">{{skill.value.total}}</td>
+                  <td title="{{formatExplanation skill.value.components}}">{{formatBuffedValue skill.value}}</td>
                   {{#if ../../data.creationMode.enabled}}
                     <td>
                       <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
@@ -788,7 +788,7 @@
                     <input type="text" name="data.metrics.{{metric.key}}.buff" value="{{metric.buff}}" />
                   </td>
                   <td title="{{formatExplanation metric.maxComponents}}">
-                    {{metric.max}}
+                    {{formatBuffedValue metric.maxExplanation}}
                   </td>
                 </tr>
               {{/each}}

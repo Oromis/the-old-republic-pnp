@@ -10,7 +10,7 @@ export default class MetricPrototype extends PropertyPrototype {
       updaters: [
         (data, { entity, property }) => {
           data.mod = entity.modifiers[property.key].explainBonus()
-          const maxExplanation = explainPropertyValue(entity, property, { target: 'max' })
+          const maxExplanation = property.maxExplanation
           data.max = maxExplanation.total
           data.maxComponents = maxExplanation.components
           data.missing = data.max - data.value

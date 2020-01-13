@@ -55,7 +55,10 @@ const LeP = new HumanoidMetricPrototype('LeP', {
     day() { return this.calcBaseValue({ target: 'max' }) / 4 },
   },
   calcBaseValue(actor) {
-    return Math.round((actor.attrValue('ko') * 2 + actor.attrValue('kk')) / 3)
+    return Math.round((
+      actor.attrValue('ko', { prop: 'permanentValue' }) * 2 +
+      actor.attrValue('kk', { prop: 'permanentValue' })
+    ) / 3)
   }
 })
 const AuP = new HumanoidMetricPrototype('AuP', {
@@ -68,7 +71,11 @@ const AuP = new HumanoidMetricPrototype('AuP', {
     turn: 1,
   },
   calcBaseValue(actor) {
-    return Math.round((actor.attrValue('ko') + actor.attrValue('kk') + actor.attrValue('wk')) * 0.66)
+    return Math.round((
+      actor.attrValue('ko', { prop: 'permanentValue' }) +
+      actor.attrValue('kk', { prop: 'permanentValue' }) +
+      actor.attrValue('wk', { prop: 'permanentValue' })
+    ) * 0.66)
   }
 })
 const MaP = new HumanoidMetricPrototype('MaP', {
@@ -82,7 +89,12 @@ const MaP = new HumanoidMetricPrototype('MaP', {
     turn: 2,
   },
   calcBaseValue(actor) {
-    return Math.round((actor.modifiers.McL.bonus / 10000) * (actor.attrValue('ch') + actor.attrValue('in') + actor.attrValue('kl') + actor.attrValue('wk')) / 2)
+    return Math.round((actor.modifiers.McL.bonus / 10000) * (
+      actor.attrValue('ch', { prop: 'permanentValue' }) +
+      actor.attrValue('in', { prop: 'permanentValue' }) +
+      actor.attrValue('kl', { prop: 'permanentValue' }) +
+      actor.attrValue('wk', { prop: 'permanentValue' })
+    ) / 2)
   }
 })
 const EnP = new HumanoidMetricPrototype('EnP', {

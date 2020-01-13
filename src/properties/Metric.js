@@ -1,4 +1,5 @@
 import Property from './Property.js'
+import {explainPropertyValue} from '../CharacterFormulas.js'
 
 export default class Metric extends Property {
   calcBaseValue({ target = 'value' } = {}) {
@@ -47,5 +48,13 @@ export default class Metric extends Property {
       deltaFactor = this._staticData.calcDeltaFactor.call(this, delta)
     }
     return this.value + (delta * deltaFactor)
+  }
+
+  get maxExplanation() {
+    return explainPropertyValue(this.entity, this, { target: 'max' })
+  }
+
+  get max() {
+    return this.maxExplanation.total
   }
 }

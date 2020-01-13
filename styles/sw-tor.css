@@ -365,11 +365,11 @@
     text-align: center;
 }
 
-.sw-tor .check-diff.good, .sw-tor .d20.good {
+.sw-tor .check-diff.good, .sw-tor .d20.good, .sw-tor .good {
     color: #006509;
 }
 
-.sw-tor .check-diff.bad, .sw-tor .d20.bad {
+.sw-tor .check-diff.bad, .sw-tor .d20.bad, .sw-tor .bad {
     color: #d6403e;
 }
 

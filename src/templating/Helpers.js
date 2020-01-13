@@ -83,6 +83,11 @@ export function registerHelpers() {
         return components.map(component => `${component.label}: ${formatMod(component.value)}`).join(' | ')
       }
     },
+    formatBuffedValue: value => new Handlebars.SafeString(
+      `<span class="${value.total > value.permanent ? 'good' : ''}${value.total < value.permanent ? 'bad' : ''}">` +
+        `${value.total}` +
+      `</span>`
+    ),
     formatRegen: regen => formatMetricChanges(regen),
     formatCosts: (actor, costs) => formatMetricChanges(actor.calculateMetricsCosts(costs)),
     expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',

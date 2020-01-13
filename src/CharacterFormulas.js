@@ -60,7 +60,7 @@ export function calcTotalXp(actor) {
 }
 
 export function explainPropertyBaseValue(actor, property, options) {
-  const result = actor.modifiers[property.key].explainBonus()
+  const result = actor.modifiers[property.key].explainBonus({ stage: STAGE_PERMANENT })
   const gp = ObjectUtils.try(property, 'gp', { default: 0 })
   if (gp !== 0) {
     result.total += gp
@@ -120,12 +120,23 @@ export function explainPermanentPropertyValue(actor, property, options) {
 
 export function explainPropertyValue(actor, property, options) {
   const result = explainPermanentPropertyValue(actor, property, options)
+  result.permanent = result.total // Save the permanent value (if someone is interested in it)
   addXpComponents(result, actor.modifiers[property.key].explainXp({ stage: STAGE_TEMPORARY }).components, { actor, property })
+  const temporaryBonus = actor.modifiers[property.key].explainBonus({ stage: STAGE_TEMPORARY })
+  result.total += temporaryBonus.total
+  result.components.push(...temporaryBonus.components)
 
   const buff = ObjectUtils.try(property, 'buff', { default: 0 })
   if (buff !== 0) {
     result.total += buff
     result.components.push({ label: 'Buff', value: buff })
+  }
+  if (property.encumberanceFactor && actor.encumberance) {
+    const debuff = Math.floor(actor.encumberance * property.encumberanceFactor)
+    if (debuff !== 0) {
+      result.total -= debuff
+      result.components.push({ label: 'Behinderung', value: -debuff })
+    }
   }
   return result
 }

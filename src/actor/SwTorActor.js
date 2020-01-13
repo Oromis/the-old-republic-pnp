@@ -73,8 +73,8 @@ export default class SwTorActor extends Actor {
     return this._getPropertyCollectionProxy('attributes')
   }
 
-  attrValue(key) {
-    return ObjectUtils.try(this.attributes[key], 'value', 'total', { default: 0 })
+  attrValue(key, { prop = 'value' } = {}) {
+    return ObjectUtils.try(this.attributes[key], prop, 'total', { default: 0 })
   }
 
   get metrics() {
@@ -143,9 +143,7 @@ export default class SwTorActor extends Actor {
       defineGetter(result, 'value', () => this._cache.lookup('inventoryWeight', () => (
         roundDecimal(this.inventory.reduce((acc, cur) => acc + (cur.quantity || 1) * (cur.weight || 0), 0), 2)
       )))
-      defineGetter(result, 'max', () => this._cache.lookup('inventoryWeightMax', () => (
-        (this.attrValue('kk') + this.attrValue('ko')) / 2
-      )))
+      defineGetter(result, 'max', () => this._cache.lookup('inventoryWeightMax', () => this._getMaxInventoryWeight()))
       defineGetter(result, 'isOverloaded', () => this._cache.lookup('inventoryOverloaded', () => (
         this.weight.value > this.weight.max
       )))
@@ -561,6 +559,11 @@ export default class SwTorActor extends Actor {
     }
 
     return result
+  }
+
+  _getMaxInventoryWeight() {
+    // To be overridden by subclasses
+    return 0
   }
 
   // ----------------------------------------------------------------------------
