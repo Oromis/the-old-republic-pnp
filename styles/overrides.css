@@ -22,3 +22,8 @@
     display: flex;
   }
 }
+
+.window-header .popout + .popout {
+  /* Two popout links following each other => bug from the popout module. This hides the second one. */
+  display: none;
+}
