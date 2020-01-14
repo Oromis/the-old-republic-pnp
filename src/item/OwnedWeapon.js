@@ -37,6 +37,7 @@ export default {
       }
       result.calcEffectiveness = true
       result.criticalBonus = Config.combat.criticalBonus
+      result.purpose = ['attack']
       return result
     })
 
@@ -55,6 +56,7 @@ export default {
       }
       result.calcEffectiveness = true
       result.criticalBonus = Config.combat.criticalBonus
+      result.purpose = ['defense']
       return result
     })
 

@@ -1,4 +1,5 @@
 import ObjectUtils from './ObjectUtils.js'
+import CombatAction from '../item/CombatAction.js'
 
 function processCheck(check, { isConfirmation = false } = {}) {
   let criticalScore = 0
@@ -132,7 +133,17 @@ export default {
         }
       }
 
-      ChatMessage.create(chatData)
+      const message = await ChatMessage.create(chatData)
+      const purpose = ObjectUtils.asArray(check.purpose) || []
+      const isAttack = purpose.includes('attack')
+      if (isAttack || purpose.includes('defense')) {
+        const combatAction = await CombatAction.get(ObjectUtils.try(game.combats.active, 'id', { default: 'none' }))
+        if (isAttack) {
+          combatAction.addAttackMessage(message)
+        } else {
+          combatAction.addDefenseMessage(message)
+        }
+      }
     }
 
     return result

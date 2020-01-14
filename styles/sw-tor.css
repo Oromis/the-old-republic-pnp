@@ -369,8 +369,16 @@
     color: #006509;
 }
 
+.sw-tor.dark .check-diff.good, .sw-tor.dark .d20.good, .sw-tor.dark .good {
+    color: #00c712;
+}
+
 .sw-tor .check-diff.bad, .sw-tor .d20.bad, .sw-tor .bad {
     color: #d6403e;
+}
+
+.sw-tor.dark .check-diff.bad, .sw-tor.dark .d20.bad, .sw-tor.dark .bad {
+    color: #ff5a58;
 }
 
 .sw-tor span.small {
@@ -439,4 +447,34 @@
 
 .sw-tor.sheet input.advantage-field {
     width: 30px;
+}
+
+/*************************************************************************************
+ * CombatActionSheet
+ *************************************************************************************/
+
+.sw-tor.combat-action {
+    height: auto !important;
+    top: auto !important;
+    bottom: 0;
+}
+
+.sw-tor.combat-action .configure-sheet {
+    display: none;
+}
+
+.sw-tor.combat-action .window-content {
+    background: transparent;
+    color: inherit;
+}
+
+.sw-tor .combat-action-grid {
+    display: grid;
+    grid-template-columns: 1fr 32px 1fr;
+    grid-gap: 12px;
+}
+
+.sw-tor .combat-action-icon {
+    width: 32px;
+    border: none;
 }

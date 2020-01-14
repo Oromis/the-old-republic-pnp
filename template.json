@@ -50,7 +50,7 @@
     }
   },
   "Item": {
-    "types": ["skill", "force-skill", "training", "innate-ability", "special-ability", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other"],
+    "types": ["skill", "force-skill", "training", "innate-ability", "special-ability", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other", "combat-action"],
     "templates": {
       "described": {
         "description": ""
@@ -156,6 +156,14 @@
     },
     "other": {
       "templates": ["described", "physical"]
+    },
+    "combat-action": {
+      "attacks": [],
+      "combat": {
+        "id": null,
+        "round": 0,
+        "turn": -1
+      }
     }
   }
 }

@@ -18,4 +18,9 @@ export default class DataCache {
       return this._data[key] = generator(key)
     }
   }
+
+  insert(key, value) {
+    this._data[key] = value
+    return value
+  }
 }

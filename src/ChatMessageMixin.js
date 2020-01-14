@@ -47,6 +47,15 @@ export default class ChatMessageMixin extends Mixin {
         })
         originalFlavor.replaceWith(flavorLink)
       }
+
+      // Render all apps connected to the ChatMessage (Foundry normally overrides this to not execute this
+      // logic for ChatMessages because it doesn't have any apps for ChatMessges, but now we have one
+      // (CombatActionSheet can register as a ChatMessage app))
+      for (let app of Object.values(originalThis.apps) ) {
+        if (!(app instanceof CheckMessageEditor)) {
+          app.render(false)
+        }
+      }
       return html
     }
   }
