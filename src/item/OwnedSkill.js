@@ -1,5 +1,5 @@
 import { defineDataAccessor, defineGetter, makeRoll } from '../util/EntityUtils.js'
-import { calcSkillXp, calcUpgradeCost, explainPropertyValue } from '../CharacterFormulas.js'
+import { calcUpgradeCost, explainPropertyValue } from '../CharacterFormulas.js'
 import RollUtils from '../util/RollUtils.js'
 
 export default {
@@ -9,7 +9,7 @@ export default {
 
     defineGetter(this, 'check', function () {
       const skillValue = this.value.total
-      return {
+      const result = {
         rolls: [
           makeRoll(this.attribute1),
           makeRoll(this.attribute2),
@@ -17,7 +17,13 @@ export default {
         ],
         AgP: { value: Math.floor(skillValue / 5) },
         confirmCriticals: true,
+        actorId: this.id,
       }
+      if (this.token != null) {
+        result.tokenId = this.token.id
+        result.sceneId = this.token.scene.id
+      }
+      return result
     })
 
     defineGetter(this, 'currentXpCategory', function () {

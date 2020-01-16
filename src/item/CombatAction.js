@@ -1,5 +1,4 @@
 import DataCache from '../util/DataCache.js'
-import {defineGetter} from '../util/EntityUtils.js'
 import ObjectUtils from '../util/ObjectUtils.js'
 
 const cache = new DataCache()

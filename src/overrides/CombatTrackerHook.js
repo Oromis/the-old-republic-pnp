@@ -1,9 +1,11 @@
 import { getActorByTokenId } from '../util/GameUtils.js'
 import SwTorActor from '../actor/SwTorActor.js'
+import CombatAction from '../item/CombatAction.js'
 
 export function installCombatTrackerHook() {
   if (game.user.isGM) {
     Hooks.on('updateCombat', onUpdateCombat)
+    Hooks.on('deleteCombat', onDeleteCombat)
   }
 }
 
@@ -30,4 +32,8 @@ function onUpdateCombat(combat) {
       }
     }
   }
+}
+
+function onDeleteCombat(combat) {
+  return CombatAction.get(combat.id).delete()
 }
