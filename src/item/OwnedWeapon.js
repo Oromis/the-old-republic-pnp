@@ -37,7 +37,7 @@ export default {
       }
       result.calcEffectiveness = true
       result.criticalBonus = Config.combat.criticalBonus
-      result.purpose = ['attack']
+      result.tags = ['attack', this.itemType.isRangedWeapon ? 'ranged' : 'melee']
       return result
     })
 
@@ -56,7 +56,7 @@ export default {
       }
       result.calcEffectiveness = true
       result.criticalBonus = Config.combat.criticalBonus
-      result.purpose = ['defense']
+      result.tags = ['defense']
       return result
     })
 

@@ -207,7 +207,7 @@ export default {
         const check = evasion.check
         check.calcEffectiveness = true
         check.criticalBonus = Config.combat.criticalBonus
-        check.purpose = ['defense']
+        check.tags = ['defense']
         return check
       } else {
         return null

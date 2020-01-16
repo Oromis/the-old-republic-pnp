@@ -83,6 +83,12 @@
               <input type="checkbox" name="data.hasStrengthModifier" {{checked data.hasStrengthModifier}} />
             </td>
           </tr>
+          <tr>
+            <td class="align-right">Anzahl Klingen</td>
+            <td>
+              <input type="text" name="data.burstSize" value="{{data.burstSize}}" data-dtype="Number" />
+            </td>
+          </tr>
         {{/if}}
         {{#if item.itemType.isRangedWeapon}}
           <tr>

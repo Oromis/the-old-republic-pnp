@@ -43,8 +43,8 @@ export function calcGp(actor) {
     ObjectUtils.try(actor.species, 'gp', { default: 0 }) -
     actor.attributes.list.reduce((acc, cur) => acc + (cur.gp || 0), 0) -
     actor.trainings.reduce((acc, cur) => acc + (+cur.gp), 0) -
-    actor.innateAbilities.reduce((acc, cur) => acc + cur.gp || 0, 0) -
-    actor.specialAbilities.reduce((acc, cur) => acc + cur.gp || 0, 0)
+    actor.innateAbilities.reduce((acc, cur) => acc + (+cur.gp) || 0, 0) -
+    actor.specialAbilities.reduce((acc, cur) => acc + (+cur.gp) || 0, 0)
 }
 
 export function calcFreeXp(actor) {

@@ -65,7 +65,8 @@
           "formula": ""
         },
         "damageType": "",
-        "skill": null
+        "skill": null,
+        "burstSize": 1
       },
       "equippable": {
         "condition": 100,
@@ -143,8 +144,7 @@
       "projectileEnergy": {
         "formula": ""
       },
-      "energyCost": 0,
-      "burstSize": 1
+      "energyCost": 0
     },
     "wearable": {
       "templates": ["described", "physical", "equippable"],

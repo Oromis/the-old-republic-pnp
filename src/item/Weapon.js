@@ -4,6 +4,7 @@ import { analyzeDamageFormula, analyzeExpression } from '../util/SheetUtils.js'
 export default {
   beforeConstruct() {
     defineDataAccessor(this, 'damage')
+    defineDataAccessor(this, 'burstSize')
 
     defineGetter(this, 'skill', function () {
       const key = this.data.data.skill

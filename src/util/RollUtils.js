@@ -134,9 +134,9 @@ export default {
       }
 
       const message = await ChatMessage.create(chatData)
-      const purpose = ObjectUtils.asArray(check.purpose) || []
-      const isAttack = purpose.includes('attack')
-      if (isAttack || purpose.includes('defense')) {
+      const tags = ObjectUtils.asArray(check.tags) || []
+      const isAttack = tags.includes('attack')
+      if (isAttack || tags.includes('defense')) {
         const combatAction = await CombatAction.get(ObjectUtils.try(game.combats.active, 'id', { default: 'none' }))
         if (isAttack) {
           combatAction.addAttackMessage(message)
