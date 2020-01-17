@@ -31,5 +31,9 @@ export default Object.freeze({
   },
   combat: {
     criticalBonus: 50,
+    defenseEffectivenessPenalty: {
+      melee: 20,
+      ranged: 10,
+    }
   }
 })

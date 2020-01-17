@@ -80,6 +80,7 @@ function processCheck(check, { isConfirmation = false } = {}) {
     } else {
       check.effectiveness = check.AgP.diff
     }
+    check.effectiveness += (check.effectivenessBonus || 0)
   } else if (check.effectiveness != null) {
     check.effectiveness = null
   }

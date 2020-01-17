@@ -55,6 +55,9 @@ export default class CombatActionSheet extends ItemSheet {
     const result = []
     for (const attack of attacks) {
       result.push(attack.message)
+      for (const defense of attack.defenses) {
+        result.push(defense.message)
+      }
     }
     return result
   }

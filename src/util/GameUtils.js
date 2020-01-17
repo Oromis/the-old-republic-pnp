@@ -1,3 +1,18 @@
+export function getActor({ tokenId, sceneId, actorId }) {
+  let result = null
+  if (tokenId && sceneId) {
+    const scene = game.scenes.get(sceneId)
+    if (scene != null) {
+      result = getActorByTokenId(tokenId, { scene })
+    }
+  }
+
+  if (result == null && actorId != null) {
+    result = game.actors.get(actorId)
+  }
+  return result
+}
+
 export function getActorByTokenId(tokenId, { scene = game.scenes.active } = {}) {
   if (canvas.scene === scene) {
     // Scene is currently active => query the token from the TokenLayer. This works for TokenActors

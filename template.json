@@ -28,6 +28,7 @@
           "type": "",
           "value": null
         },
+        "defenseEffectivenessBonus": 0,
         "species": "",
         "xp": {
           "gained": 0,
