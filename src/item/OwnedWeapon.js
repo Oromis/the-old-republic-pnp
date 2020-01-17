@@ -62,7 +62,7 @@ export default {
 
     this.calcBaseParadeAdvantage = function () {
       const primarySlot = this.primaryEquippedSlot
-      return ((primarySlot && primarySlot.coordination) || 0) +
+      return ((primarySlot && primarySlot.explainCoordination(this.actor).total) || 0) +
         (this.data.data.paradeAdvantage || 0)
     }
 
