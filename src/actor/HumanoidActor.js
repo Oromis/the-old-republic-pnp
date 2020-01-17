@@ -68,18 +68,22 @@ export default {
           const costOptions = metric.costOptions
           let costAmount = costs[key]
           for (let i = 0; i < costOptions.length; ++i) {
-            const costKey = costOptions[i]
+            let costOption = costOptions[i]
+            if (typeof costOption === 'string') {
+              costOption = { key: costOption, factor: 1 }
+            }
+            const costKey = costOption.key
 
             const previouslyDeducted = -(result[costKey] || 0)
             const available = this.metrics[costKey].value - previouslyDeducted
-            let toDeduct = costAmount
+            let toDeduct = costAmount * costOption.factor
 
             if (available < toDeduct && i < costOptions.length - 1) {
               // Costs can be paid via a different metric
               toDeduct = available
             }
 
-            costAmount -= toDeduct
+            costAmount -= Math.round(toDeduct / costOption.factor)
             if (toDeduct > 0) {
               result[costKey] = -(previouslyDeducted + toDeduct)
             }

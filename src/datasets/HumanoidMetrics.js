@@ -83,10 +83,13 @@ const MaP = new HumanoidMetricPrototype('MaP', {
   desc: 'Ein Maß für die Menge an Macht-Kräften, die zur Verfügung stehen',
   xpCategory: Config.character.MaP.xpCategory,
   backgroundColor: '#e3caff',
-  fallbackCostOptions: [AuP.key, LeP.key],  // If the force user is out of MaP, costs will be paid in AuP and then LeP
+  // If the force user is out of MaP, costs will be paid in AuP (at double the cost) and then LeP
+  fallbackCostOptions: [{ key: AuP.key, factor: 2 }, LeP.key],
   regen: {
     day: 'missing',
-    turn: 2,
+    turn(actor) {
+      return Math.round(3 * (actor.modifiers.McL.bonus / 10000))
+    },
   },
   calcBaseValue(actor) {
     return Math.round((actor.modifiers.McL.bonus / 10000) * (
@@ -94,7 +97,7 @@ const MaP = new HumanoidMetricPrototype('MaP', {
       actor.attrValue('in', { prop: 'permanentValue' }) +
       actor.attrValue('kl', { prop: 'permanentValue' }) +
       actor.attrValue('wk', { prop: 'permanentValue' })
-    ) / 2)
+    ) / 1.8)
   }
 })
 const EnP = new HumanoidMetricPrototype('EnP', {
