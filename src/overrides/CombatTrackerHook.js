@@ -9,7 +9,7 @@ export function installCombatTrackerHook() {
   }
 }
 
-function onUpdateCombat(combat) {
+async function onUpdateCombat(combat) {
   const gms = game.users.entities.filter(u => u.isGM && u.active).sort((a, b) => a.id.localeCompare(b.id))
   if (gms.length > 0 && game.user.id === gms[0].id) {
     // We're the GM with the lowest ID => we need to take care of all of the housekeeping stuff. Great.
@@ -20,12 +20,15 @@ function onUpdateCombat(combat) {
       forward = false
     }
 
+    const combatAction = await CombatAction.get(combat.id)
     if (forward) {
+      combatAction != null && await combatAction.onNextTurn()
       const actor = getActorByTokenId(combat.current.tokenId)
       if (actor instanceof SwTorActor) {
         actor.enterTurn({ combat, round: combat.current.round })
       }
     } else {
+      combatAction != null && await combatAction.onPrevTurn()
       const actor = getActorByTokenId(combat.previous.tokenId)
       if (actor instanceof SwTorActor) {
         actor.undoEnterTurn({ combat, round: combat.previous.round })

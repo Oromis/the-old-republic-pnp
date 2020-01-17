@@ -160,6 +160,7 @@
     },
     "combat-action": {
       "attacks": [],
+      "prevAttacks": [],
       "combat": {
         "id": null,
         "round": 0,

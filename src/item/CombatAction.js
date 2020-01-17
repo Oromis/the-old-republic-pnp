@@ -41,11 +41,11 @@ export default {
   // ---------------------------------------------------------------------
 
   beforeConstruct() {
-    this.processAttacks = function processAttacks() {
+    this.processAttacks = function processAttacks(attacks = this.data.data.attacks) {
       const effectivenessBonusMap = new Map()
       return {
         effectivenessBonusMap,
-        attacks: this.data.data.attacks.map(raw => {
+        attacks: (attacks || []).map(raw => {
           const message = game.messages.get(raw.messageId)
           const attackCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
           const attackWeapon = ObjectUtils.try(attackCheck, 'weapon', { default: { burstSize: 1, img: 'icons/svg/sword.svg' } })
@@ -88,6 +88,34 @@ export default {
       }
     }
 
+    this.onNextTurn = async function onNextTurn() {
+      const combatAction = this.processAttacks()
+      for (const [actor, bonus] of combatAction.effectivenessBonusMap) {
+        await actor.update({
+          'data.defenseEffectivenessBonus': (actor.defenseEffectivenessBonus || 0) + bonus,
+        })
+      }
+      if (this.data.data.attacks.length > 0) {
+        await this.update({
+          'data.attacks': [],
+          'data.prevAttacks': this.data.data.attacks,
+        })
+      }
+    }
+
+    this.onPrevTurn = async function onPrevTurn() {
+      const combatAction = this.processAttacks(this.data.data.prevAttacks)
+      for (const [actor, bonus] of combatAction.effectivenessBonusMap) {
+        await actor.update({ 'data.defenseEffectivenessBonus': (actor.defenseEffectivenessBonus || 0) - bonus })
+      }
+      if (this.data.data.prevAttacks.length > 0) {
+        await this.update({
+          'data.attacks': this.data.data.prevAttacks,
+          'data.prevAttacks': [],
+        })
+      }
+    }
+
     this.addAttackMessage = async function addAttackMessage(message) {
       const updateData = {}
       const existingCombatData = this.data.data.combat
@@ -97,13 +125,6 @@ export default {
         existingCombatData.round !== currentCombatData.round ||
         existingCombatData.turn !== currentCombatData.turn) {
         // New combat turn => clear combat action and start over
-        {
-          const prevAttacks = this.processAttacks()
-          for (const [actor, bonus] of prevAttacks.effectivenessBonusMap) {
-            actor.update({ 'data.defenseEffectivenessBonus': (actor.defenseEffectivenessBonus || 0) + bonus })
-          }
-        }
-        existingAttacks = []
         if (currentCombatData != null) {
           updateData['data.combat'] = {
             round: currentCombatData.round,
