@@ -17,11 +17,11 @@ export default {
         ],
         AgP: { value: Math.floor(skillValue / 5) },
         confirmCriticals: true,
-        actorId: this.id,
+        actorId: this.actor.id,
       }
-      if (this.token != null) {
-        result.tokenId = this.token.id
-        result.sceneId = this.token.scene.id
+      if (this.actor.token != null) {
+        result.tokenId = this.actor.token.id
+        result.sceneId = this.actor.token.scene.id
       }
       return result
     })

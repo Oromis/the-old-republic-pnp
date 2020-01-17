@@ -34,6 +34,9 @@ function onUpdateCombat(combat) {
   }
 }
 
-function onDeleteCombat(combat) {
-  return CombatAction.get(combat.id).delete()
+async function onDeleteCombat(combat) {
+  const combatAction = await CombatAction.get(combat.id)
+  if (combatAction != null) {
+    return combatAction.delete()
+  }
 }

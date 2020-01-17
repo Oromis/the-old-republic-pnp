@@ -376,6 +376,7 @@ export default class SwTorActor extends Actor {
     const diff = this.getRegeneration('turn').diff
     const payload = this.modifyMetrics(diff, { dryRun: true })
     payload.data.lastTurnRegeneration = diff
+    this._callDelegate('enterTurn', payload)
     return this.update(payload)
   }
 
@@ -385,6 +386,7 @@ export default class SwTorActor extends Actor {
     if (reg != null && typeof reg === 'object') {
       const payload = this.modifyMetrics(ObjectUtils.mapValues(reg, a => -a), { dryRun: true })
       payload.data['-=lastTurnRegeneration'] = null
+      this._callDelegate('undoEnterTurn', payload)
       return this.update(payload)
     }
   }

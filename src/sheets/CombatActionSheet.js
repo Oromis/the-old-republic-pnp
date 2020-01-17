@@ -24,7 +24,7 @@ export default class CombatActionSheet extends ItemSheet {
 
   getData() {
     const data = super.getData()
-    data.attacks = this.item.calcAttacks()
+    data.attacks = this.item.processAttacks().attacks
     this._updateAppAssociations(this._extractObjects(data.attacks))
     data.combatAction = data.item = this.item
     return data

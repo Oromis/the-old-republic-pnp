@@ -53,6 +53,8 @@ export default {
       return this.xp.gp * Config.character.gpToXpRate
     })
 
+    defineDataAccessor(this, 'defenseEffectivenessBonus')
+
     /**
      * Given a cost object of the form { <metric-key>: <cost|number> }, calculates an object containing the actual
      * values being deducted from the actor's metrics if they need to be paid at the current point in time.
@@ -232,5 +234,11 @@ export default {
 
   afterPrepareData(actorData) {
     actorData.data.initiativeFormula = `${this.baseInitiativeExplanation.total} + 1d12`
-  }
+  },
+
+  enterTurn(payload) {
+    if (this.defenseEffectivenessBonus !== 0) {
+      payload['data.defenseEffectivenessBonus'] = 0
+    }
+  },
 }

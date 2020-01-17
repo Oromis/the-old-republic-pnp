@@ -1,6 +1,6 @@
 import DataCache from '../util/DataCache.js'
 import ObjectUtils from '../util/ObjectUtils.js'
-import { getActor, getActorByTokenId } from '../util/GameUtils.js'
+import { getActor } from '../util/GameUtils.js'
 import Config from '../Config.js'
 
 const cache = new DataCache()
@@ -41,48 +41,51 @@ export default {
   // ---------------------------------------------------------------------
 
   beforeConstruct() {
-    this.calcAttacks = function calcAttacks() {
+    this.processAttacks = function processAttacks() {
       const effectivenessBonusMap = new Map()
-      return this.data.data.attacks.map(raw => {
-        const message = game.messages.get(raw.messageId)
-        const attackCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
-        const attackWeapon = ObjectUtils.try(attackCheck, 'weapon', { default: { burstSize: 1, img: 'icons/svg/sword.svg' } })
-        const effectivenessPenalty = Config.combat.defenseEffectivenessPenalty[attackCheck.tags.includes('melee') ? 'melee' : 'ranged']
-        return {
-          ...raw,
-          message,
-          weapon: attackWeapon,
-          check: attackCheck,
-          defenses: raw.defenses.map(defense => {
-            const message = game.messages.get(defense.messageId)
-            const defenseCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
-            const defender = getActor({
-              tokenId: defenseCheck.tokenId,
-              sceneId: defenseCheck.sceneId,
-              actorId: defenseCheck.actorId
-            })
-            const instances = Array(attackWeapon.burstSize).fill().map((_, i) => {
-              const prevBonus = effectivenessBonusMap.get(defender) || 0
-              const totalEffectiveness = defenseCheck.effectiveness + prevBonus
-              const res = {
-                prevEffectiveness: defenseCheck.effectiveness,
-                bonus: prevBonus,
-                totalEffectiveness,
-                hits: attackCheck.effectiveness > totalEffectiveness
+      return {
+        effectivenessBonusMap,
+        attacks: this.data.data.attacks.map(raw => {
+          const message = game.messages.get(raw.messageId)
+          const attackCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
+          const attackWeapon = ObjectUtils.try(attackCheck, 'weapon', { default: { burstSize: 1, img: 'icons/svg/sword.svg' } })
+          const effectivenessPenalty = Config.combat.defenseEffectivenessPenalty[attackCheck.tags.includes('melee') ? 'melee' : 'ranged']
+          return {
+            ...raw,
+            message,
+            weapon: attackWeapon,
+            check: attackCheck,
+            defenses: raw.defenses.map(defense => {
+              const message = game.messages.get(defense.messageId)
+              const defenseCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
+              const defender = getActor({
+                tokenId: defenseCheck.tokenId,
+                sceneId: defenseCheck.sceneId,
+                actorId: defenseCheck.actorId
+              })
+              const instances = Array(attackWeapon.burstSize).fill().map(() => {
+                const prevBonus = effectivenessBonusMap.get(defender) || 0
+                const totalEffectiveness = defenseCheck.effectiveness + prevBonus
+                const res = {
+                  prevEffectiveness: defenseCheck.effectiveness,
+                  bonus: prevBonus,
+                  totalEffectiveness,
+                  hits: attackCheck.effectiveness > totalEffectiveness
+                }
+                effectivenessBonusMap.set(defender, prevBonus - effectivenessPenalty)
+                return res
+              })
+              return {
+                ...defense,
+                message,
+                instances,
+                check: defenseCheck,
+                totalHits: instances.reduce((acc, cur) => acc + (cur.hits ? 1 : 0), 0)
               }
-              effectivenessBonusMap.set(defender, prevBonus - effectivenessPenalty)
-              return res
             })
-            return {
-              ...defense,
-              message,
-              instances,
-              check: defenseCheck,
-              totalHits: instances.reduce((acc, cur) => acc + (cur.hits ? 1 : 0), 0)
-            }
-          })
-        }
-      })
+          }
+        })
+      }
     }
 
     this.addAttackMessage = async function addAttackMessage(message) {
@@ -95,9 +98,9 @@ export default {
         existingCombatData.turn !== currentCombatData.turn) {
         // New combat turn => clear combat action and start over
         {
-          const prevAttacks = this.calcAttacks()
+          const prevAttacks = this.processAttacks()
           for (const [actor, bonus] of prevAttacks.effectivenessBonusMap) {
-            actor.update({ 'data.defenseEffectivenessBonus': bonus })
+            actor.update({ 'data.defenseEffectivenessBonus': (actor.defenseEffectivenessBonus || 0) + bonus })
           }
         }
         existingAttacks = []
