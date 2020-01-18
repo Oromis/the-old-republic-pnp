@@ -17,8 +17,6 @@ export default class SwTorActor extends Actor {
       this._swTorInitialized = true
     }
     this._callDelegate('afterConstruct')
-    this._pendingCalls = []
-    this._cacheClearPending = false
   }
 
   prepareData(actorData) {
@@ -49,6 +47,11 @@ export default class SwTorActor extends Actor {
   _onUpdate(...args) {
     this._cache.clear()
     return super._onUpdate(...args)
+  }
+
+  _onModifyEmbeddedEntity(...args) {
+    this._cache.clear()
+    return super._onModifyEmbeddedEntity(...args)
   }
 
   prepareEmbeddedEntities(...args) {
@@ -158,26 +161,20 @@ export default class SwTorActor extends Actor {
     if (targetSlot == null) {
       throw new Error(`Ungültiger Slot: ${slotKey}`)
     }
+    const itemUpdates = []
 
     if (item != null && !item.isEquippedInSlot(slotKey)) {
       // Equip Item in slot
       const prevItemSlots = item.slots || []
       const itemSlotTypes = [...item.slotTypes]
 
-      const awaitOperation = () => {
-        // Work around a Foundry 0.4.3 bug: If this is a token actor, we need to wait for the response from
-        // the server before proceeding or we'll override any changes done here in the next item update
-        // (even if it is a completely different item)
-        this._pendingCalls.push(() => this.equipItem(slotKey, this.getOwnedItem(item.id)))
-      }
-
       // Remove any previous item in the slot
       const removedItems = []
       const oldItem = this.getItemInSlot(slotKey)
       if (oldItem != null) {
         removedItems.push(oldItem.id)
-        await oldItem.unequip()
-        return awaitOperation()
+        // Unequip item
+        itemUpdates.push({ _id: oldItem._id, 'data.slots': [] })
       }
 
       // Find an item that will be in a slot after the current equipItem() execution has finished
@@ -230,8 +227,7 @@ export default class SwTorActor extends Actor {
             if (prevItem != null) {
               // Remove the previous item
               removedItems.push(prevItem.id)
-              await prevItem.unequip()
-              return awaitOperation()
+              itemUpdates.push({ _id: prevItem._id, 'data.slots': [] })
             }
             // Make sure that no slot is assigned to twice
             slotList.splice(slotList.indexOf(slot), 1)
@@ -245,16 +241,16 @@ export default class SwTorActor extends Actor {
         }
       }
 
-      this._cacheClearPending = true
-      return item.equip(newItemSlots)
+      itemUpdates.push({ _id: item._id, 'data.slots': newItemSlots })
     } else if (item == null) {
       // Set the slot to empty
       const oldItem = this.getItemInSlot(slotKey)
       if (oldItem != null) {
-        this._cacheClearPending = true
-        await oldItem.unequip()
+        itemUpdates.push({ _id: oldItem._id, 'data.slots': [] })
       }
     }
+
+    return this.updateManyEmbeddedEntities('OwnedItem', itemUpdates)
   }
 
   getItemInSlot(slotKey) {
@@ -574,11 +570,11 @@ export default class SwTorActor extends Actor {
   // Install some item hooks to make sure that item invariants are kept
   // ----------------------------------------------------------------------------
 
-  createOwnedItem(data, ...rest) {
-    return this._checkValidItem(data, () => super.createOwnedItem(data, ...rest))
+  createEmbeddedEntity(embeddedName, data, ...rest) {
+    return this._checkValidItem(data, () => super.createEmbeddedEntity(embeddedName, data, ...rest))
   }
 
-  updateOwnedItem(data, ...rest) {
+  updateEmbeddedEntity(embeddedName, data, ...rest) {
     let item = this.getOwnedItem(data.id)
     if (item != null) {
       data = item._filterUpdateData(data)
@@ -586,11 +582,7 @@ export default class SwTorActor extends Actor {
       console.warn(`Updating item that does not exist: `, data)
     }
 
-    return this._checkValidItem(data, () => super.updateOwnedItem(data, ...rest))
-      .then(res => {
-        this._runPendingCalls()
-        return res
-      })
+    return this._checkValidItem(data, () => super.updateEmbeddedEntity(embeddedName, data, ...rest))
   }
 
   _checkValidItem(data, cb) {
@@ -619,13 +611,5 @@ export default class SwTorActor extends Actor {
     }
 
     return cb()
-  }
-
-  _runPendingCalls() {
-    const calls = [...this._pendingCalls]
-    this._pendingCalls = []
-    for (const call of calls) {
-      call()
-    }
   }
 }

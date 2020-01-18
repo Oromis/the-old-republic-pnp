@@ -320,7 +320,7 @@ export default class SwTorActorSheet extends ActorSheet {
     const slotKey = event.currentTarget.getAttribute('data-slot')
     const rawItemId = event.currentTarget.getAttribute('data-item')
     try {
-      return await this.actor.equipItem(slotKey, isNaN(rawItemId) ? null : this.actor.getOwnedItem(+rawItemId))
+      return await this.actor.equipItem(slotKey, this.actor.getOwnedItem(rawItemId) || null)
     } catch (e) {
       ui.notifications.error(e.message)
       return Promise.reject(e)
