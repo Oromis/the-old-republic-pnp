@@ -1,6 +1,5 @@
 import ObjectUtils from '../util/ObjectUtils.js'
 import RadialMenu from '../vendor/radial-menu-js/RadialMenu.js'
-import RollUtils from '../util/RollUtils.js'
 
 function getBaseMenuStructure() {
   return [

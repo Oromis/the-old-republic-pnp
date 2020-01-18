@@ -18,8 +18,8 @@
 
 .flex-reverse-row { flex-direction: row-reverse; }
 .flex-grow { flex-grow: 1; }
-.flex-no-grow { flex-grow: 0; }
-.flex-no-shrink { flex-shrink: 0; }
+.flex-no-grow { flex-grow: 0 !important; }
+.flex-no-shrink { flex-shrink: 0 !important; }
 .flex-wrap { flex-wrap: wrap; }
 .flex-cross-start { align-items: flex-start; }
 .flex-cross-stretch { align-items: stretch; }
@@ -30,7 +30,7 @@
 .flex-space-between { justify-content: space-between; }
 
 .full-width { width: 100% !important; }
-.auto-width { width: auto; }
+.auto-width { width: auto !important; }
 
 .align-left { text-align: left !important; }
 .align-right { text-align: right !important; }

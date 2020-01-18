@@ -35,6 +35,10 @@
     text-shadow: 0 0 8px red;
 }
 
+.sw-tor .sheet-header h1 input {
+    margin: 0;
+}
+
 /*************************************************************************************
  * Charsheet
  *************************************************************************************/
@@ -47,12 +51,16 @@
 
 .sw-tor.sheet .window-content {
     padding: 5px;
+    background: #ecebe7;
 }
 
 /* Sheet Header */
 .sw-tor.sheet .profile-img {
     width: 100px;
+    height: 100px;
+    margin-right: 4px;
     align-self: flex-start;
+    flex-basis: unset;
 }
 
 .sw-tor.sheet .header-fields {
@@ -61,10 +69,12 @@
 
 .sw-tor.sheet .char-name {
     border-bottom: 0;
+    margin: 4px;
 }
 
 .sw-tor.sheet .char-name input {
     height: 34px;
+    width: 100%;
 }
 
 .sw-tor.sheet .species-info {

@@ -2,7 +2,7 @@
 
   {{!-- Sheet Header --}}
   <header class="sheet-header flex-row multi-item flex-cross-start">
-    <div class="multi-item">
+    <div class="multi-item flex-no-grow">
       <img class="profile-img" src="{{actor.img}}" data-editable title="{{actor.name}}" height="100" width="100" />
       {{#if actor.encumberance}}
         <div title="Behinderung: {{formatExplanation actor.encumberanceExplanation.components}}">

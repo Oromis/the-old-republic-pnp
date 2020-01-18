@@ -12,20 +12,23 @@ export default class SwTorActor extends Actor {
   constructor(...args) {
     super(...args)
 
+    if (!this._swTorInitialized) {
+      this._callDelegate('beforeConstruct')
+      this._swTorInitialized = true
+    }
     this._callDelegate('afterConstruct')
     this._pendingCalls = []
     this._cacheClearPending = false
   }
 
   prepareData(actorData) {
+    if (!this._swTorInitialized) {
+      this._callDelegate('beforeConstruct')
+      this._swTorInitialized = true
+    }
+
     actorData = super.prepareData(actorData) || this.data
     const data = actorData.data
-    if (!Array.isArray(this.items)) {
-      if (typeof this._getItems === 'function') {
-        this.items = this._getItems()
-      }
-      this._callDelegate('beforeConstruct')
-    }
 
     this._callDelegate('beforePrepareData', actorData)
 
@@ -35,6 +38,7 @@ export default class SwTorActor extends Actor {
     this._updateCollection(data, 'resistances')
 
     this._callDelegate('afterPrepareData', actorData)
+
     return actorData
   }
 
@@ -47,9 +51,9 @@ export default class SwTorActor extends Actor {
     return super._onUpdate(...args)
   }
 
-  _getItems(...args) {
-    // _getItems() re-generates the array of owned items. Reset the cache in this case.
-    const res = super._getItems(...args)
+  prepareEmbeddedEntities(...args) {
+    // prepareEmbeddedEntities() re-generates the array of owned items. Reset the cache in this case.
+    const res = super.prepareEmbeddedEntities(...args)
     this._cache && this._cache.clear()
     return res
   }
@@ -57,13 +61,11 @@ export default class SwTorActor extends Actor {
   render(force, context, ...rest) {
     if (context != null) {
       if (['createOwnedItem', 'updateOwnedItem', 'updateManyOwnedItem', 'deleteOwnedItem'].indexOf(context.renderContext) !== -1) {
-        this.items = this._getItems()
-        this._cache.clear()
+        this.prepareEmbeddedEntities()
         this.prepareData({})
       }
     } else if (this.isToken) {
-      this.items = this._getItems()
-      this._cache.clear()
+      this.prepareEmbeddedEntities()
       this.prepareData({})
     }
     return super.render(force, context, ...rest)

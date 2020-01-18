@@ -38,7 +38,7 @@ export default class ChatMessageMixin extends Mixin {
         })
       }
 
-      if (originalThis.owner) {
+      if (originalThis.data.permission && originalThis.owner) {
         // Turn the "flavor" text into a link that opens the roll editor
         const originalFlavor = html.find('.flavor-text')
         const flavorLink = $(`<a class="flavor-text">${originalFlavor.text()}</a>`)

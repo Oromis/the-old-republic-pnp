@@ -1,3 +1,7 @@
+.sw-tor input, .sw-tor textarea, .sw-tor select {
+  background: white;
+}
+
 .sw-tor input:not([type=checkbox]):not(.text), .input-width {
   width: 56px;
 }
@@ -18,6 +22,11 @@
 
 .sw-tor.sheet input.formula {
   width: 100px;
+}
+
+.sw-tor button {
+  border: 1px solid #AAA;
+  background: white;
 }
 
 .sw-tor.sheet button.small {
