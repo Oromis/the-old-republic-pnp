@@ -38,6 +38,8 @@ export default {
         name: 'Kampfaktion',
         permission: { default: CONST.ENTITY_PERMISSIONS.OWNER },
         data: { combat: { id: combatId } }
+      }, {
+        displaySheet: false,  // We have a different, setting-based mechanic to automatically show the combat tracker.
       })
       cache.insert(combatId, combatAction.id)
       resultId = combatAction.id
