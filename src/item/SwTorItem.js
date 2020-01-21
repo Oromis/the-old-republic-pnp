@@ -38,8 +38,14 @@ export default class SwTorItem extends Item {
     super.update(this._filterUpdateData(data), ...rest)
   }
 
+  _onCreate(...args) {
+    this._callDelegate('onCreate', ...args)
+    return super._onCreate(...args)
+  }
+
   _onUpdate(...args) {
     this._cache.clear()
+    this._callDelegate('onUpdate', ...args)
     return super._onUpdate(...args)
   }
 

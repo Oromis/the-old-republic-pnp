@@ -27,3 +27,7 @@
   /* Two popout links following each other => bug from the popout module. This hides the second one. */
   display: none;
 }
+
+.sheet .sheet-header img {
+  flex-basis: auto;
+}

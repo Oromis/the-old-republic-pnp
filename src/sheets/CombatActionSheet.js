@@ -24,7 +24,9 @@ export default class CombatActionSheet extends ItemSheet {
 
   getData() {
     const data = super.getData()
-    const rawAttacks = this.item.data.data.attacks.length > 0 ? this.item.data.data.attacks : this.item.data.data.prevAttacks
+    const rawAttacks = (this.item.data.data.attacks != null && this.item.data.data.attacks.length > 0 ?
+      this.item.data.data.attacks :
+      this.item.data.data.prevAttacks) || []
     data.attacks = this.item.processAttacks(rawAttacks).attacks
     this._updateAppAssociations(this._extractObjects(data.attacks))
     data.combatAction = data.item = this.item
@@ -60,7 +62,7 @@ export default class CombatActionSheet extends ItemSheet {
         result.push(defense.message)
       }
     }
-    return result
+    return result.filter(i => i != null)
   }
 
   _updateAppAssociations(entities) {

@@ -326,6 +326,7 @@
 
 .sw-tor img.table-icon {
     width: 24px;
+    height: 24px;
     filter: invert(0.8);
     border: 0;
     display: block;
@@ -333,6 +334,7 @@
 
 .sw-tor img.table-icon.small {
     width: 16px;
+    height: 16px;
 }
 
 .sw-tor i.table-icon {

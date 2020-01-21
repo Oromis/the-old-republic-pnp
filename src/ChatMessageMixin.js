@@ -18,7 +18,8 @@ export default class ChatMessageMixin extends Mixin {
       let html = await callSuper(...args)
       if (originalThis.isAuthor && ObjectUtils.try(originalThis.data.flags, 'sw-tor', 'check', 'needsConfirmation')) {
         // Critical result needs to be confirmed
-        html.find('.sw-tor-confirm-button').on('click', async () => {
+        const btn = $('<button type="button" class="sw-tor-confirm-button"><i class="fas fa-dice-d20"></i> Bestätigen</button>')
+        btn.on('click', async () => {
           const check = ObjectUtils.cloneDeep(originalThis.data.flags['sw-tor'].check)
           const confirmation = await RollUtils.rollCheck(check, {
             isConfirmation: true,
@@ -36,6 +37,7 @@ export default class ChatMessageMixin extends Mixin {
             }),
           })
         })
+        html.find('.message-content').append(btn)
       }
 
       if (originalThis.data.permission && originalThis.owner) {

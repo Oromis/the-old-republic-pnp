@@ -18,4 +18,13 @@ export const registerSystemSettings = function() {
     default: true,
     type: Boolean,
   })
+
+  game.settings.register("sw-tor", "autoShowCombatActionTracker", {
+    name: "Combat Action Tracker automatisch anzeigen",
+    hint: "Zeigt den Combat Action Tracker an, sobald jemand angreift oder verteidigt.",
+    scope: "client",
+    config: true,
+    default: true,
+    type: Boolean,
+  })
 }

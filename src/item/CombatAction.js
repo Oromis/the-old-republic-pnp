@@ -5,6 +5,15 @@ import Config from '../Config.js'
 
 const cache = new DataCache()
 
+function onChange(combatAction, context) {
+  if (game.settings.get('sw-tor', 'autoShowCombatActionTracker')) {
+    const sheet = combatAction.sheet
+    if (sheet) {
+      sheet.render(true, context)
+    }
+  }
+}
+
 export default {
 
   // ---------------------------------------------------------------------
@@ -49,7 +58,8 @@ export default {
           const message = game.messages.get(raw.messageId)
           const attackCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
           const attackWeapon = ObjectUtils.try(attackCheck, 'weapon', { default: { burstSize: 1, img: 'icons/svg/sword.svg' } })
-          const effectivenessPenalty = Config.combat.defenseEffectivenessPenalty[attackCheck.tags.includes('melee') ? 'melee' : 'ranged']
+          const isMelee = attackCheck == null || attackCheck.tags.includes('melee')
+          const effectivenessPenalty = Config.combat.defenseEffectivenessPenalty[isMelee ? 'melee' : 'ranged']
           return {
             ...raw,
             message,
@@ -58,23 +68,26 @@ export default {
             defenses: raw.defenses.map(defense => {
               const message = game.messages.get(defense.messageId)
               const defenseCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
-              const defender = getActor({
-                tokenId: defenseCheck.tokenId,
-                sceneId: defenseCheck.sceneId,
-                actorId: defenseCheck.actorId
-              })
-              const instances = Array(attackWeapon.burstSize).fill().map(() => {
-                const prevBonus = effectivenessBonusMap.get(defender) || 0
-                const totalEffectiveness = defenseCheck.effectiveness + prevBonus
-                const res = {
-                  prevEffectiveness: defenseCheck.effectiveness,
-                  bonus: prevBonus,
-                  totalEffectiveness,
-                  hits: attackCheck.effectiveness > totalEffectiveness
-                }
-                effectivenessBonusMap.set(defender, prevBonus - effectivenessPenalty)
-                return res
-              })
+              let defender = null, instances = []
+              if (defenseCheck != null) {
+                defender = getActor({
+                  tokenId: defenseCheck.tokenId,
+                  sceneId: defenseCheck.sceneId,
+                  actorId: defenseCheck.actorId
+                })
+                instances = Array(attackWeapon.burstSize).fill().map(() => {
+                  const prevBonus = effectivenessBonusMap.get(defender) || 0
+                  const totalEffectiveness = defenseCheck.effectiveness + prevBonus
+                  const res = {
+                    prevEffectiveness: defenseCheck.effectiveness,
+                    bonus: prevBonus,
+                    totalEffectiveness,
+                    hits: attackCheck.effectiveness > totalEffectiveness
+                  }
+                  effectivenessBonusMap.set(defender, prevBonus - effectivenessPenalty)
+                  return res
+                })
+              }
               return {
                 ...defense,
                 message,
@@ -95,7 +108,7 @@ export default {
           'data.defenseEffectivenessBonus': (actor.defenseEffectivenessBonus || 0) + bonus,
         })
       }
-      if (this.data.data.attacks.length > 0) {
+      if (this.data.data.attacks && this.data.data.attacks.length > 0) {
         await this.update({
           'data.attacks': [],
           'data.prevAttacks': this.data.data.attacks,
@@ -108,7 +121,7 @@ export default {
       for (const [actor, bonus] of combatAction.effectivenessBonusMap) {
         await actor.update({ 'data.defenseEffectivenessBonus': (actor.defenseEffectivenessBonus || 0) - bonus })
       }
-      if (this.data.data.prevAttacks.length > 0) {
+      if (this.data.data.prevAttacks && this.data.data.prevAttacks.length > 0) {
         await this.update({
           'data.attacks': this.data.data.prevAttacks,
           'data.prevAttacks': [],
@@ -120,7 +133,7 @@ export default {
       const updateData = {}
       const existingCombatData = this.data.data.combat
       const currentCombatData = game.combats.active
-      let existingAttacks = this.data.data.attacks
+      let existingAttacks = this.data.data.attacks || []
       if (existingCombatData == null || currentCombatData == null ||
         existingCombatData.round !== currentCombatData.round ||
         existingCombatData.turn !== currentCombatData.turn) {
@@ -173,5 +186,13 @@ export default {
         })
       })
     }
-  }
+  },
+
+  onCreate(data, options, userId, context) {
+    onChange(this, context)
+  },
+
+  onUpdate(data, options, userId, context) {
+    onChange(this, context)
+  },
 }

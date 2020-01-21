@@ -46,6 +46,7 @@ export default class SwTorActor extends Actor {
 
   _onUpdate(...args) {
     this._cache.clear()
+    this._callDelegate('onUpdate', ...args)
     return super._onUpdate(...args)
   }
 
@@ -575,7 +576,7 @@ export default class SwTorActor extends Actor {
   }
 
   updateEmbeddedEntity(embeddedName, data, ...rest) {
-    let item = this.getOwnedItem(data.id)
+    let item = this.getOwnedItem(data._id)
     if (item != null) {
       data = item._filterUpdateData(data)
     } else {

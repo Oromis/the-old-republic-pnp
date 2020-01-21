@@ -1,7 +1,7 @@
 <div class="combat-action-grid">
   {{#each attacks as |attack attackIndex|}}
     <div class="attack multi-item">
-      <div class="flex-row">
+      <div class="flex-row flex-cross-start">
         {{#if attack.check}}
           <div>{{attack.message.data.flavor}}</div>
         {{else}}
@@ -33,7 +33,7 @@
     <div class="defenses multi-item">
       {{#each attack.defenses as |defense defenseIndex|}}
         <div class="defense multi-item">
-          <div class="flex-row">
+          <div class="flex-row flex-cross-start">
             {{#if defense.check}}
               <div>{{defense.message.data.flavor}}</div>
             {{else}}

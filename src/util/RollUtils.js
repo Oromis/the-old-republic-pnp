@@ -138,11 +138,13 @@ export default {
       const tags = ObjectUtils.asArray(check.tags) || []
       const isAttack = tags.includes('attack')
       if (isAttack || tags.includes('defense')) {
-        const combatAction = await CombatAction.get(ObjectUtils.try(game.combats.active, 'id', { default: 'none' }))
-        if (isAttack) {
-          combatAction.addAttackMessage(message)
-        } else {
-          combatAction.addDefenseMessage(message)
+        if (game.combats.active != null) {
+          const combatAction = await CombatAction.get(game.combats.active.id)
+          if (isAttack) {
+            await combatAction.addAttackMessage(message)
+          } else {
+            await combatAction.addDefenseMessage(message)
+          }
         }
       }
     }
