@@ -586,6 +586,18 @@ export default class SwTorActor extends Actor {
     return this._checkValidItem(data, () => super.updateEmbeddedEntity(embeddedName, data, ...rest))
   }
 
+  async updateManyEmbeddedEntities(embeddedName, changes, ...rest) {
+    if (this.isToken) {
+      // There seems to be a FoundryVTT bug in 0.4.5 that prevents updateManyEmbeddedEntities from working for
+      // token actors ...
+      for (const change of changes) {
+        await this.updateEmbeddedEntity(embeddedName, change, ...rest)
+      }
+    } else {
+      return super.updateManyEmbeddedEntities(embeddedName, changes, ...rest)
+    }
+  }
+
   _checkValidItem(data, cb) {
     // Check if actor type matches
     if (data.data) {
