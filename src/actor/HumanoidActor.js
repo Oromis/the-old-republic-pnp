@@ -237,7 +237,7 @@ export default {
         const combatAction = CombatAction.getSync(game.combats.active.id)
         const isMeleeAttack = combatAction.isMeleeAttack(combatAction.getNextUnhandledAttack())
         if (!isMeleeAttack) {
-          check.effectivenessBonus -= Config.combat.defenseEffectivenessPenalty.rangedFlat
+          check.effectivenessBonus = (check.effectivenessBonus || 0) - Config.combat.defenseEffectivenessPenalty.rangedFlat
         }
       }
       return check
