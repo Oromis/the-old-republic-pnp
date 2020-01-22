@@ -3,7 +3,7 @@
     <div class="attack multi-item">
       <div class="flex-row flex-cross-start">
         {{#if attack.check}}
-          <div>{{attack.message.data.flavor}}</div>
+          <div>{{attack.message.alias}}: {{attack.message.data.flavor}}</div>
         {{else}}
           <strong>Attacke-Probe fehlt!</strong>
         {{/if}}
@@ -35,7 +35,7 @@
         <div class="defense multi-item">
           <div class="flex-row flex-cross-start">
             {{#if defense.check}}
-              <div>{{defense.message.data.flavor}}</div>
+              <div>{{defense.message.alias}}: {{defense.message.data.flavor}}</div>
             {{else}}
               <strong>Attacke-Probe fehlt!</strong>
             {{/if}}
