@@ -259,6 +259,7 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('.item-create').click(this._onCreateItem)
     html.find('.add-missing-skills').click(this._onAddMissingSkills)
     html.find('.clear-cache').click(this._clearActorCache)
+    html.find('.sync-items').click(this._syncItems)
 
     // Update Item (or skill)
     html.find('.item-edit').click(ev => {
@@ -434,6 +435,10 @@ export default class SwTorActorSheet extends ActorSheet {
   _clearActorCache = () => {
     this.actor.clearCache()
     this.actor.render(false)
+  }
+
+  _syncItems = () => {
+    this.actor.syncItems()
   }
 
   _processDeltaProperty = (formData, { name }) => {

@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 import DataSets from '../datasets/DataSets.js'
 import DataCache from '../util/DataCache.js'
 import ObjectUtils from '../util/ObjectUtils.js'
@@ -419,6 +421,24 @@ export default class SwTorActor extends Actor {
 
   clearCache() {
     this._cache.clear()
+  }
+
+  syncItems({ types = null } = {}) {
+    const updateData = []
+    for (const item of this.items) {
+      if (types == null || types.includes(item.type)) {
+        const globalItem = game.items.entities.find(i => item.type === i.type && (item.key != null ? item.key === i.key : item.name === i.name))
+        if (globalItem && Object.keys(diffObject(item.data.data, globalItem.data.data)).length > 0) {
+          updateData.push({ _id: item._id, data: _.merge({}, item.data.data, globalItem.data.data) })
+          // console.log(`Would update item ${item.type} / ${item.name}`, item.data.data, globalItem.data.data,
+          //   diffObject(item.data.data, updateData[updateData.length - 1].data))
+        }
+      }
+    }
+
+    if (updateData.length > 0) {
+      return this.updateManyEmbeddedEntities('OwnedItem', updateData)
+    }
   }
 
   // ---------------------------------------------------------------------
