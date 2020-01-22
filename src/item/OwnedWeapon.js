@@ -63,7 +63,7 @@ export default {
       result.criticalBonus = Config.combat.criticalBonus
       result.effectivenessBonus = this.actor.defenseEffectivenessBonus || 0
       result.tags = ['defense']
-      return result
+      return this.actor.processDefenseEffectiveness(result)
     })
 
     this.calcBaseParadeAdvantage = function () {

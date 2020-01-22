@@ -30,7 +30,9 @@
   </div>
   {{#if (isNumeric check.effectiveness)}}
     <div class="sw-tor-effectiveness sw-tor">
-      Effektivität: {{formatCheckDiff check.effectiveness}}
+      Effektivität
+      (<input type="text" name="effectivenessBonus" value="{{formatMod check.effectivenessBonus}}" class="advantage-field" data-dtype="Number" />):
+      {{formatCheckDiff check.effectiveness}}
     </div>
   {{/if}}
   {{#if check.confirmCriticals}}
@@ -65,11 +67,6 @@
           </div>
         {{/if}}
       </div>
-      {{#if (isNumeric check.confirmation.effectiveness)}}
-        <div class="sw-tor-effectiveness sw-tor">
-          Effektivität: {{formatCheckDiff check.confirmation.effectiveness}}
-        </div>
-      {{/if}}
     {{/if}}
   {{/if}}
 

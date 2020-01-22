@@ -4,10 +4,22 @@ import RollUtils from './util/RollUtils.js'
 import CheckMessageEditor from './apps/CheckMessageEditor.js'
 
 export default class ChatMessageMixin extends Mixin {
-  constructor(...args) {
-    super(...args)
+  constructor(Subject, ...rest) {
+    super(Subject, ...rest)
 
     this.interceptMethod('render', this.render, { wrapSuper: true })
+
+    const oldPrepareData = Subject.prepareData
+    Subject.prepareData = function (...args) {
+      const data = (typeof oldPrepareData === 'function' ?
+        oldPrepareData.call(this, ...args) :
+        Subject.prototype.prepareData.call(this, ...args)
+      ) || this.data || {}
+      if (data.permission == null) {
+        data.permission = { default: CONST.ENTITY_PERMISSIONS.OBSERVER, [this.data.user]: CONST.ENTITY_PERMISSIONS.OWNER }
+      }
+      return data
+    }
   }
 
   async render({ args, originalThis, callSuper }) {
@@ -40,7 +52,7 @@ export default class ChatMessageMixin extends Mixin {
         html.find('.message-content').append(btn)
       }
 
-      if (originalThis.data.permission && originalThis.owner) {
+      if (originalThis.user != null && originalThis.user.id === game.user.id) {
         // Turn the "flavor" text into a link that opens the roll editor
         const originalFlavor = html.find('.flavor-text')
         const flavorLink = $(`<a class="flavor-text">${originalFlavor.text()}</a>`)

@@ -11,6 +11,7 @@ import SwTorItem from '../item/SwTorItem.js'
 import { roundDecimal } from '../util/MathUtils.js'
 import { STAGE_PERMANENT } from '../util/Modifier.js'
 import RollUtils from '../util/RollUtils.js'
+import CombatAction from '../item/CombatAction.js'
 
 /**
  * Functionality for humanoid characters. "humanoid" refers to intelligent life forms, it has
@@ -214,7 +215,7 @@ export default {
         check.calcEffectiveness = true
         check.criticalBonus = Config.combat.criticalBonus
         check.tags = ['defense']
-        return check
+        return this.processDefenseEffectiveness(check)
       } else {
         return null
       }
@@ -229,6 +230,17 @@ export default {
 
     this._getMaxInventoryWeight = function () {
       return (this.attrValue('kk', { prop: 'permanentValue' }) + this.attrValue('ko', { prop: 'permanentValue' })) / 2
+    }
+
+    this.processDefenseEffectiveness = function processDefenseEffetiveness(check) {
+      if (game.combats.active != null) {
+        const combatAction = CombatAction.getSync(game.combats.active.id)
+        const isMeleeAttack = combatAction.isMeleeAttack(combatAction.getNextUnhandledAttack())
+        if (!isMeleeAttack) {
+          check.effectivenessBonus -= Config.combat.defenseEffectivenessPenalty.rangedFlat
+        }
+      }
+      return check
     }
   },
 

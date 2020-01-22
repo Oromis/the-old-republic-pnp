@@ -83,6 +83,10 @@ export default class CheckMessageEditor extends BaseEntitySheet {
     }
   }
 
+  _onUpdateEffectivenessBonus = (data, { name }) => {
+
+  }
+
   _updateChecks = () => {
     if (this._check.confirmation) {
       RollUtils.processCheck(this._check.confirmation, { isConfirmation: true })

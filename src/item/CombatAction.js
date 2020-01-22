@@ -20,18 +20,27 @@ export default {
   // "Static" methods (to be used on the CombatAction object itself)
   // ---------------------------------------------------------------------
 
-  async get(combatId) {
+  /**
+   * Same as get() but will not create a new CombatAction if it doesn't exist yet
+   * @param combatId
+   */
+  getSync(combatId) {
     let resultId = cache.lookup(combatId, () => {
       const combatAction = game.items.entities.find(item => (
         item.type === 'combat-action' && item.data.data.combat.id === combatId
       ))
       return combatAction != null ? combatAction.id : null
     })
-    let result
+    let result = null
     if (resultId != null) {
       result = game.items.get(resultId)
     }
-    if (resultId == null || result == null) {
+    return result
+  },
+
+  async get(combatId) {
+    const result = this.getSync(combatId)
+    if (result == null) {
       // CombatAction doesn't exist yet
       const combatAction = await Item.create({
         type: 'combat-action',
@@ -42,9 +51,10 @@ export default {
         displaySheet: false,  // We have a different, setting-based mechanic to automatically show the combat tracker.
       })
       cache.insert(combatId, combatAction.id)
-      resultId = combatAction.id
+      return game.items.get(combatAction.id)
+    } else {
+      return result
     }
-    return result || game.items.get(resultId)
   },
 
   // ---------------------------------------------------------------------
@@ -60,7 +70,7 @@ export default {
           const message = game.messages.get(raw.messageId)
           const attackCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
           const attackWeapon = ObjectUtils.try(attackCheck, 'weapon', { default: { burstSize: 1, img: 'icons/svg/sword.svg' } })
-          const isMelee = attackCheck == null || attackCheck.tags.includes('melee')
+          const isMelee = this.isMeleeAttack(raw)
           const effectivenessPenalty = Config.combat.defenseEffectivenessPenalty[isMelee ? 'melee' : 'ranged']
           return {
             ...raw,
@@ -71,11 +81,11 @@ export default {
               const message = game.messages.get(defense.messageId)
               const defenseCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
               let defender = null, instances = []
-              if (defenseCheck != null) {
+              if (defenseCheck != null && attackCheck != null && attackWeapon != null) {
                 defender = getActor({
                   tokenId: defenseCheck.tokenId,
                   sceneId: defenseCheck.sceneId,
-                  actorId: defenseCheck.actorId
+                  actorId: defenseCheck.actorId,
                 })
                 instances = Array(attackWeapon.burstSize).fill().map(() => {
                   const prevBonus = effectivenessBonusMap.get(defender) || 0
@@ -101,6 +111,15 @@ export default {
           }
         })
       }
+    }
+
+    this.isMeleeAttack = function isMeleeAttack(attack) {
+      if (attack == null) {
+        return true
+      }
+      const message = game.messages.get(attack.messageId)
+      const attackCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
+      return attackCheck == null || attackCheck.tags.includes('melee')
     }
 
     this.onNextTurn = async function onNextTurn() {
@@ -152,12 +171,11 @@ export default {
     }
 
     this.addDefenseMessage = async function addDefenseMessage(message) {
-      if (this.data.data.attacks.length > 0) {
-        let found = false
+      const referenceAttack = this.getNextUnhandledAttack()
+      if (referenceAttack != null) {
         return this.update({
           'data.attacks': this.data.data.attacks.map((attack, index) => {
-            if (!found && (attack.defenses.length === 0 || index === this.data.data.attacks.length - 1)) {
-              found = true
+            if (attack === referenceAttack) {
               const copy = ObjectUtils.cloneDeep(attack)
               copy.defenses.push({ messageId: message.id })
               return copy
@@ -167,6 +185,19 @@ export default {
           })
         })
       }
+    }
+
+    this.getNextUnhandledAttack = function getNextUnhandledAttack() {
+      let result = null
+      if (this.data.data.attacks != null && this.data.data.attacks.length > 0) {
+        for (const attack of this.data.data.attacks) {
+          if (attack.defenses.length === 0 || attack === this.data.data.attacks[this.data.data.attacks.length - 1]) {
+            result = attack
+            break
+          }
+        }
+      }
+      return result
     }
 
     this.removeAttackByIndex = function removeAttackByIndex(index) {

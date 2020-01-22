@@ -34,6 +34,7 @@ export default Object.freeze({
     defenseEffectivenessPenalty: {
       melee: 20,
       ranged: 10,
-    }
+      rangedFlat: 60,
+    },
   }
 })

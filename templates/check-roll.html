@@ -22,6 +22,6 @@
 </div>
 {{#if (isNumeric effectiveness)}}
   <div class="sw-tor-effectiveness sw-tor">
-    Effektivität: {{formatCheckDiff effectiveness}}
+    Effektivität{{#if effectivenessBonus}} ({{formatCheckDiff effectivenessBonus}}){{/if}}: {{formatCheckDiff effectiveness}}
   </div>
 {{/if}}
