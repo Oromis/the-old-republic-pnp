@@ -34,6 +34,7 @@ import OwnedMeleeWeapon from '../item/OwnedMeleeWeapon.js'
 import InnateAbility from '../item/InnateAbility.js'
 import SpecialAbility from '../item/SpecialAbility.js'
 import CombatAction from '../item/CombatAction.js'
+import ActiveEffect from '../item/ActiveEffect.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -104,6 +105,13 @@ export default Object.freeze({
         return {
           delegates: [
             CombatAction
+          ]
+        }
+
+      case 'active-effect':
+        return {
+          delegates: [
+            ActiveEffect,
           ]
         }
 

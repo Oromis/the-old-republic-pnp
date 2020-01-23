@@ -57,6 +57,7 @@ export function registerHelpers() {
     resolve: (object, ...path) => ObjectUtils.try(object, ...path),
     class: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(`class="${when ? then : otherwise}"`),
     ite: ({ hash: { when, then, otherwise = '' } }) => new Handlebars.SafeString(when ? then : otherwise),
+    isEqual: (a, b) => a === b,
     embedClass: ({ hash: { name, ...rest } }) => conditionalClass(name, rest),
     errorClass: ({ hash }) => conditionalClass(ERROR_CLASS, hash),
     hiddenClass: ({ hash }) => conditionalClass(HIDDEN_CLASS, hash),
@@ -141,5 +142,31 @@ export function registerHelpers() {
         `</div>`
       )
     },
+
+    // ----------------------------------------------------------------------------
+    // Active Effects
+    // ----------------------------------------------------------------------------
+    formatActiveEffectTriggerEvent: key => {
+      return {
+        onInit: 'Zu Beginn',
+        onTurnStart: 'Bei Zugbeginn',
+        onTurnEnd: 'Bei Zugende'
+      }[key] || ''
+    },
+
+    formatActiveEffectTriggerCondition: key => {
+      return {
+        eq: 'Bei Aktivierung Nr.',
+        gte: 'Ab Aktivierung Nr.',
+      }[key] || ''
+    },
+
+    formatActiveEffectActionType: key => {
+      return {
+        effect: 'Effekt aktivieren',
+        metric: 'Metrik verändern',
+        end: 'Terminieren',
+      }[key] || ''
+    }
   })
 }

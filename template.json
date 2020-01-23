@@ -51,7 +51,7 @@
     }
   },
   "Item": {
-    "types": ["skill", "force-skill", "training", "innate-ability", "special-ability", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other", "combat-action"],
+    "types": ["skill", "force-skill", "training", "innate-ability", "special-ability", "melee-weapon", "ranged-weapon", "wearable", "consumable", "other", "combat-action", "active-effect"],
     "templates": {
       "described": {
         "description": ""
@@ -166,6 +166,10 @@
         "round": 0,
         "turn": -1
       }
+    },
+    "active-effect": {
+      "templates": ["described"],
+      "triggers": []
     }
   }
 }

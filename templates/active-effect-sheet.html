@@ -1,0 +1,158 @@
+<form class="{{cssClass}} multi-item" autocomplete="off">
+  <header class="sheet-header flex-row multi-item">
+    <img class="profile-img" src="{{item.img}}" data-editable title="{{item.name}}"/>
+    <div class="header-fields flex-grow multi-item">
+      <div class="flex-row multi-item flex-cross-start">
+        <h1 class="char-name flex-grow">
+          <input name="name" class="full-width" type="text" value="{{item.name}}" placeholder="Name"/>
+        </h1>
+      </div>
+      <div class="flex-row">
+        <textarea placeholder="Beschreibung" name="data.description" class="flex-grow">{{data.description}}</textarea>
+      </div>
+    </div>
+  </header>
+
+  {{!-- Sheet Body --}}
+  <section class="sheet-body active-effect">
+    <div class="tab-wrapper">
+      <div class="tab-content">
+        <div>
+          <div class="multi-item">
+            {{#each activeEffect.triggers as |trigger triggerIndex|}}
+              <div class="active-effect__trigger multi-item">
+                <div class="flex-row flex-space-between">
+                  <span>
+                    {{formatActiveEffectTriggerEvent trigger.event}}
+                    {{#if trigger.condition}}
+                      {{formatActiveEffectTriggerCondition trigger.condition}} {{trigger.conditionArg}}
+                    {{/if}}
+                  </span>
+                  <button type="button" class="small delete-trigger auto-width" title="Trigger löschen" data-index="{{triggerIndex}}">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                <div class="active-effect__trigger-body multi-item">
+                  {{#each trigger.actions as |action actionIndex|}}
+                    <div class="flex-row flex-space-between">
+                      <span>
+                        {{formatActiveEffectActionType action.type}}
+                        {{#if (isEqual action.type 'effect')}}
+                          | <span title="{{action.key}}">{{action.label}}</span>: {{formatMod action.value.bonus}}
+                        {{/if}}
+                        {{#if (isEqual action.type 'metric')}}
+                          | <span title="{{action.key}}">{{action.label}}</span>: {{formatMod action.value.delta}}
+                        {{/if}}
+                      </span>
+                      <button
+                          type="button" class="small delete-action auto-width" title="Aktion löschen"
+                          data-trigger-index="{{triggerIndex}}" data-action-index="{{actionIndex}}">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  {{/each}}
+                  <div class="flex-row multi-item">
+                    <label>
+                      <select name="newActions.{{triggerIndex}}.type">
+                        {{#select (resolve ../newActions triggerIndex 'type')}}
+                          <option value="">Neue Aktion ...</option>
+                          <option value="effect">{{formatActiveEffectActionType 'effect'}}</option>
+                          <option value="metric">{{formatActiveEffectActionType 'metric'}}</option>
+                          <option value="end">{{formatActiveEffectActionType 'end'}}</option>
+                        {{/select}}
+                      </select>
+                    </label>
+                    {{#if (isEqual (resolve ../newActions triggerIndex 'type') 'effect')}}
+                      <label>
+                        <select name="newActions.{{triggerIndex}}.effectKey">
+                          {{#select (resolve ../newActions triggerIndex 'effectKey')}}
+                            <option value="">Auswählen ...</option>
+                            {{#each ../effectTypes as |effectGroup|}}
+                              <optgroup label="{{effectGroup.label}}">
+                                {{#each effectGroup.properties as |effect|}}
+                                  <option value="{{effect.key}}">{{fallback effect.label effect.name}}</option>
+                                {{/each}}
+                              </optgroup>
+                            {{/each}}
+                          {{/select}}
+                        </select>
+                      </label>
+                      <input
+                          type="text"
+                          class="flex-grow auto-width"
+                          name="newActions.{{triggerIndex}}.effectBonus"
+                          value="{{formatMod (resolve ../newActions triggerIndex 'effectBonus')}}"
+                      />
+                      <button type="button" class="small new-effect auto-width" title="Effekt anlegen" data-index="{{triggerIndex}}">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    {{/if}}
+                    {{#if (isEqual (resolve ../newActions triggerIndex 'type') 'metric')}}
+                      <label>
+                        <select name="newActions.{{triggerIndex}}.metricKey">
+                          {{#select (resolve ../newActions triggerIndex 'metricKey')}}
+                            <option value="">Auswählen ...</option>
+                            {{#each ../metricTypes as |metric|}}
+                              <option value="{{metric.key}}">{{metric.label}}</option>
+                            {{/each}}
+                          {{/select}}
+                        </select>
+                      </label>
+                      <input
+                          type="text"
+                          class="flex-grow auto-width"
+                          name="newActions.{{triggerIndex}}.metricDelta"
+                          value="{{formatMod (resolve ../newActions triggerIndex 'metricDelta')}}"
+                      />
+                      <button type="button" class="small new-metric auto-width" title="Metrik anlegen" data-index="{{triggerIndex}}">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    {{/if}}
+                    {{#if (isEqual (resolve ../newActions triggerIndex 'type') 'end')}}
+                      <div class="flex-grow"></div>
+                      <button type="button" class="small new-end auto-width" title="Aktion anlegen" data-index="{{triggerIndex}}">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+            {{/each}}
+          </div>
+          <hr />
+          <div class="flex-row multi-item">
+            <label>
+              <select name="newTrigger.event">
+                {{#select newTrigger.event}}
+                  <option value="">Neuer Trigger ...</option>
+                  <option value="onInit">{{formatActiveEffectTriggerEvent 'onInit'}}</option>
+                  <option value="onTurnStart">{{formatActiveEffectTriggerEvent 'onTurnStart'}}</option>
+                  <option value="onTurnEnd">{{formatActiveEffectTriggerEvent 'onTurnEnd'}}</option>
+                {{/select}}
+              </select>
+            </label>
+            {{#if newTrigger.supportsCondition}}
+              <label>
+                Bedingung:
+                <select name="newTrigger.condition">
+                  {{#select newTrigger.condition}}
+                    <option value="">Keine</option>
+                    <option value="eq">{{formatActiveEffectTriggerCondition 'eq'}}</option>
+                    <option value="gte">{{formatActiveEffectTriggerCondition 'gte'}}</option>
+                  {{/select}}
+                </select>
+                {{#if newTrigger.condition}}
+                  <input type="text" name="newTrigger.conditionArg" value="{{newTrigger.conditionArg}}" />
+                {{/if}}
+              </label>
+            {{/if}}
+            <div class="flex-grow"></div>
+            <button type="button" class="small new-trigger auto-width" title="Trigger anlegen">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</form>

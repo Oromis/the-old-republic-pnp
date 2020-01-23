@@ -15,11 +15,11 @@ import { installCombatTrackerHook } from './overrides/CombatTrackerHook.js'
 import { injectDefaultItemPermissions } from './overrides/DefaultItemPermission.js'
 import { injectPrivateMeasurements } from './overrides/PrivateMeasurements.js'
 import InnateAbilitySheet from './sheets/InnateAbilitySheet.js'
-import Shortcuts, {CTRL, SHIFT} from './shortcuts/Shortcuts.js'
 import {installGlobalShortcuts} from './shortcuts/GlobalShortcuts.js'
 import SpecialAbilitySheet from './sheets/SpecialAbilitySheet.js'
 import {installTokenInputHandler} from './overrides/TokenInputHandler.js'
 import CombatActionSheet from './sheets/CombatActionSheet.js'
+import ActiveEffectSheet from './sheets/ActiveEffectSheet.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -52,6 +52,7 @@ Hooks.once("init", async function() {
   Items.registerSheet("sw-tor", InnateAbilitySheet, { types: ['innate-ability'], makeDefault: true })
   Items.registerSheet("sw-tor", SpecialAbilitySheet, { types: ['special-ability'], makeDefault: true })
   Items.registerSheet("sw-tor", CombatActionSheet, { types: ['combat-action'], makeDefault: true })
+  Items.registerSheet("sw-tor", ActiveEffectSheet, { types: ['active-effect'], makeDefault: true })
 
   // We need to register actors & sheets before doing any async work. Otherwise Actors might be
   // created before the class is overridden

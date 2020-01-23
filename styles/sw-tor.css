@@ -133,6 +133,7 @@
 /* Content Tabs */
 .sw-tor.sheet .sheet-body {
     flex-shrink: 1;
+    flex-grow: 1;
     overflow: hidden;
 }
 .sw-tor.sheet .sheet-body .editor {
@@ -495,4 +496,12 @@
 .sw-tor .combat-action-glyph {
     color: white;
     font-size: 10px;
+}
+
+/******************************************************************
+ * ActiveEffect
+ ******************************************************************/
+
+.sw-tor .active-effect__trigger .active-effect__trigger-body {
+    margin-left: 20px;
 }

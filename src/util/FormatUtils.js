@@ -1,5 +1,5 @@
 export function formatMod(val) {
-  return val > 0 ? `+${val}` : val
+  return (+val) > 0 ? `+${val}` : val
 }
 
 export function formatEffectValue(value) {

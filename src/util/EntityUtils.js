@@ -138,3 +138,14 @@ export function replaceFunction(object, functionName, replacement) {
     return replacement.call(this, { original, args })
   }
 }
+
+export function defineAccessors(object, data) {
+  for (const [key] of Object.entries(data)) {
+    if (!(key in object)) {
+      Object.defineProperty(object, key, {
+        configurable: true,
+        get() { return data[key] }
+      })
+    }
+  }
+}
