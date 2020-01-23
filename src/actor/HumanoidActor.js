@@ -12,6 +12,7 @@ import { roundDecimal } from '../util/MathUtils.js'
 import { STAGE_PERMANENT } from '../util/Modifier.js'
 import RollUtils from '../util/RollUtils.js'
 import CombatAction from '../item/CombatAction.js'
+import ExplanationUtils from '../util/ExplanationUtils.js'
 
 /**
  * Functionality for humanoid characters. "humanoid" refers to intelligent life forms, it has
@@ -208,14 +209,25 @@ export default {
       return this.encumberanceExplanation.total
     })
 
+    this.explainEvasionAdvantage = function () {
+      const result = { total: 0, components: [] }
+      ExplanationUtils.join(result, this.modifiers.ElD.explainBonus())
+      return result
+    }
+
     defineGetter(this, 'evasionCheck', function () {
       const evasion = this.skills.aus
       if (evasion) {
         const check = evasion.check
+        const advantageExplanation = this.explainEvasionAdvantage()
+        for (const roll of check.rolls) {
+          roll.advantage = (roll.advantage || 0) + advantageExplanation.total
+        }
         check.calcEffectiveness = true
+        check.advantageExplanation = advantageExplanation
         check.criticalBonus = Config.combat.criticalBonus
         check.tags = ['defense']
-        return this.processDefenseEffectiveness(check)
+        return this.processDefenseCheck(check)
       } else {
         return null
       }
@@ -232,12 +244,39 @@ export default {
       return (this.attrValue('kk', { prop: 'permanentValue' }) + this.attrValue('ko', { prop: 'permanentValue' })) / 2
     }
 
-    this.processDefenseEffectiveness = function processDefenseEffetiveness(check) {
+    this.processDefenseCheck = function processDefenseCheck(check, { defenseType = 'evasion' } = {}) {
       if (game.combats.active != null) {
         const combatAction = CombatAction.getSync(game.combats.active.id)
-        const isMeleeAttack = combatAction.isMeleeAttack(combatAction.getNextUnhandledAttack())
-        if (!isMeleeAttack) {
-          check.effectivenessBonus = (check.effectivenessBonus || 0) - Config.combat.defenseEffectivenessPenalty.rangedFlat
+        if (combatAction != null) {
+          const attack = combatAction.getNextUnhandledAttack()
+          if (attack != null) {
+            const isMeleeAttack = combatAction.isMeleeAttack(attack)
+            const advantageChanges = { total: 0, components: [] }
+            if (isMeleeAttack) {
+              // Defense against melee attack
+              ExplanationUtils.join(advantageChanges, this.modifiers.ElD_N.explainBonus())
+              if (defenseType === 'parade') {
+                ExplanationUtils.join(advantageChanges, this.modifiers.ElP_N.explainBonus())
+              }
+            } else {
+              // Defense against ranged attack
+              check.effectivenessBonus = (check.effectivenessBonus || 0) - Config.combat.defenseEffectivenessPenalty.rangedFlat
+              ExplanationUtils.join(advantageChanges, this.modifiers.ElD_F.explainBonus())
+              if (defenseType === 'parade') {
+                ExplanationUtils.join(advantageChanges, this.modifiers.ElP_F.explainBonus())
+              }
+            }
+            if (advantageChanges.total !== 0) {
+              for (const roll of check.rolls) {
+                roll.advantage = (roll.advantage || 0) + advantageChanges.total
+              }
+              if (check.advantageExplanation != null) {
+                ExplanationUtils.join(check.advantageExplanation, advantageChanges)
+              } else {
+                check.advantageExplanation = advantageChanges
+              }
+            }
+          }
         }
       }
       return check

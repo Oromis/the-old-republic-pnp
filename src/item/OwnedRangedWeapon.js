@@ -1,6 +1,7 @@
-import { defineGetter, evalSkillExpression } from '../util/EntityUtils.js'
+import {defineGetter, evalSkillExpression, replaceFunction} from '../util/EntityUtils.js'
 import ObjectUtils from '../util/ObjectUtils.js'
 import { roundDecimal } from '../util/MathUtils.js'
+import ExplanationUtils from '../util/ExplanationUtils.js'
 
 const distanceVariableNames = ['Entfernung', 'entfernung', 'Distanz', 'distanz', 'Distance', 'distance']
 
@@ -22,9 +23,10 @@ export default {
       ).value, 3), 0)
     })
 
-    defineGetter(this, 'attackAdvantage', function () {
-      return this.currentPrecision +
-        this.calcBaseAttackAdvantage()
+    replaceFunction(this, 'explainAttackAdvantage', function ({ original }) {
+      const result = original.call(this)
+      ExplanationUtils.add(result, { label: 'Präzision', value: this.currentPrecision })
+      return result
     })
   }
 }

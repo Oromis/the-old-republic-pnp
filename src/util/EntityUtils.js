@@ -131,3 +131,10 @@ export function explainComputedValue({ value, label, bonusExplanation }) {
   }
   return result
 }
+
+export function replaceFunction(object, functionName, replacement) {
+  const original = object[functionName]
+  object[functionName] = function (...args) {
+    return replacement.call(this, { original, args })
+  }
+}

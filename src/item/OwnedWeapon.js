@@ -3,6 +3,7 @@ import ObjectUtils from '../util/ObjectUtils.js'
 import RollUtils from '../util/RollUtils.js'
 import Config from '../Config.js'
 import {roundDecimal} from '../util/MathUtils.js'
+import ExplanationUtils from '../util/ExplanationUtils.js'
 
 export default {
   beforeConstruct() {
@@ -18,25 +19,37 @@ export default {
       }
     })
 
-    this.calcBaseAttackAdvantage = () => {
+    this.explainAttackAdvantage = () => {
+      const result = { total: 0, components: [] }
       const primarySlot = this.primaryEquippedSlot
-      return ((primarySlot && primarySlot.explainCoordination(this.actor).total) || 0) +
-        (this.data.data.attackAdvantage || 0)
+      const coordination = (primarySlot && primarySlot.explainCoordination(this.actor).total) || 0
+      ExplanationUtils.add(result, { label: 'Koordination', value: coordination })
+      ExplanationUtils.add(result, { label: 'Manuelle Erleichterung', value: this.data.data.attackAdvantage })
+      ExplanationUtils.join(result, this.actor.modifiers.ElA.explainBonus())
+      return result
     }
 
-    defineGetter(this, 'attackAdvantage', this.calcBaseAttackAdvantage, { configurable: true })
+    defineGetter(this, 'attackAdvantageExplanation', function () {
+      return this.explainAttackAdvantage()
+    }, { configurable: true })
+
+    defineGetter(this, 'attackAdvantage', function () {
+      return this.explainAttackAdvantage().total
+    }, { configurable: true })
 
     defineGetter(this, 'attackCheck', function () {
       if (this.skill == null) {
         return null
       }
-      const attackAdvantage = this.attackAdvantage
+      const advantageExplanation = this.explainAttackAdvantage()
+      const attackAdvantage = advantageExplanation.total
       const result = this.skill.check
       for (const roll of result.rolls) {
         roll.advantage = attackAdvantage
       }
       result.calcEffectiveness = true
       result.criticalBonus = Config.combat.criticalBonus
+      result.advantageExplanation = advantageExplanation
       result.weapon = {
         name: this.name,
         img: this.img,
@@ -54,22 +67,28 @@ export default {
         return null
       }
 
-      const paradeAdvantage = this.calcBaseParadeAdvantage()
+      const advantageExplanation = this.explainParadeAdvantage()
       const result = skill.check
       for (const roll of result.rolls) {
-        roll.advantage = paradeAdvantage
+        roll.advantage = advantageExplanation.total
       }
       result.calcEffectiveness = true
       result.criticalBonus = Config.combat.criticalBonus
+      result.advantageExplanation = advantageExplanation
       result.effectivenessBonus = this.actor.defenseEffectivenessBonus || 0
       result.tags = ['defense']
-      return this.actor.processDefenseEffectiveness(result)
+      return this.actor.processDefenseCheck(result, { defenseType: 'parade' })
     })
 
-    this.calcBaseParadeAdvantage = function () {
+    this.explainParadeAdvantage = function () {
+      const result = { total: 0, components: [] }
       const primarySlot = this.primaryEquippedSlot
-      return ((primarySlot && primarySlot.explainCoordination(this.actor).total) || 0) +
-        (this.data.data.paradeAdvantage || 0)
+      const coordination = (primarySlot && primarySlot.explainCoordination(this.actor).total) || 0
+      ExplanationUtils.add(result, { label: 'Koordination', value: coordination })
+      ExplanationUtils.add(result, { label: 'Manuelle Erleichterung', value: this.data.data.paradeAdvantage })
+      ExplanationUtils.join(result, this.actor.modifiers.ElD.explainBonus())
+      ExplanationUtils.join(result, this.actor.modifiers.ElP.explainBonus())
+      return result
     }
 
     defineGetter(this, 'currentDamageFormula', function () {
