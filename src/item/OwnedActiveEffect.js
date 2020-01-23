@@ -46,7 +46,7 @@ export default {
           let triggers = true
           if (trigger.condition && trigger.conditionArg != null) {
             try {
-              const rhs = Parser.evaluate(trigger.conditionArg, this.actor)
+              const rhs = Parser.evaluate(trigger.conditionArg, this.actor.propertyValues)
               triggers = willTrigger(trigger.activationCount, trigger.condition, rhs)
             } catch (e) {
               console.warn(e)
@@ -60,7 +60,7 @@ export default {
                 case 'effect': {
                   try {
                     const existing = newData.effects.find(e => e.key === action.key)
-                    const bonus = valueFactor * Parser.evaluate(action.value.bonus, this.actor)
+                    const bonus = valueFactor * Parser.evaluate(action.value.bonus, this.actor.propertyValues)
                     if (existing != null) {
                       existing.value.bonus += bonus
                       if (existing.value.bonus === 0) {

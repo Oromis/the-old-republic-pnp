@@ -93,6 +93,30 @@ export default class SwTorActor extends Actor {
     return this._getPropertyCollectionProxy('resistances')
   }
 
+  get propertyValues() {
+    return new Proxy(this, {
+      get(actor, key) {
+        if (key === 'actor') {
+          return actor
+        }
+        const sources = [
+          actor.attributes,
+          actor.skills,
+          actor.metrics,
+          actor.resistances,
+        ]
+        for (const source of sources) {
+          // Not exactly the most efficient way to do this...
+          const prop = source.list.find(i => i.key === key)
+          if (prop != null) {
+            return ObjectUtils.try(prop, 'value', 'total') || prop.max
+          }
+        }
+        return 0
+      }
+    })
+  }
+
   // ---------------------------------------------------------------------
   // Item accessors
   // ---------------------------------------------------------------------
