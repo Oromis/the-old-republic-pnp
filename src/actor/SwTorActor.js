@@ -407,6 +407,15 @@ export default class SwTorActor extends Actor {
     return this._emitActiveEffectEvent('onTurnEnd', this.activeEffects, { undo: true })
   }
 
+  /// Notifies the actor that the next turn (of any combatant) in the current combat has started
+  async nextTurn() {
+    return this._emitActiveEffectEvent('onNextTurn', this.activeEffects)
+  }
+
+  async undoNextTurn() {
+    return this._emitActiveEffectEvent('onNextTurn', this.activeEffects, { undo: true })
+  }
+
   get missingSkills() {
     return this._cache.lookup('missingSkills', () => game.items.entities.filter(item => {
       if (item.isSkill && item.actorType === this.actorType) {

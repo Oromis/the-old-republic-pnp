@@ -150,7 +150,8 @@ export function registerHelpers() {
       return {
         onInit: 'Zu Beginn',
         onTurnStart: 'Bei Zugbeginn',
-        onTurnEnd: 'Bei Zugende'
+        onTurnEnd: 'Bei Zugende',
+        onNextTurn: 'Bei nächstem Zug (bel. Token)',
       }[key] || ''
     },
 

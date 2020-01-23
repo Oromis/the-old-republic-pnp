@@ -4,7 +4,7 @@ import CombatAction from '../item/CombatAction.js'
 
 function processHookArg(combat) {
   if (combat instanceof CombatEncounters) {
-    return combat.entities[0]
+    return combat.active || combat.entities[0]
   } else {
     return combat
   }
@@ -45,6 +45,13 @@ async function onUpdateCombat(combat) {
         await prevActor.exitTurn({ combat, round: combat.previous.round })
       }
       combatAction != null && await combatAction.onNextTurn()
+      for (const combatant of combat.combatants) {
+        // Notify all tokens in the current combat that it's the next turn
+        const actor = getActorByTokenId(combatant.tokenId)
+        if (actor instanceof SwTorActor) {
+          await actor.nextTurn()
+        }
+      }
       const currentActor = getActorByTokenId(combat.current.tokenId)
       if (currentActor instanceof SwTorActor) {
         await currentActor.enterTurn({ combat, round: combat.current.round })
@@ -55,6 +62,14 @@ async function onUpdateCombat(combat) {
         await currentActor.undoExitTurn({ combat, round: combat.current.round })
       }
       combatAction != null && await combatAction.onPrevTurn()
+      for (const combatant of combat.combatants) {
+        // Notify all tokens in the current combat that it's the next turn
+        const actor = getActorByTokenId(combatant.tokenId)
+        if (actor instanceof SwTorActor) {
+          await actor.undoNextTurn()
+        }
+      }
+
       const actor = getActorByTokenId(combat.previous.tokenId)
       if (actor instanceof SwTorActor) {
         await actor.undoEnterTurn({ combat, round: combat.previous.round })

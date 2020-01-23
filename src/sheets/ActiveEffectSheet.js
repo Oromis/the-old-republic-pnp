@@ -18,7 +18,7 @@ export default class ActiveEffectSheet extends ItemSheet {
     autoSubmit.addFilter('newTrigger.*', (obj, { name, path }) => {
       const key = path[path.length - 1]
       this._newTrigger[key] = obj[name]
-      this._newTrigger.supportsCondition = ['onTurnStart', 'onTurnEnd'].includes(this._newTrigger.event)
+      this._newTrigger.supportsCondition = ['onTurnStart', 'onTurnEnd', 'onNextTurn'].includes(this._newTrigger.event)
       this.render(false)
       return {}
     })
