@@ -1,6 +1,5 @@
 import ObjectUtils from './ObjectUtils.js'
 import { Parser } from '../vendor/expr-eval/expr-eval.js'
-import { resolveGlobalProperty } from './EntityUtils.js'
 
 export function analyzeExpression({ expression, path = [], defaultExpr = '' }) {
   const text = expression || ObjectUtils.try(...path) || defaultExpr
@@ -17,11 +16,6 @@ export function analyzeExpression({ expression, path = [], defaultExpr = '' }) {
 export function analyzeDamageFormula({ expression, path, defaultExpr = '' }) {
   const text = expression != null ? expression : (ObjectUtils.try(...path) || defaultExpr)
   return { formulaError: !text.match(/^\s*\d+\s*(\+\s*\d+[wd]\d+(\/\d+)?\s*)?$/g) }
-}
-
-export function resolveEffectLabel(key, { defaultLabel = key } = {}) {
-  const property = resolveGlobalProperty(key)
-  return ObjectUtils.try(property, 'label', { default: defaultLabel })
 }
 
 export function onDragOver() {

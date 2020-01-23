@@ -34,7 +34,6 @@ import OwnedMeleeWeapon from '../item/OwnedMeleeWeapon.js'
 import InnateAbility from '../item/InnateAbility.js'
 import SpecialAbility from '../item/SpecialAbility.js'
 import CombatAction from '../item/CombatAction.js'
-import ActiveEffect from '../item/ActiveEffect.js'
 import OwnedActiveEffect from '../item/OwnedActiveEffect.js'
 
 export default Object.freeze({
@@ -112,7 +111,6 @@ export default Object.freeze({
       case 'active-effect':
         return {
           delegates: [
-            ActiveEffect,
             owned && OwnedActiveEffect,
           ]
         }

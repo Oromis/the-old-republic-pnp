@@ -1,5 +1,4 @@
 import { defineDataAccessor, defineGetter } from '../util/EntityUtils.js'
-import { resolveEffectLabel } from '../util/SheetUtils.js'
 import SwTorItem from './SwTorItem.js'
 import { formatEffectValue } from '../util/FormatUtils.js'
 
@@ -18,7 +17,7 @@ export default {
     defineGetter(this, 'summary', function () {
       const lines = [`GP: ${this.gp}`]
       for (const effect of this.effects) {
-        lines.push(`${effect.label || resolveEffectLabel(effect.key)}: ${formatEffectValue(effect.value)}`)
+        lines.push(`${effect.label || effect.key}: ${formatEffectValue(effect.value)}`)
       }
       return lines.join('\n')
     })

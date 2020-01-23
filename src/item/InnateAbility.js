@@ -1,5 +1,4 @@
 import { defineDataAccessor, defineGetter } from '../util/EntityUtils.js'
-import { resolveEffectLabel } from '../util/SheetUtils.js'
 import { formatEffectValue } from '../util/FormatUtils.js'
 
 export default {
@@ -8,7 +7,7 @@ export default {
 
     defineGetter(this, 'summary', function () {
       return (Array.isArray(this.effects) ? this.effects : [])
-        .map(effect => `${effect.label || resolveEffectLabel(effect.key)}: ${formatEffectValue(effect.value)}`)
+        .map(effect => `${effect.label || effect.key}: ${formatEffectValue(effect.value)}`)
         .join(', ')
     })
   }

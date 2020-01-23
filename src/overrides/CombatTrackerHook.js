@@ -40,16 +40,24 @@ async function onUpdateCombat(combat) {
 
     const combatAction = await CombatAction.get(combat.id)
     if (forward) {
+      const prevActor = getActorByTokenId(combat.previous.tokenId)
+      if (prevActor instanceof SwTorActor) {
+        await prevActor.exitTurn({ combat, round: combat.previous.round })
+      }
       combatAction != null && await combatAction.onNextTurn()
-      const actor = getActorByTokenId(combat.current.tokenId)
-      if (actor instanceof SwTorActor) {
-        actor.enterTurn({ combat, round: combat.current.round })
+      const currentActor = getActorByTokenId(combat.current.tokenId)
+      if (currentActor instanceof SwTorActor) {
+        await currentActor.enterTurn({ combat, round: combat.current.round })
       }
     } else {
+      const currentActor = getActorByTokenId(combat.current.tokenId)
+      if (currentActor instanceof SwTorActor) {
+        await currentActor.undoExitTurn({ combat, round: combat.current.round })
+      }
       combatAction != null && await combatAction.onPrevTurn()
       const actor = getActorByTokenId(combat.previous.tokenId)
       if (actor instanceof SwTorActor) {
-        actor.undoEnterTurn({ combat, round: combat.previous.round })
+        await actor.undoEnterTurn({ combat, round: combat.previous.round })
       }
     }
   }

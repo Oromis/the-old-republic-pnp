@@ -376,24 +376,35 @@ export default class SwTorActor extends Actor {
     }
   }
 
-  enterTurn({ round, combat }) {
+  async enterTurn({ round, combat }) {
     // Apply turn regeneration
     const diff = this.getRegeneration('turn').diff
+    await this._emitActiveEffectEvent('onTurnStart', this.activeEffects, { metricsChanges: diff })
     const payload = this.modifyMetrics(diff, { dryRun: true })
     payload.data.lastTurnRegeneration = diff
     this._callDelegate('enterTurn', payload)
     return this.update(payload)
   }
 
-  undoEnterTurn({ round, combat }) {
+  async undoEnterTurn({ round, combat }) {
     // Undo the last turn regeneration
     const reg = this.data.data.lastTurnRegeneration
     if (reg != null && typeof reg === 'object') {
-      const payload = this.modifyMetrics(ObjectUtils.mapValues(reg, a => -a), { dryRun: true })
+      const diff = ObjectUtils.mapValues(reg, a => -a)
+      await this._emitActiveEffectEvent('onTurnStart', this.activeEffects, { undo: true, metricsChanges: diff })
+      const payload = this.modifyMetrics(diff, { dryRun: true })
       payload.data['-=lastTurnRegeneration'] = null
       this._callDelegate('undoEnterTurn', payload)
       return this.update(payload)
     }
+  }
+
+  async exitTurn() {
+    return this._emitActiveEffectEvent('onTurnEnd', this.activeEffects)
+  }
+
+  async undoExitTurn() {
+    return this._emitActiveEffectEvent('onTurnEnd', this.activeEffects, { undo: true })
   }
 
   get missingSkills() {
@@ -576,6 +587,7 @@ export default class SwTorActor extends Actor {
       { items: this.specialAbilities, stage: STAGE_PERMANENT },
       { items: this.trainings, stage: STAGE_PERMANENT },
       { items: this.equippedItems, stage: STAGE_TEMPORARY },
+      { items: this.activeEffects, stage: STAGE_TEMPORARY },
     ]
 
     for (const source of sources) {
@@ -594,6 +606,39 @@ export default class SwTorActor extends Actor {
     return 0
   }
 
+  async _emitActiveEffectEvent(eventType, activeEffects, { undo = false, metricsChanges = null } = {}) {
+    const submitMetricsChanges = metricsChanges == null
+    if (metricsChanges == null) {
+      metricsChanges = {}
+    }
+    const activeEffectChanges = []
+    const deletedEffects = []
+    for (const activeEffect of activeEffects) {
+      const result = activeEffect.handleEvent(eventType, { undo })
+      if (result.delete) {
+        deletedEffects.push(activeEffect._id)
+      }
+      if (result.metricsChanges) {
+        for (const [key, value] of Object.entries(result.metricsChanges)) {
+          metricsChanges[key] = (metricsChanges[key] || 0) + value
+        }
+      }
+      if (result.activeEffect) {
+        activeEffectChanges.push(result.activeEffect)
+      }
+    }
+
+    if (activeEffectChanges.length > 0) {
+      await this.updateManyEmbeddedEntities('OwnedItem', activeEffectChanges)
+    }
+    if (deletedEffects.length > 0) {
+      await this.deleteManyEmbeddedEntities('OwnedItem', deletedEffects)
+    }
+    if (submitMetricsChanges && Object.keys(metricsChanges).length > 0) {
+      await this.modifyMetrics(metricsChanges)
+    }
+  }
+
   // ----------------------------------------------------------------------------
   // Install some item hooks to make sure that item invariants are kept
   // ----------------------------------------------------------------------------
@@ -604,7 +649,7 @@ export default class SwTorActor extends Actor {
       if (data.type === 'active-effect') {
         const activeEffect = this.items.find(i => i._id === item._id)
         if (activeEffect != null) {
-          activeEffect.handleEvent('onInit')
+          await this._emitActiveEffectEvent('onInit', [activeEffect])
         } else {
           ui.notifications.error(`Aktiver Effekt ${item._id} nicht gefunden!`)
         }

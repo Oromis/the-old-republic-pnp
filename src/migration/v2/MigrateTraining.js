@@ -1,4 +1,3 @@
-import {resolveEffectLabel} from "../../util/SheetUtils.js"
 
 export function migrateTraining(item, updateData) {
   const mods = item.data.mods
@@ -7,7 +6,7 @@ export function migrateTraining(item, updateData) {
     for (const key of Object.keys(mods)) {
       newEffects.push({
         key,
-        label: resolveEffectLabel(key),
+        label: key,
         value: mods[key],
       })
     }

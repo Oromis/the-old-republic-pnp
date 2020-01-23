@@ -2,9 +2,6 @@ import PropertyPrototype from '../properties/PropertyPrototype.js'
 import ObjectUtils from './ObjectUtils.js'
 import { Parser } from '../vendor/expr-eval/expr-eval.js'
 import { roundDecimal } from './MathUtils.js'
-import { detectPropertyType } from '../CharacterFormulas.js'
-import Attributes from '../datasets/AllAttributes.js'
-import Metrics from '../datasets/AllMetrics.js'
 
 export function defineDataAccessor(object, key, { configurable = false } = {}) {
   Object.defineProperty(object, key, {
@@ -100,19 +97,6 @@ export function evalSkillExpression(expr, skill, { vars, round }) {
     evalError = true
   }
   return { value, formulaError, evalError, variables, formula: expr }
-}
-
-export function resolveGlobalProperty(key) {
-  const type = detectPropertyType({ key }, { throwOnError: false })
-  switch (type) {
-    case 'skill':
-      return resolveGlobalSkill(key)
-    case 'attribute':
-      return Attributes.map[key.toLowerCase()]
-    case 'metric':
-      return Metrics.map[key.toLowerCase()]
-  }
-  return null
 }
 
 export function resolveGlobalSkill(key) {
