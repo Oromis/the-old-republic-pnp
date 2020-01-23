@@ -52,24 +52,6 @@
                 {{/if}}
               </div>
             {{/if}}
-            <div class="vertical-divider"></div>
-            <div class="training-info flex-row multi-item">
-              <span>Ausbildungen:</span>
-              <div class="trainings flex-row multi-item">
-                {{#each actor.trainings as |training|}}
-                  <div data-item-id="{{training.id}}" class="flex-row">
-                    <a class="item-control item-edit" title="{{training.summary}}">
-                      {{training.name}}
-                    </a>
-                    {{#if ../data.creationMode.enabled}}
-                      &nbsp;
-                      <a class="item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
-                    {{/if}}
-                    {{#unless @last}},{{/unless}}
-                  </div>
-                {{/each}}
-              </div>
-            </div>
           </div>
         </div>
         <div class="multi-item">
@@ -810,6 +792,37 @@
                   </td>
                   <td title="{{formatExplanation metric.maxComponents}}">
                     {{formatBuffedValue metric.maxExplanation}}
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+        <div class="padded">
+          <table>
+            <thead>
+              <tr>
+                <th>Ausbildungen</th>
+                <th>GP</th>
+                <th>Effekte</th>
+                <th class="icon-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each actor.trainings as |training|}}
+                <tr class="item" data-item-id="{{training.id}}">
+                  <td>
+                    <div class="flex-row multi-item">
+                      <img src="{{training.img}}" title="{{training.name}}" width="24" height="24" alt="{{training.name}}" />
+                      <a class="item-control item-edit">
+                        {{training.name}}
+                      </a>
+                    </div>
+                  </td>
+                  <td>{{training.gp}}</td>
+                  <td>{{training.summary}}</td>
+                  <td>
+                    <a class="item-control item-delete" title="{{training.name}} löschen"><i class="fas fa-trash"></i></a>
                   </td>
                 </tr>
               {{/each}}

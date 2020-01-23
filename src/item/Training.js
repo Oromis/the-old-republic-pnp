@@ -15,11 +15,7 @@ export default {
     })
 
     defineGetter(this, 'summary', function () {
-      const lines = [`GP: ${this.gp}`]
-      for (const effect of this.effects) {
-        lines.push(`${effect.label || effect.key}: ${formatEffectValue(effect.value)}`)
-      }
-      return lines.join('\n')
+      return this.effects.map(effect => `${effect.label || effect.key}: ${formatEffectValue(effect.value)}`).join(', ')
     })
   }
 }
