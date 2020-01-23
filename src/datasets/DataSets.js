@@ -35,6 +35,7 @@ import InnateAbility from '../item/InnateAbility.js'
 import SpecialAbility from '../item/SpecialAbility.js'
 import CombatAction from '../item/CombatAction.js'
 import ActiveEffect from '../item/ActiveEffect.js'
+import OwnedActiveEffect from '../item/OwnedActiveEffect.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -112,6 +113,7 @@ export default Object.freeze({
         return {
           delegates: [
             ActiveEffect,
+            owned && OwnedActiveEffect,
           ]
         }
 

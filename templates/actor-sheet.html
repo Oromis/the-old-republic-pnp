@@ -880,6 +880,33 @@
             </tbody>
           </table>
         </div>
+        <div class="padded">
+          <table>
+            <thead>
+              <tr>
+                <th>Aktive Effekte</th>
+                <th class="icon-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each actor.activeEffects as |activeEffect|}}
+                <tr class="item" data-item-id="{{activeEffect.id}}">
+                  <td>
+                    <div class="flex-row multi-item">
+                      <img src="{{activeEffect.img}}" title="{{activeEffect.name}}" width="24" height="24" alt="{{activeEffect.name}}" />
+                      <a class="item-control item-edit">
+                        {{activeEffect.name}}
+                      </a>
+                    </div>
+                  </td>
+                  <td>
+                    <a class="item-control item-delete" title="{{activeEffect.name}} löschen"><i class="fas fa-trash"></i></a>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
         <div>
           <hr />
           <h3>Einstellungen</h3>

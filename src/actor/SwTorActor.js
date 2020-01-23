@@ -133,6 +133,10 @@ export default class SwTorActor extends Actor {
     return this._categorizedItems.equippedItems
   }
 
+  get activeEffects() {
+    return this._categorizedItems.activeEffects
+  }
+
   get dataSet() {
     return this._cache.lookup('dataSet', () => DataSets.fromActorType(this.type))
   }
@@ -464,6 +468,7 @@ export default class SwTorActor extends Actor {
         inventory: [],
         freeItems: [],
         equippedItems: [],
+        activeEffects: [],
       }
       for (const item of this.items || []) {
         if (item.type === 'skill' || item.type === 'force-skill') {
@@ -477,6 +482,8 @@ export default class SwTorActor extends Actor {
           categories.innateAbilities.push(item)
         } else if (item.type === 'special-ability') {
           categories.specialAbilities.push(item)
+        } else if (item.type === 'active-effect') {
+          categories.activeEffects.push(item)
         } else {
           categories.inventory.push(item)
           if (item.isEquipped) {
@@ -592,7 +599,18 @@ export default class SwTorActor extends Actor {
   // ----------------------------------------------------------------------------
 
   createEmbeddedEntity(embeddedName, data, ...rest) {
-    return this._checkValidItem(data, () => super.createEmbeddedEntity(embeddedName, data, ...rest))
+    return this._checkValidItem(data, async () => {
+      const item = await super.createEmbeddedEntity(embeddedName, data, ...rest)
+      if (data.type === 'active-effect') {
+        const activeEffect = this.items.find(i => i._id === item._id)
+        if (activeEffect != null) {
+          activeEffect.handleEvent('onInit')
+        } else {
+          ui.notifications.error(`Aktiver Effekt ${item._id} nicht gefunden!`)
+        }
+      }
+      return item
+    })
   }
 
   updateEmbeddedEntity(embeddedName, data, ...rest) {

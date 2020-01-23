@@ -169,7 +169,8 @@
     },
     "active-effect": {
       "templates": ["described"],
-      "triggers": []
+      "triggers": [],
+      "effects": []
     }
   }
 }
