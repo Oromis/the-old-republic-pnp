@@ -174,7 +174,8 @@
     "active-effect": {
       "templates": ["described"],
       "triggers": [],
-      "effects": []
+      "effects": [],
+      "showOnToken": true
     }
   }
 }

@@ -7,8 +7,16 @@
           <input name="name" class="full-width" type="text" value="{{item.name}}" placeholder="Name"/>
         </h1>
       </div>
-      <div class="flex-row">
-        <textarea placeholder="Beschreibung" name="data.description" class="flex-grow">{{data.description}}</textarea>
+      <label class="flex-row">
+        <textarea placeholder="Beschreibung" name="data.description">{{data.description}}</textarea>
+      </label>
+      <div>
+        <label class="flex-row multi-item">
+          <span>
+            <input type="checkbox" name="data.showOnToken" {{checked item.showOnToken}} />
+          </span>
+          <span>Auf Token anzeigen</span>
+        </label>
       </div>
     </div>
   </header>

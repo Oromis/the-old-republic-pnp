@@ -61,7 +61,7 @@ export default {
       if (userEffect != null) {
         const effect = game.items.get(userEffect)
         if (effect != null) {
-          await this.actor.createEmbeddedEntity('OwnedItem', effect.data)
+          await this.actor.createEmbeddedEntity('OwnedItem', ObjectUtils.omit(effect.data, ['id']))
         } else {
           ui.notifications.error(`Aktiver Effekt ${this.data.data.activeEffects.onUser} nicht gefunden!`)
         }

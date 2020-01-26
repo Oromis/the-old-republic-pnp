@@ -9,6 +9,7 @@ import { measureDistance } from '../overrides/DistanceMeasurement.js'
 import { keyMissing } from '../util/ProxyUtils.js'
 import Modifier, { STAGE_PERMANENT, STAGE_TEMPORARY } from '../util/Modifier.js'
 import ActorTypes from '../datasets/ActorTypes.js'
+import TokenUtils from '../util/TokenUtils.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
@@ -681,8 +682,13 @@ export default class SwTorActor extends Actor {
       const item = await super.createEmbeddedEntity(embeddedName, data, ...rest)
       if (data.type === 'active-effect') {
         const activeEffect = this.items.find(i => i._id === item._id)
-        if (activeEffect != null) {
+        if (activeEffect != null && activeEffect.showOnToken) {
           await this._emitActiveEffectEvent('onInit', [activeEffect])
+          if (activeEffect) {
+            for (const token of this._linkedTokens) {
+              await TokenUtils.addEffect(token, activeEffect.img)
+            }
+          }
         } else {
           ui.notifications.error(`Aktiver Effekt ${item._id} nicht gefunden!`)
         }
@@ -702,6 +708,11 @@ export default class SwTorActor extends Actor {
     return this._checkValidItem(data, () => super.updateEmbeddedEntity(embeddedName, data, ...rest))
   }
 
+  async deleteEmbeddedEntity(embeddedName, id, ...rest) {
+    this._handleDeletedOwnedItem(id)
+    return super.deleteEmbeddedEntity(embeddedName, id, ...rest)
+  }
+
   async updateManyEmbeddedEntities(embeddedName, changes, ...rest) {
     if (this.isToken) {
       // There seems to be a FoundryVTT bug in 0.4.5 that prevents updateManyEmbeddedEntities from working for
@@ -711,6 +722,20 @@ export default class SwTorActor extends Actor {
       }
     } else {
       return super.updateManyEmbeddedEntities(embeddedName, changes, ...rest)
+    }
+  }
+
+  async deleteManyEmbeddedEntities(embeddedName, ids, ...rest) {
+    await Promise.all(ids.map(id => this._handleDeletedOwnedItem(id)))
+    return super.deleteManyEmbeddedEntities(embeddedName, ids, ...rest)
+  }
+
+  async _handleDeletedOwnedItem(id) {
+    const activeEffect = this.items.find(i => i._id === id)
+    if (activeEffect != null && activeEffect.type === 'active-effect' && activeEffect.showOnToken) {
+      for (const token of this._linkedTokens) {
+        await TokenUtils.removeEffect(token, activeEffect.img)
+      }
     }
   }
 
@@ -740,5 +765,12 @@ export default class SwTorActor extends Actor {
     }
 
     return cb()
+  }
+
+  get _linkedTokens() {
+    return [
+      ...this.getActiveTokens(true),
+      ...(this.token != null ? [this.token] : [])
+    ]
   }
 }
