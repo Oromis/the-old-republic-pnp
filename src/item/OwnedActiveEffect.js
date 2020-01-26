@@ -84,7 +84,14 @@ export default {
                   if (metricsChanges == null) {
                     metricsChanges = {}
                   }
-                  metricsChanges[action.key] = (metricsChanges[action.key] || 0) + (valueFactor * metricsChanges.value.delta)
+                  try {
+                    const actionValue = Math.round(Parser.evaluate(action.value.delta, this.actor.propertyValues))
+                    metricsChanges[action.key] = (metricsChanges[action.key] || 0) + (valueFactor * actionValue)
+                  } catch (e) {
+                    console.warn(e)
+                    ui.notifications.error(`Konnte Effekt ${action.value.delta} nicht evaluieren: ${e.message}`)
+                  }
+
                   break
                 }
 
