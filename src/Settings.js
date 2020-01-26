@@ -27,4 +27,22 @@ export const registerSystemSettings = function() {
     default: true,
     type: Boolean,
   })
+
+  game.settings.register("sw-tor", "autoShowChatOnCheck", {
+    name: "Chat-Tab bei Probe automatisch anzeigen",
+    hint: "Chat-Tab automatisch anzeigen, sobald du eine Probe würfelst (um das Ergebnis sofort sehen zu können)",
+    scope: "client",
+    config: true,
+    default: true,
+    type: Boolean,
+  })
+
+  game.settings.register("sw-tor", "autoRollConfirmation", {
+    name: "1er und 20er automatisch bestäigen",
+    hint: "Wirft Bestätigungsproben für geworfene 1er und 20er automatisch",
+    scope: "client",
+    config: true,
+    default: false,
+    type: Boolean,
+  })
 }

@@ -113,6 +113,17 @@ export default {
 
     processCheck(result, { isConfirmation })
 
+    let confirmation
+    if (result.needsConfirmation && game.settings.get('sw-tor', 'autoRollConfirmation')) {
+      // User wants confirmations to be rolled automatically, without manual interaction
+      confirmation = await this.rollCheck(ObjectUtils.cloneDeep(result), {
+        isConfirmation: true,
+        sendToChat: false,
+      })
+      result.confirmation = confirmation
+      processCheck(result)
+    }
+
     if (sendToChat) {
       const chatData = {
         user: game.user.id,
@@ -121,7 +132,7 @@ export default {
         flavor: label,
         speaker: { actor },
         sound: CONFIG.sounds.dice,
-        content: await renderTemplate('systems/sw-tor/templates/check-message.html', { check: result }),
+        content: await renderTemplate('systems/sw-tor/templates/check-message.html', { check: result, confirmation }),
         flags: { 'sw-tor': { check: result } },
         permission: { default: 0, [game.user.id]: CONST.ENTITY_PERMISSIONS.OWNER },
       }
@@ -145,6 +156,13 @@ export default {
           } else {
             await combatAction.addDefenseMessage(message)
           }
+        }
+      }
+
+      if (game.settings.get('sw-tor', 'autoShowChatOnCheck')) {
+        const sidebar = ObjectUtils.try(ui, 'sidebar')
+        if (sidebar != null && typeof sidebar.activateTab === 'function') {
+          sidebar.activateTab('chat')
         }
       }
     }

@@ -57,8 +57,9 @@ export default {
       if (this.duration.hasOneTimeCost) {
         await this.actor.modifyMetrics(this.actor.calculateMetricsCosts(this.cost.oneTime.diff))
       }
-      if (this.data.data.activeEffects.onUser != null) {
-        const effect = game.items.get(this.data.data.activeEffects.onUser)
+      const userEffect = ObjectUtils.try(this.data.data.activeEffects, 'onUser')
+      if (userEffect != null) {
+        const effect = game.items.get(userEffect)
         if (effect != null) {
           await this.actor.createEmbeddedEntity('OwnedItem', effect.data)
         } else {

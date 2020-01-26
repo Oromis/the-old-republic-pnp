@@ -222,7 +222,7 @@ export default class SwTorActorSheet extends ActorSheet {
         type: incomingDamageType,
         amount: incomingDamageAmount,
         resistances: incomingDamage.resistances,
-        cost: incomingDamage.costs,
+        cost: incomingDamage.costs != null ? this.actor.calculateMetricsCosts(incomingDamage.costs) : null,
       },
     }
     data.actor = this.actor

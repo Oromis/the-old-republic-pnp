@@ -8,6 +8,16 @@ function resistFlat(damage) {
   return { damage: Math.max(0, damage - this.value.total) }
 }
 
+function resistForce(damage) {
+  if (this.value.total !== 0) {
+    // Force shield can take all or nothing. Even if it kills the user.
+    const forceCost = Math.round(damage * (0.5 + ((100 - this.value.total) / 100)))
+    return { damage: 0, cost: { MaP: forceCost } }
+  } else {
+    return { damage }
+  }
+}
+
 function resistEnergy(damage, type, actor) {
   const EnP = actor.metrics.EnP.value
   let damageMulti = 1
@@ -37,7 +47,11 @@ function resistPercentage(damage) {
 
 class ResistanceTypeInstance extends Property {
   canResist(damageType) {
-    return this._staticData.resists.indexOf(damageType.key) !== -1
+    if (typeof this._staticData.resists === 'boolean') {
+      return this._staticData.resists
+    } else {
+      return this._staticData.resists.indexOf(damageType.key) !== -1
+    }
   }
 
   resist(damage, type) {
@@ -63,6 +77,9 @@ class ResistanceTypePrototype extends PropertyPrototype {
 }
 
 const list = [
+  new ResistanceTypePrototype('r_force',
+    { label: 'Machtschild', icon: 'icons/svg/circle.svg', resists: true, resist: resistForce }
+  ),
   new ResistanceTypePrototype('r_shield',
     { label: 'Schild', icon: 'icons/svg/circle.svg', resists: ['energy', 'ion', 'shock'], resist: resistEnergy }
   ),

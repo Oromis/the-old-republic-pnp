@@ -616,22 +616,24 @@
                   {{damageIcon type=ui.damageIncoming.type classes='table-icon'}}
                 </div>
                 {{#each ui.damageIncoming.resistances as |res|}}
-                  <div class="flex-row multi-item flex-end">
-                    <img src="{{res.icon}}" alt="{{res.label}}" title="{{res.label}}" class="table-icon" />
-                    <span title="{{formatExplanation res.value.components}}">{{res.value.total}}</span>
-                    <span>|</span>
-                    <span>{{res.damageBefore}}</span>
-                    <i class="fas fa-arrow-right"></i>
-                    <span>{{res.damageAfter}}</span>
-                  </div>
+                  {{#if res.value.total}}
+                    <div class="flex-row multi-item flex-end">
+                      <img src="{{res.icon}}" alt="{{res.label}}" title="{{res.label}}" class="table-icon" />
+                      <span title="{{formatExplanation res.value.components}}">{{res.value.total}}</span>
+                      <span>|</span>
+                      <span>{{res.damageBefore}}</span>
+                      <i class="fas fa-arrow-right"></i>
+                      <span>{{res.damageAfter}}</span>
+                    </div>
+                  {{/if}}
                 {{/each}}
                 {{#if ui.damageIncoming.cost}}
                   <div class="flex-row multi-item flex-end border-top">
                     <img src="icons/svg/degen.svg" alt="Effektivschaden" title="Effektivschaden" class="table-icon" />
                     {{#each ui.damageIncoming.cost as |cost key|}}
-                      <span>-{{cost}} {{key}}</span>
+                      <span>{{cost}} {{key}}</span>
                     {{/each}}
-                    <a class="modify-metrics" data-deduct="{{json ui.damageIncoming.cost}}" title="Abziehen">
+                    <a class="modify-metrics" data-add="{{json ui.damageIncoming.cost}}" title="Abziehen">
                       <i class="fas fa-minus-square"></i>
                     </a>
                   </div>
