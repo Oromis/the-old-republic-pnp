@@ -63,6 +63,11 @@
     flex-basis: unset;
 }
 
+.sw-tor.sheet.item .profile-img {
+    width: 48px;
+    height: 48px;
+}
+
 .sw-tor.sheet .header-fields {
     flex: 1;
 }

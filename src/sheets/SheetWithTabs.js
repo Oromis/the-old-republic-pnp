@@ -138,7 +138,6 @@ export default class SheetWithTabs extends Mixin {
   }
 
   _onClose = () => {
-    console.log('Removing resize handler')
     window.removeEventListener('resize', this._onResize)
   }
 }
