@@ -777,9 +777,6 @@ export default class SwTorActor extends Actor {
   }
 
   get _linkedTokens() {
-    return [
-      ...this.getActiveTokens(true),
-      ...(this.token != null ? [this.token] : [])
-    ]
+    return this.getActiveTokens()
   }
 }
