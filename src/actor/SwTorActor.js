@@ -685,8 +685,8 @@ export default class SwTorActor extends Actor {
         if (activeEffect == null) {
           // There's a foundry bug which will sometimes report the wrong ID for the created item
           // (it will actually return the actor's ID). This is a workaround for this case.
-          activeEffect = this.items[this.items.length]
-          if (activeEffect.type !== 'active-effect') {
+          activeEffect = this.items[this.items.length - 1]
+          if (activeEffect != null && activeEffect.type !== 'active-effect') {
             // Sanity check failed
             activeEffect = null
           }
