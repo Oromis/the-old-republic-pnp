@@ -31,3 +31,7 @@
 .sheet .sheet-header img {
   flex-basis: auto;
 }
+
+.subdirectory .directory-item {
+  margin-left: 10px;
+}
