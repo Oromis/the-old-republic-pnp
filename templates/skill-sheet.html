@@ -98,6 +98,14 @@
           </tr>
         {{/if}}
         {{#if skill.isForceSkill}}
+          <tr title="Muss eine Probe geworfen werden, um den Machteffekt zu aktivieren?">
+            <td class="align-right">Benötigt Probe?</td>
+            <td>
+              <label>
+                <input type="checkbox" name="data.needsCheck" {{checked skill.needsCheck}} />
+              </label>
+            </td>
+          </tr>
           <tr>
             <td class="align-right">Reichweite</td>
             <td>
@@ -172,6 +180,19 @@
                 </select>
                 {{expressionVariables skill.effect.variables}}
               </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-right">Aktiver Effekt auf Benutzer</td>
+            <td>
+              <select name="data.activeEffects.onUser">
+                {{#select data.activeEffects.onUser}}
+                  <option value="">[Keiner]</option>
+                  {{#each activeEffects as |activeEffect|}}
+                    <option value="{{activeEffect.id}}">{{activeEffect.name}}</option>
+                  {{/each}}
+                {{/select}}
+              </select>
             </td>
           </tr>
           <tr>

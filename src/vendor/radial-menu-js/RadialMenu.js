@@ -147,8 +147,9 @@ RadialMenu.prototype.handleClick = function () {
       self.showNestedMenu(item)
     } else {
       if (self.onClick) {
-        self.onClick(item)
-        if (self.closeOnClick) {
+        let close = self.closeOnClick
+        self.onClick(item, { preventClose: () => close = false })
+        if (close) {
           self.close()
         }
       }
@@ -395,12 +396,12 @@ RadialMenu.prototype.setSelectedIndex = function (index) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RadialMenu.prototype.createIconTag = function (x, y, link) {
+RadialMenu.prototype.createIconTag = function (x, y, link, { scale = 1, className = '' } = {}) {
   let icon
   if (typeof link === 'string') {
     icon = document.createElementNS('http://www.w3.org/2000/svg', 'text')
     icon.setAttribute('fill', 'white')
-    icon.setAttribute('class', 'fas-icon')
+    icon.setAttribute('class', ['fas-icon', className].join(' '))
     icon.textContent = link
   } else if (typeof link === 'object' && link != null && typeof link.image === 'string') {
     icon = document.createElementNS('http://www.w3.org/2000/svg', 'image')
@@ -409,7 +410,7 @@ RadialMenu.prototype.createIconTag = function (x, y, link) {
     throw new Error(`Bad icon format: ${link}`)
   }
 
-  let size = 10 * ObjectUtils.try(link, 'scale', { default: 1 })
+  let size = 10 * ObjectUtils.try(link, 'scale', { default: 1 }) * scale
   icon.setAttribute('x', RadialMenu.numberToString(x))
   icon.setAttribute('y', RadialMenu.numberToString(y))
   icon.setAttribute('width', `${size}`)
@@ -452,6 +453,7 @@ RadialMenu.prototype.appendSectorPath = function (startAngleDeg, endAngleDeg, sv
       g.appendChild(text)
     }
 
+    let mainIconSize = 10
     if (item.icon) {
       const icon = self.createIconTag(centerPoint.x, centerPoint.y, item.icon)
       let size = +icon.getAttribute('width')
@@ -460,6 +462,19 @@ RadialMenu.prototype.appendSectorPath = function (startAngleDeg, endAngleDeg, sv
         offsetY += 8
       }
       icon.setAttribute('transform', `translate(${(-size / 2)},${(-size / 2) + offsetY})`)
+
+      g.appendChild(icon)
+    }
+    if (item.subIcon) {
+      const icon = self.createIconTag(centerPoint.x, centerPoint.y, item.subIcon, { scale: 0.5, className: 'sub-icon' })
+      let size = +icon.getAttribute('width')
+      const offset = 0.4
+      let offsetY = (item.label ? -3 : 0) + (mainIconSize * offset)
+      if (icon instanceof SVGTextElement) {
+        offsetY += 4
+      }
+      let offsetX = mainIconSize * offset
+      icon.setAttribute('transform', `translate(${(-size / 2) + offsetX},${(-size / 2) + offsetY})`)
 
       g.appendChild(icon)
     }

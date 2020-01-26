@@ -27,17 +27,20 @@ function fillWithOverflow({ menu, availableSlots, objects, generateItem, generat
   let parent = menu
   for (let i = 0; i < objects.length; i++) {
     const object = objects[i]
-    const last = i === objects.length - 1
-    if ((last ? availableSlots.length : availableSlots.length - 1) < generateItem.length) {
-      // We need a new sub-menu
-      const subMenuItem = generateSubMenuItem()
-      parent[availableSlots[0]] = subMenuItem
-      parent = subMenuItem.items
-      availableSlots = generateAvailableSlots()
-    }
+    const items = generateItem.map(generator => generator(object)).filter(i => i != null)
+    if (items.length > 0) {
+      const last = i === objects.length - 1
+      if ((last ? availableSlots.length : availableSlots.length - 1) < items.length) {
+        // We need a new sub-menu
+        const subMenuItem = generateSubMenuItem()
+        parent[availableSlots[0]] = subMenuItem
+        parent = subMenuItem.items
+        availableSlots = generateAvailableSlots()
+      }
 
-    for (const generator of generateItem) {
-      parent[availableSlots.shift()] = generator(object)
+      for (const item of items) {
+        parent[availableSlots.shift()] = item
+      }
     }
   }
 }
@@ -55,12 +58,14 @@ function getMenuStructure(actor) {
         label: 'Attacke',
         title: `Attacke ${weapon.primaryEquippedSlot.label} (${weapon.name})`,
         icon: { image: weapon.img, scale: 1.5 },
+        subIcon: '\uf6cf',
         action: () => weapon.rollAttack(),
       }),
       weapon => ({
         label: 'Schaden',
         title: `Schaden ${weapon.primaryEquippedSlot.label} (${weapon.name})`,
         icon: { image: weapon.img, scale: 1.5 },
+        subIcon: '\uf6d1',
         action: () => weapon.rollDamage(),
       })
     ],
@@ -89,6 +94,7 @@ function getMenuStructure(actor) {
       label: 'Parade',
       title: `Parade ${weapon.primaryEquippedSlot.label} (${weapon.name})`,
       icon: { image: weapon.img, scale: 1.5 },
+      subIcon: '\uf3ed',
       action: () => weapon.rollParade(),
     }),
     generateSubMenuItem: () => ({
@@ -112,12 +118,25 @@ function getMenuStructure(actor) {
       menu: result[2].items,
       availableSlots: [2, 3, 4, 5, 6, 7, 0, 1],
       objects: forceSkills,
-      generateItem: forceSkill => ({
-        label: forceSkill.shortName,
-        icon: { image: forceSkill.img },
-        title: `${forceSkill.name} (${forceSkill.key.toUpperCase()}) wirken`,
-        action: () => forceSkill.rollCheck(),
-      }),
+      generateItem: [
+        forceSkill => forceSkill.needsCheck ? ({
+          label: forceSkill.shortName,
+          icon: { image: forceSkill.img },
+          subIcon: '\uf6cf',
+          title: `${forceSkill.name} würfeln`,
+          action: ({ preventClose }) => {
+            forceSkill.rollCheck()
+            preventClose()
+          },
+        }) : null,
+        forceSkill => ({
+          label: forceSkill.shortName,
+          icon: { image: forceSkill.img },
+          subIcon: '\uf04b',
+          title: `${forceSkill.name} aktivieren`,
+          action: () => forceSkill.apply(),
+        })
+      ],
       generateSubMenuItem: () => ({
         label: 'Mehr ...',
         icon: '\uf669',
@@ -143,9 +162,9 @@ function launchRadialMenu(event) {
     destroyOnClose: true,
     position: { x: event.data.originalEvent.clientX, y: event.data.originalEvent.clientY },
     menuItems: getMenuStructure(event.target.actor),
-    onClick: function (item) {
+    onClick: function (item, options) {
       if (typeof item.action === 'function') {
-        item.action()
+        item.action(options)
       }
     }
   })

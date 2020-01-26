@@ -255,6 +255,7 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('button.change-metric-gained').click(this._onChangeMetricGained)
     html.find('.do-roll').click(this._onDoRoll)
     html.find('.roll-check').click(this._onRollCheck)
+    html.find('.apply-force-skill').click(this._onApplyForceSkill)
     html.find('.run-actor-action').click(this._onRunActorAction)
     html.find('.item-create').click(this._onCreateItem)
     html.find('.add-missing-skills').click(this._onAddMissingSkills)
@@ -413,6 +414,13 @@ export default class SwTorActorSheet extends ActorSheet {
     const label = event.currentTarget.getAttribute('data-label') || undefined
 
     await RollUtils.rollCheck(check, { actor: this.actor.id, label })
+  }
+
+  _onApplyForceSkill = async event => {
+    const skill = this.actor.getOwnedItem(event.currentTarget.getAttribute('data-id'))
+    if (skill != null) {
+      await skill.apply()
+    }
   }
 
   _onRunActorAction = event => {

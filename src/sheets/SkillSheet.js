@@ -34,6 +34,7 @@ export default class SkillSheet extends ItemSheet {
    */
   getData() {
     const data = super.getData()
+    data.activeEffects = this.activeEffects
     data.skill = this.item
     return data
   }
@@ -49,5 +50,9 @@ export default class SkillSheet extends ItemSheet {
 
   get skill() {
     return this.item
+  }
+
+  get activeEffects() {
+    return game.items.entities.filter(i => i.type === 'active-effect')
   }
 }

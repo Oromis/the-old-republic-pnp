@@ -333,6 +333,7 @@
               <th>Effekt</th>
               <th>Ausrichtung</th>
               <th class="icon-col"></th>
+              <th class="icon-col"></th>
             </tr>
           </thead>
           <tbody>
@@ -389,6 +390,11 @@
                 <td>
                   <a class="roll-check" title="Probe werfen" data-path="skills.{{skill.key}}.check" data-label="{{skill.name}}">
                     <i class="fas fa-dice-d20"></i>
+                  </a>
+                </td>
+                <td>
+                  <a class="apply-force-skill" title="Ausführen" data-id="{{skill.id}}">
+                    <i class="fas fa-play"></i>
                   </a>
                 </td>
               </tr>

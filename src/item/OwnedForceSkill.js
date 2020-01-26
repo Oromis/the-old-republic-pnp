@@ -51,5 +51,20 @@ export default {
         }
       })
     })
+
+    // "Casts" the force skill, deducting initial costs and activating any permanent effects
+    this.apply = async function apply() {
+      if (this.duration.hasOneTimeCost) {
+        await this.actor.modifyMetrics(this.actor.calculateMetricsCosts(this.cost.oneTime.diff))
+      }
+      if (this.data.data.activeEffects.onUser != null) {
+        const effect = game.items.get(this.data.data.activeEffects.onUser)
+        if (effect != null) {
+          await this.actor.createEmbeddedEntity('OwnedItem', effect.data)
+        } else {
+          ui.notifications.error(`Aktiver Effekt ${this.data.data.activeEffects.onUser} nicht gefunden!`)
+        }
+      }
+    }
   }
 }

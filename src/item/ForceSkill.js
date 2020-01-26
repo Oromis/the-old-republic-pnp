@@ -29,6 +29,14 @@ export default {
       return StringUtils.capitalize(name)
     })
 
+    defineGetter(this, 'needsCheck', function () {
+      let result = this.data.data.needsCheck
+      if (result == null) {
+        result = true
+      }
+      return result
+    })
+
     this._addUpdateFilter('data.cost.oneTime.formula', data => {
       Object.assign(data.data.cost.oneTime, analyzeExpression({ expression: data.data.cost.oneTime.formula, defaultExpr: '0' }))
     })
