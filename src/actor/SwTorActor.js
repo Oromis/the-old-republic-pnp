@@ -681,7 +681,16 @@ export default class SwTorActor extends Actor {
     return this._checkValidItem(data, async () => {
       const item = await super.createEmbeddedEntity(embeddedName, data, ...rest)
       if (data.type === 'active-effect') {
-        const activeEffect = this.items.find(i => i._id === item._id)
+        let activeEffect = this.items.find(i => i._id === item._id)
+        if (activeEffect == null) {
+          // There's a foundry bug which will sometimes report the wrong ID for the created item
+          // (it will actually return the actor's ID). This is a workaround for this case.
+          activeEffect = this.items[this.items.length]
+          if (activeEffect.type !== 'active-effect') {
+            // Sanity check failed
+            activeEffect = null
+          }
+        }
         if (activeEffect != null && activeEffect.showOnToken) {
           await this._emitActiveEffectEvent('onInit', [activeEffect])
           if (activeEffect) {
