@@ -125,9 +125,7 @@ export default {
     this.onNextTurn = async function onNextTurn() {
       const combatAction = this.processAttacks()
       for (const [actor, bonus] of combatAction.effectivenessBonusMap) {
-        await actor.update({
-          'data.defenseEffectivenessBonus': (actor.defenseEffectivenessBonus || 0) + bonus,
-        })
+        await (actor.defenseEffectivenessBonus = (actor.defenseEffectivenessBonus || 0) + bonus)
       }
       if (this.data.data.attacks && this.data.data.attacks.length > 0) {
         await this.update({
@@ -140,7 +138,7 @@ export default {
     this.onPrevTurn = async function onPrevTurn() {
       const combatAction = this.processAttacks(this.data.data.prevAttacks)
       for (const [actor, bonus] of combatAction.effectivenessBonusMap) {
-        await actor.update({ 'data.defenseEffectivenessBonus': (actor.defenseEffectivenessBonus || 0) - bonus })
+        await (actor.defenseEffectivenessBonus = (actor.defenseEffectivenessBonus || 0) - bonus)
       }
       if (this.data.data.prevAttacks && this.data.data.prevAttacks.length > 0) {
         await this.update({

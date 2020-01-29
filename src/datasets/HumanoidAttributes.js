@@ -1,23 +1,12 @@
 import Config from '../Config.js'
 import ObjectUtils from '../util/ObjectUtils.js'
-import {calcUpgradeCost, explainPermanentPropertyValue} from '../CharacterFormulas.js'
-import Property from '../properties/Property.js'
+import {calcUpgradeCost} from '../CharacterFormulas.js'
 import AttributePrototype from '../properties/AttributePrototype.js'
-import { makeRoll } from '../util/EntityUtils.js'
+import Attribute from './Attribute.js'
 
-class HumanoidAttribute extends Property {
+class HumanoidAttribute extends Attribute {
   get upgradeCost() {
     return calcUpgradeCost(this._entity, this, { max: this._entity.xp.free })
-  }
-
-  get check() {
-    return {
-      rolls: [makeRoll(this)],
-    }
-  }
-
-  get permanentValue() {
-    return explainPermanentPropertyValue(this.entity, this)
   }
 
   get currentXpCategory() {

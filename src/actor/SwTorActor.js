@@ -383,6 +383,50 @@ export default class SwTorActor extends Actor {
   }
 
   /**
+   * Given a cost object of the form { <metric-key>: <cost|number> }, calculates an object containing the actual
+   * values being deducted from the actor's metrics if they need to be paid at the current point in time.
+   * Doesn't actually pay these costs, it just computes the effect it would have on the actor.
+   * @param costs {object} The costs object
+   * @returns {object} A diff of the actor's metrics
+   */
+  calculateMetricsCosts(costs) {
+    const result = {}
+    for (const key of Object.keys(costs)) {
+      const metric = this.metrics[key]
+      if (metric != null) {
+        const costOptions = metric.costOptions
+        let costAmount = costs[key]
+        for (let i = 0; i < costOptions.length; ++i) {
+          let costOption = costOptions[i]
+          if (typeof costOption === 'string') {
+            costOption = { key: costOption, factor: 1 }
+          }
+          const costKey = costOption.key
+
+          const previouslyDeducted = -(result[costKey] || 0)
+          const available = this.metrics[costKey].value - previouslyDeducted
+          let toDeduct = costAmount * costOption.factor
+
+          if (available < toDeduct && i < costOptions.length - 1) {
+            // Costs can be paid via a different metric
+            toDeduct = available
+          }
+
+          costAmount -= Math.round(toDeduct / costOption.factor)
+          if (toDeduct > 0) {
+            result[costKey] = -(previouslyDeducted + toDeduct)
+          }
+
+          if (costAmount === 0) {
+            break
+          }
+        }
+      }
+    }
+    return result
+  }
+
+  /**
    * Changes the actor's metrics' values by the diff provided.
    */
   modifyMetrics(diff, { dryRun = false } = {}) {

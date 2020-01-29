@@ -36,21 +36,34 @@ import SpecialAbility from '../item/SpecialAbility.js'
 import CombatAction from '../item/CombatAction.js'
 import OwnedActiveEffect from '../item/OwnedActiveEffect.js'
 import ActiveEffect from '../item/ActiveEffect.js'
+import BeastActor from '../actor/BeastActor.js'
+import BeastAttributes from './BeastAttributes.js'
+import BeastMetrics from './BeastMetrics.js'
 
 export default Object.freeze({
   fromActorType(type) {
-    // TODO return different data sets for droids, ships, ...
-    return {
-      delegate: HumanoidActor,
-      attributes: HumanoidAttributes,
-      metrics: HumanoidMetrics,
-      species: HumanoidSpecies,
-      resistances: ResistanceTypes,
-      xpTable: XpTable,
-      skillCategories: SkillCategories,
-      itemTypes: ItemTypes,
-      damageTypes: DamageTypes,
-      slots: HumanoidSlots,
+    switch (type) {
+      case 'beast':
+        return {
+          delegate: BeastActor,
+          attributes: BeastAttributes,
+          metrics: BeastMetrics,
+          resistances: ResistanceTypes,
+        }
+
+      default:
+        return {
+          delegate: HumanoidActor,
+          attributes: HumanoidAttributes,
+          metrics: HumanoidMetrics,
+          species: HumanoidSpecies,
+          resistances: ResistanceTypes,
+          xpTable: XpTable,
+          skillCategories: SkillCategories,
+          itemTypes: ItemTypes,
+          damageTypes: DamageTypes,
+          slots: HumanoidSlots,
+        }
     }
   },
 

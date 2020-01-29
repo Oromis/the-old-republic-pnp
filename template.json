@@ -2,7 +2,7 @@
   "Actor": {
     "types": ["pc", "npc"],
     "templates": {
-      "common": {
+      "humanoid": {
         "attributes": {},
         "metrics": {
           "LeP": {
@@ -44,10 +44,31 @@
       }
     },
     "pc": {
-      "templates": ["common"]
+      "templates": ["humanoid"]
     },
     "npc": {
-      "templates": ["common"]
+      "templates": ["humanoid"]
+    },
+    "beast": {
+      "attributes": {},
+      "metrics": {
+        "LeP": {
+          "value": 0,
+          "max": 0
+        },
+        "AuP": {
+          "value": 0,
+          "max":  0
+        }
+      },
+      "resistances": {},
+      "regeneration": {},
+      "targetDistance": {
+        "type": "",
+        "value": null
+      },
+      "defenseEffectivenessBonus": 0,
+      "initiativeFormula": "1d12"
     }
   },
   "Item": {

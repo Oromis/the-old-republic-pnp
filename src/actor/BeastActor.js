@@ -1,59 +1,19 @@
-import { calcFreeXp, calcGp, calcTotalXp } from '../CharacterFormulas.js'
 import Config from '../Config.js'
 import {
   defineCachedGetter,
-  defineEnumAccessor,
   defineGetter,
   explainComputedValue
 } from '../util/EntityUtils.js'
-import SwTorItem from '../item/SwTorItem.js'
 import { roundDecimal } from '../util/MathUtils.js'
-import { STAGE_PERMANENT } from '../util/Modifier.js'
 import RollUtils from '../util/RollUtils.js'
 import CombatAction from '../item/CombatAction.js'
 import ExplanationUtils from '../util/ExplanationUtils.js'
 
 /**
- * Functionality for humanoid characters. "humanoid" refers to intelligent life forms, it has
- * nothing to do with physical properties. E.g. an insectoid species like the Geonosians would be
- * classified as humanoid too.
- *
- * This is a mixin src. It's method will be called at the corresponding points in the actor's
- * lifecycle. `this` refers to the actor.
- *
- * This is done instead of an inheritance relationship because FoundryVTT doesn't support different
- * actor classes for different actor types (yet).
+ * Functionality for beasts. Beasts are always NPCs and use a different (simplified) charsheet
  */
 export default {
   beforeConstruct() {
-    defineEnumAccessor(this, 'species', { dataSetKey: 'species' })
-
-    const actor = this
-    defineGetter(this, 'gp', function () {
-      return {
-        ...this.data.data.gp,
-        get value() {
-          return actor._cache.lookup('currentGp', () => calcGp(actor))
-        }
-      }
-    })
-
-    defineGetter(this, 'xp', function () {
-      return {
-        ...this.data.data.xp,
-        get total() {
-          return actor._cache.lookup('totalXp', () => calcTotalXp(actor))
-        },
-        get free() {
-          return actor._cache.lookup('freeXp', () => calcFreeXp(actor))
-        }
-      }
-    })
-
-    defineGetter(this, 'xpFromGp', function () {
-      return this.xp.gp * Config.character.gpToXpRate
-    })
-
     Object.defineProperty(this, 'defenseEffectivenessBonus', {
       enumerable: true,
       get() {
@@ -63,42 +23,6 @@ export default {
         return this.update({ 'data.defenseEffectivenessBonus': newValue })
       }
     })
-
-    this._getEmptySlotWeapon = function _getEmptySlotWeapon(slotKey) {
-      const skillRating = this.skillValue('fau')
-      return new SwTorItem({
-        data: {
-          skill: 'fau',
-          damage: {
-            formula: `${skillRating / 5}+${skillRating >= 50 ? 2 : 1}d6`
-          },
-          damageType: 'stamina',
-          hasStrengthModifier: true,
-          slots: [slotKey],
-        },
-        type: 'melee-weapon',
-        name: 'Faust',
-        img: 'systems/sw-tor/icons/ui/fist-raised-solid.svg',
-      }, { actor: this, temporary: true })
-    }
-
-    const superCalcModifiers = this._calcModifiers
-    this._calcModifiers = function _calcModifiers() {
-      const result = superCalcModifiers.call(this)
-
-      // The actor's species can give modifiers
-      if (this.species != null) {
-        for (const [key, value] of Object.entries(this.species.mods || {})) {
-          result.getModifier(key).inject(value, { label: this.species.name, stage: STAGE_PERMANENT })
-        }
-      }
-
-      return result
-    }
-
-    this.getFallbackCombatSkill = function getFallbackCombatSkill() {
-      return this.skills.fau
-    }
 
     defineCachedGetter(this, 'baseInitiativeExplanation', () => explainComputedValue({
       value: roundDecimal((this.attrValue('in') + this.attrValue('sc')) / 5, 2),
@@ -148,13 +72,6 @@ export default {
         const encumberance = Math.ceil((((0.3 - staminaPercentage) * (10/3)) ** 2) * 5)
         result.total += encumberance
         result.components.push({ label: 'Erschöpfung', value: encumberance })
-      }
-
-      // Encumberance from inventory weight
-      if (this.weight.isOverloaded) {
-        const encumberance = Math.ceil(((this.weight.value / this.weight.max) - 1) * 10)
-        result.total += encumberance
-        result.components.push({ label: 'Überladung', value: encumberance })
       }
 
       // Encumberance from armor & carried items
