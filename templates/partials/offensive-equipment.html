@@ -1,0 +1,72 @@
+{{#each actor.equippedWeapons as |weapon index|}}
+  {{#if weapon.skill}}
+    <div class="weapon-slot multi-item">
+      <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
+      <div class="line-view multi-item">
+        <div class="flex-row multi-item">
+          <img src="icons/svg/sword.svg" class="table-icon" alt="Attacke" title="Attacke" />
+          {{> "systems/sw-tor/templates/check-preview.html"
+              check=weapon.attackCheck
+              action=(concat 'equippedWeapons.' index '.rollAttack')
+          }}
+        </div>
+        <div class="flex-row multi-item">
+          <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)" title="Erleichterung (>0) / Erschwernis (<0)" />
+          <input type="text" name="items.{{weapon.id}}.data.attackAdvantage"
+                 value="{{weapon.data.data.attackAdvantage}}" data-dtype="Number"
+                 title="Erleichterung (>0) / Erschwernis (<0)"
+          />
+          {{#if weapon.itemType.isRangedWeapon}}
+            <img src="icons/svg/target.svg" class="table-icon" alt="Genauigkeit" title="Genauigkeit" />
+            <span title="Genauigkeit">{{weapon.currentPrecision}}</span>
+          {{/if}}
+          {{#if (calcCoordination weapon.primaryEquippedSlot actor)}}
+            <span
+                title="Koordination: {{formatExplanation (explainCoordination weapon.primaryEquippedSlot actor)}}"
+                class="flex-row multi-item"
+            >
+              <i class="fas fa-hand-paper table-icon"></i>
+              <span>{{calcCoordination weapon.primaryEquippedSlot actor}}</span>
+            </span>
+          {{/if}}
+        </div>
+        <div class="flex-row multi-item">
+          {{damageIcon type=weapon.damageType classes='table-icon'}}
+          <span class="flex-row">
+                        {{weapon.damage.formula}}
+            {{#if (isRelevantFactor weapon.currentProjectileEnergy)}}
+              *&nbsp;
+              <span title="Projektilenergie" class="flex-row">
+                {{weapon.currentProjectileEnergy}}
+                (<img src="icons/svg/target.svg" class="table-icon small" alt="Projektilenergie" />)
+              </span>
+            {{/if}}
+            {{#if (isRelevantFactor weapon.currentStrengthModifier)}}
+              *&nbsp;
+              <span title="Körperkraftmodifikator" class="flex-row">
+                {{weapon.currentStrengthModifier}}
+                (<i class="fas fa-fist-raised table-icon small"></i>)
+              </span>
+            {{/if}}
+            {{#if (isLessThan weapon.condition 100)}}
+              *&nbsp;
+              <span title="Zustand" class="flex-row">
+                {{weapon.condition}}%
+                (<i class="fas fa-unlink table-icon small"></i>)
+              </span>
+            {{/if}}
+                      </span>
+          <a class="run-actor-action" title="Schaden auswürfeln" data-action="equippedWeapons.{{index}}.rollDamage">
+            <i class="fas fa-dice-d6"></i>
+          </a>
+        </div>
+        {{#if weapon.energyCost}}
+          <div class="flex-row multi-item">
+            <i class="fas fa-coins table-icon"></i>
+            <span>{{weapon.energyCost}} EnP</span>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+  {{/if}}
+{{/each}}

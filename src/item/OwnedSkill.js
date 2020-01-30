@@ -4,6 +4,7 @@ import RollUtils from '../util/RollUtils.js'
 
 export default {
   beforeConstruct() {
+    defineDataAccessor(this, 'fixed')
     defineDataAccessor(this, 'buff')
     defineDataAccessor(this, 'gained')
 

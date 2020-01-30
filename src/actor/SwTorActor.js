@@ -163,7 +163,7 @@ export default class SwTorActor extends Actor {
   }
 
   get dataSet() {
-    return this._cache.lookup('dataSet', () => DataSets.fromActorType(this.type))
+    return this._cache.lookup('dataSet', () => DataSets.fromActorType(this.data.type))
   }
 
   get modifiers() {
@@ -509,7 +509,7 @@ export default class SwTorActor extends Actor {
   }
 
   get actorType() {
-    return ActorTypes.map[ActorTypes.default]
+    return ActorTypes.map[this.data.type] || ActorTypes.map[ActorTypes.default]
   }
 
   clearCache() {

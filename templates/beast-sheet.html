@@ -47,6 +47,7 @@
   {{!-- Sheet Tab Navigation --}}
   {{#tabGroup id='main' minWidth=600}}
     {{tabHeader id='overview' label='Übersicht'}}
+    {{tabHeader id='skills' label='Fähigkeiten'}}
     {{tabHeader id='items' label='Inventar'}}
   {{/tabGroup}}
 
@@ -54,100 +55,121 @@
   {{#tabContents}}
     {{!-- Attributes Tab --}}
     {{#tabContent groupId='main' id='overview'}}
-      <div class="flex-row flex-wrap multi-item">
-        {{#each actor.attributes.list as |attr|}}
-          <label class="flex-row multi-item">
-            <span>{{formatAttrKey attr.key}}</span>
-            <input type="text" name="data.attributes.{{attr.key}}.fixed" value="{{attr.fixed}}" />
-          </label>
-        {{/each}}
+      <div class="multi-item">
+        <div class="flex-row flex-wrap multi-item">
+          {{#each actor.attributes.list as |attr|}}
+            <label class="flex-row multi-item">
+              <span>{{formatAttrKey attr.key}}</span>
+              <input type="text" name="data.attributes.{{attr.key}}.fixed" value="{{attr.fixed}}" />
+            </label>
+          {{/each}}
+        </div>
+        <div class="flex-row multi-item">
+          {{#each computed.slots as |slot|}}
+            <div class="equipment-tile">
+              {{#if slot}}
+                <div class="equipment-slot equipment-slot--bg">
+                  {{#if slot.item}}
+                    <img src="{{slot.item.img}}" alt="{{slot.item.name}}" class="equipment-item" />
+                  {{/if}}
+                  <div class="equipment-popup">
+                    <h4>{{slot.label}}</h4>
+                    {{#if slot.options}}
+                      <ul>
+                        {{#each slot.options as |item|}}
+                          <li>
+                            <a class="equip-btn {{embedClass name='link-active' when=item.active}}" data-slot="{{slot.key}}" data-item="{{item.id}}">{{item.name}}</a>
+                          </li>
+                        {{/each}}
+                      </ul>
+                    {{/if}}
+                  </div>
+                </div>
+              {{/if}}
+            </div>
+          {{/each}}
+          <div class="flex-grow"></div>
+          {{> "systems/sw-tor/templates/partials/target-distance.html"}}
+        </div>
+        <div class="beast-combat-grid">
+          <div class="multi-item flex-grow">
+            {{> "systems/sw-tor/templates/partials/offensive-equipment.html"}}
+          </div>
+          <div class="multi-item flex-grow">
+            {{> "systems/sw-tor/templates/partials/defensive-equipment.html"}}
+            <div class="flex-row flex-end multi-item">
+              <span>Effektivitätsbonus</span>
+              <input type="text" name="data.defenseEffectivenessBonus" value="{{actor.defenseEffectivenessBonus}}" data-dtype="Number" />
+            </div>
+          </div>
+          <div class="multi-item flex-grow">
+            {{> "systems/sw-tor/templates/partials/incoming-damage.html"}}
+          </div>
+        </div>
       </div>
     {{/tabContent}}
 
+    {{!-- Skills Tab --}}
+    {{#tabContent groupId='main' id='skills' classes='multi-item'}}
+      <div class="padded">
+        <table>
+          <thead>
+            <tr>
+              <th>Skill</th>
+              <th class="attr-key-col" title="Primärattribut">A1</th>
+              <th class="attr-key-col" title="Sekundärattribut">A2</th>
+              <th class="fixed-col">Fix</th>
+              <th class="buff-col">Buff</th>
+              <th class="value-col">Wert</th>
+              <th class="icon-col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each actor.skills.list as |skill|}}
+              <tr {{class when=skill.isBasicSkill then='basic-skill'}} data-item-id="{{skill.id}}">
+                <td>
+                  <div class="flex-row multi-item">
+                    <img src="{{skill.img}}" alt="{{skill.name}}" width="24" height="24" />
+                    <span class="skill-key-col">{{formatAttrKey skill.key}}</span>
+                    <a class="flex-grow item-control item-edit" title="{{skill.name}} bearbeiten">{{skill.name}}</a>
+                    <a class="roll-check" title="Probe werfen" data-path="skills.{{skill.key}}.check" data-label="{{skill.name}}">
+                      <i class="fas fa-dice-d20"></i>
+                    </a>
+                  </div>
+                </td>
+                <td title="{{skill.attribute1.label}}">{{formatAttrKey skill.attribute1.key}}</td>
+                <td title="{{skill.attribute2.label}}">{{formatAttrKey skill.attribute2.key}}</td>
+                <td>
+                  <input type="text" name="skills.{{skill.key}}.data.fixed" value="{{skill.fixed}}" />
+                </td>
+                <td>
+                  <input type="text" name="skills.{{skill.key}}.data.buff" value="{{skill.buff}}" />
+                </td>
+                <td title="{{formatExplanation skill.value.components}}">{{formatBuffedValue skill.value}}</td>
+                <td>
+                  <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{> "systems/sw-tor/templates/partials/missing-skills.html"}}
+    {{/tabContent}}
 
     {{!-- Inventory Tab --}}
     {{#tabContent groupId='main' id='items'}}
       <div class="flex-row multi-item">
         <div class="flex-grow"></div>
-          <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
-            <i class="fas fa-weight-hanging"></i>
-            <span>{{actor.weight.value}}</span>
-            <span>/</span>
-            <span>{{actor.weight.max}}</span>
-          </div>
+        <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
+          <i class="fas fa-weight-hanging"></i>
+          <span>{{actor.weight.value}}</span>
+          <span>/</span>
+          <span>{{actor.weight.max}}</span>
         </div>
-        {{#each computed.inventory as |category|}}
-          <div class="padded">
-            <table>
-            <thead>
-              <tr>
-                <th>
-                  <div class="flex-row multi-item">
-                    <a class="toggle-inventory-view" data-category="{{category.key}}">
-                      {{#if (resolve ../ui.inventoryHidden category.key)}}
-                        <i class="fas fa-eye-slash"></i>
-                      {{else}}
-                        <i class="fas fa-eye"></i>
-                      {{/if}}
-                    </a>
-                    <span>{{category.label}}</span>
-                  </div>
-                </th>
-                {{#if category.isWeapon}}
-                  <th class="damage-col" title="Schaden">Schaden</th>
-                {{/if}}
-                {{#if category.isWearable}}
-                  <th class="damage-col" title="Rüstung">Rüstung</th>
-                  <th class="encumberance-col" title="Behinderung">Behinderung</th>
-                {{/if}}
-                {{#if category.isEquippable}}
-                  <th class="damage-col" title="Zustand">Zustand</th>
-                {{/if}}
-                <th class="price-col" title="Preis"><i class="fas fa-coins"></i></th>
-                <th class="weight-col" title="Gewicht"><i class="fas fa-weight-hanging"></i></th>
-                <th class="icon-col">
-                  <a class="item-create" data-type="{{category.key}}" title="{{category.label}} hinzufügen">
-                    <i class="fas fa-plus"></i>
-                  </a>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#unless (resolve ../ui.inventoryHidden category.key)}}
-                {{#each category.items as |item|}}
-                  <tr class="item" data-item-id="{{item.id}}">
-                    <td>
-                      <div class="flex-row multi-item">
-                        <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
-                        <a class="item-control item-edit" title="{{item.description}}">
-                          {{#if (isMultiple item.quantity)}}
-                            {{item.quantity}}x
-                          {{/if}}
-                          {{item.name}}
-                        </a>
-                      </div>
-                    </td>
-                    {{#if category.isWeapon}}
-                      <td title="Schaden">{{item.damage.formula}}</td>
-                    {{/if}}
-                    {{#if category.isWearable}}
-                      <td title="Rüstung">{{item.armor}}</td>
-                      <td title="Behinderung">{{item.encumberance}}</td>
-                    {{/if}}
-                    {{#if category.isEquippable}}
-                      <td class="damage-col" title="Zustand">{{formatPercentage item.condition}}</td>
-                    {{/if}}
-                    <td title="Preis">{{item.price}}</td>
-                    <td title="Gewicht">{{item.weight}}</td>
-                    <td>
-                      <a class="item-control item-delete" title="{{item.name}} löschen"><i class="fas fa-trash"></i></a>
-                    </td>
-                  </tr>
-                {{/each}}
-              {{/unless}}
-            </tbody>
-          </table>
-        </div>
+      </div>
+      {{#each computed.inventory as |category|}}
+        {{> "systems/sw-tor/templates/partials/inventory-category.html" category=category inventoryHidden=../ui.inventoryHidden}}
       {{/each}}
     {{/tabContent}}
   {{/tabContents}}

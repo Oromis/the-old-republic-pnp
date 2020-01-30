@@ -1,0 +1,5 @@
+.sw-tor .beast-combat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 16px;
+}

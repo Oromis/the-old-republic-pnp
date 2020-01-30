@@ -25,7 +25,7 @@
         "resistances": {},
         "regeneration": {},
         "targetDistance": {
-          "type": "",
+          "type": "auto",
           "value": null
         },
         "defenseEffectivenessBonus": 0,
@@ -103,6 +103,7 @@
         "attribute2": null,
         "xpCategory": null,
         "gained": [],
+        "fixed": 0,
         "buff": 0,
         "value": null
       }

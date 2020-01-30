@@ -8,6 +8,7 @@ import { roundDecimal } from '../util/MathUtils.js'
 import RollUtils from '../util/RollUtils.js'
 import CombatAction from '../item/CombatAction.js'
 import ExplanationUtils from '../util/ExplanationUtils.js'
+import ActorTypes from '../datasets/ActorTypes.js'
 
 /**
  * Functionality for beasts. Beasts are always NPCs and use a different (simplified) charsheet

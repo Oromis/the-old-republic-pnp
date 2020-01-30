@@ -1,0 +1,14 @@
+{{#if actor.missingSkills.length}}
+  <div>
+    <hr />
+    <h3>Fehlende Fähigkeiten</h3>
+    <p>
+      {{#each actor.missingSkills as |skill|}}
+        {{skill.name}}{{#unless @last}},{{/unless}}
+      {{/each}}
+    </p>
+    <div class="flex-row multi-item">
+      <button type="button" class="auto-width add-missing-skills">Hinzufügen</button>
+    </div>
+  </div>
+{{/if}}

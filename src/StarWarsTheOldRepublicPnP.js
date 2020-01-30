@@ -64,6 +64,12 @@ Hooks.once("init", async function() {
     'systems/sw-tor/templates/check-roll.html',
     'systems/sw-tor/templates/check-preview.html',
     'systems/sw-tor/templates/effects-editor.html',
+    'systems/sw-tor/templates/partials/offensive-equipment.html',
+    'systems/sw-tor/templates/partials/defensive-equipment.html',
+    'systems/sw-tor/templates/partials/incoming-damage.html',
+    'systems/sw-tor/templates/partials/inventory-category.html',
+    'systems/sw-tor/templates/partials/target-distance.html',
+    'systems/sw-tor/templates/partials/missing-skills.html',
   ])
 })
 

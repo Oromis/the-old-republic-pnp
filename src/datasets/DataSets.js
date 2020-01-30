@@ -40,6 +40,7 @@ import BeastActor from '../actor/BeastActor.js'
 import BeastAttributes from './BeastAttributes.js'
 import BeastMetrics from './BeastMetrics.js'
 import BeastSlots from './BeastSlots.js'
+import BeastResistanceTypes from './BeastResistanceTypes.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -49,7 +50,7 @@ export default Object.freeze({
           delegate: BeastActor,
           attributes: BeastAttributes,
           metrics: BeastMetrics,
-          resistances: ResistanceTypes,
+          resistances: BeastResistanceTypes,
           itemTypes: ItemTypes,
           damageTypes: DamageTypes,
           slots: BeastSlots,

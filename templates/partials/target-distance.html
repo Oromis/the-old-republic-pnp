@@ -1,0 +1,24 @@
+<div class="multi-item">
+  <div>
+    <strong>Zielentfernung</strong>
+  </div>
+  <div class="flex-row multi-item">
+    <select name="data.targetDistance.type" class="small">
+      {{#select data.targetDistance.type}}
+        <option value="">Manuell</option>
+        <option value="auto">Auto</option>
+      {{/select}}
+    </select>
+    <label class="flex-row">
+      <input
+          type="text"
+          name="data.targetDistance.value"
+          value="{{actor.targetDistance}}"
+          {{#if actor.usesAutomaticTargetDistance}}disabled{{/if}}
+          data-dtype="Number"
+      />
+      <span>&nbsp;m</span>
+    </label>
+  </div>
+  <small><i>Update: [CTRL]+[<]</i></small>
+</div>

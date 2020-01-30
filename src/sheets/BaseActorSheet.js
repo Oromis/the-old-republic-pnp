@@ -24,6 +24,8 @@ export default class BaseActorSheet extends ActorSheet {
           let value = obj[name]
           if (path.indexOf('buff') !== -1) {
             value = processDeltaValue(value, skill.buff || 0)
+          } else if (path.indexOf('fixed') !== -1) {
+            value = processDeltaValue(value, skill.fixed || 0)
           } else if (path.indexOf('vars') !== -1) {
             value = value === '' || isNaN(value) ? '' : +value
           }

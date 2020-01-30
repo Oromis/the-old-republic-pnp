@@ -304,20 +304,7 @@
           </table>
         </div>
       {{/each}}
-      {{#if actor.missingSkills.length}}
-        <div>
-          <hr />
-          <h3>Fehlende Fähigkeiten</h3>
-          <p>
-            {{#each actor.missingSkills as |skill|}}
-              {{skill.name}}{{#unless @last}},{{/unless}}
-            {{/each}}
-          </p>
-          <div class="flex-row multi-item">
-            <button type="button" class="auto-width add-missing-skills">Hinzufügen</button>
-          </div>
-        </div>
-      {{/if}}
+      {{> "systems/sw-tor/templates/partials/missing-skills.html"}}
     {{/tabContent}}
 
     {{!-- Force Tab --}}
@@ -410,106 +397,8 @@
         <div class="flex-grow flex-zero">
           <h3 class="align-center">Offensive</h3>
           <div class="multi-item">
-            {{#each actor.equippedWeapons as |weapon index|}}
-              <div class="weapon-slot multi-item">
-                <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
-                {{#if weapon.skill}}
-                  <div class="line-view multi-item">
-                    <div class="flex-row multi-item">
-                      <img src="icons/svg/sword.svg" class="table-icon" alt="Attacke" title="Attacke" />
-                      {{> "systems/sw-tor/templates/check-preview.html"
-                          check=weapon.attackCheck
-                          action=(concat 'equippedWeapons.' index '.rollAttack')
-                      }}
-                    </div>
-                    <div class="flex-row multi-item">
-                      <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)" title="Erleichterung (>0) / Erschwernis (<0)" />
-                      <input type="text" name="items.{{weapon.id}}.data.attackAdvantage"
-                             value="{{weapon.data.data.attackAdvantage}}" data-dtype="Number"
-                             title="Erleichterung (>0) / Erschwernis (<0)"
-                      />
-                      {{#if weapon.itemType.isRangedWeapon}}
-                        <img src="icons/svg/target.svg" class="table-icon" alt="Genauigkeit" title="Genauigkeit" />
-                        <span title="Genauigkeit">{{weapon.currentPrecision}}</span>
-                      {{/if}}
-                      {{#if (calcCoordination weapon.primaryEquippedSlot actor)}}
-                        <span
-                            title="Koordination: {{formatExplanation (explainCoordination weapon.primaryEquippedSlot actor)}}"
-                            class="flex-row multi-item"
-                        >
-                          <i class="fas fa-hand-paper table-icon"></i>
-                          <span>{{calcCoordination weapon.primaryEquippedSlot actor}}</span>
-                        </span>
-                      {{/if}}
-                    </div>
-                    <div class="flex-row multi-item">
-                      {{damageIcon type=weapon.damageType classes='table-icon'}}
-                      <span class="flex-row">
-                        {{weapon.damage.formula}}
-                        {{#if (isRelevantFactor weapon.currentProjectileEnergy)}}
-                          *&nbsp;
-                          <span title="Projektilenergie" class="flex-row">
-                            {{weapon.currentProjectileEnergy}}
-                            (<img src="icons/svg/target.svg" class="table-icon small" alt="Projektilenergie" />)
-                          </span>
-                        {{/if}}
-                        {{#if (isRelevantFactor weapon.currentStrengthModifier)}}
-                          *&nbsp;
-                          <span title="Körperkraftmodifikator" class="flex-row">
-                            {{weapon.currentStrengthModifier}}
-                            (<i class="fas fa-fist-raised table-icon small"></i>)
-                          </span>
-                        {{/if}}
-                        {{#if (isLessThan weapon.condition 100)}}
-                          *&nbsp;
-                          <span title="Zustand" class="flex-row">
-                            {{weapon.condition}}%
-                            (<i class="fas fa-unlink table-icon small"></i>)
-                          </span>
-                        {{/if}}
-                      </span>
-                      <a
-                        class="run-actor-action"
-                        title="Schaden auswürfeln"
-                        data-action="equippedWeapons.{{index}}.rollDamage"
-                      >
-                        <i class="fas fa-dice-d6"></i>
-                      </a>
-                    </div>
-                    {{#if weapon.energyCost}}
-                      <div class="flex-row multi-item">
-                        <i class="fas fa-coins table-icon"></i>
-                        <span>{{weapon.energyCost}} EnP</span>
-                      </div>
-                    {{/if}}
-                  </div>
-                {{/if}}
-              </div>
-            {{/each}}
-            <div class="multi-item">
-              <div>
-                <strong>Zielentfernung</strong>
-              </div>
-              <div class="flex-row multi-item">
-                <select name="data.targetDistance.type" class="small">
-                  {{#select data.targetDistance.type}}
-                    <option value="">Manuell</option>
-                    <option value="auto">Auto</option>
-                  {{/select}}
-                </select>
-                <label class="flex-row">
-                  <input
-                      type="text"
-                      name="data.targetDistance.value"
-                      value="{{actor.targetDistance}}"
-                      {{#if actor.usesAutomaticTargetDistance}}disabled{{/if}}
-                      data-dtype="Number"
-                  />
-                  <span>&nbsp;m</span>
-                </label>
-              </div>
-              <small><i>Update: [CTRL]+[<]</i></small>
-            </div>
+            {{> "systems/sw-tor/templates/partials/offensive-equipment.html"}}
+            {{> "systems/sw-tor/templates/partials/target-distance.html"}}
           </div>
         </div>
         <div class="equipment-grid multi-item">
@@ -544,101 +433,13 @@
         <div class="flex-grow flex-zero">
           <h3 class="align-center">Defensive</h3>
           <div class="multi-item align-right">
-            {{#each actor.equippedWeapons as |weapon index|}}
-              <div class="weapon-slot">
-                <h4>{{weapon.primaryEquippedSlot.label}} - <strong>{{weapon.skill.name}} ({{weapon.name}})</strong></h4>
-                {{#if weapon.skill}}
-                  <div class="line-view multi-item">
-                    <div class="flex-row multi-item flex-end">
-                      <img src="icons/svg/shield.svg" class="table-icon" alt="Parade" title="Parade" />
-                      {{> "systems/sw-tor/templates/check-preview.html"
-                          check=weapon.paradeCheck
-                          action=(concat 'equippedWeapons.' index '.rollParade')
-                      }}
-                    </div>
-                    <div class="flex-row multi-item flex-end">
-                      <img src="icons/svg/up.svg" class="table-icon" alt="Erleichterung (>0) / Erschwernis (<0)"
-                           title="Erleichterung (>0) / Erschwernis (<0)"
-                      />
-                      <input type="text" name="items.{{weapon.id}}.data.paradeAdvantage"
-                             value="{{weapon.data.data.paradeAdvantage}}" data-dtype="Number"
-                             title="Erleichterung (>0) / Erschwernis (<0)"
-                      />
-                      {{#if (calcCoordination weapon.primaryEquippedSlot actor)}}
-                        <span
-                            title="Koordination: {{formatExplanation (explainCoordination weapon.primaryEquippedSlot actor)}}"
-                            class="flex-row multi-item"
-                        >
-                          <i class="fas fa-hand-paper table-icon"></i>
-                          <span>{{calcCoordination weapon.primaryEquippedSlot actor}}</span>
-                        </span>
-                      {{/if}}
-                    </div>
-                  </div>
-                {{/if}}
-              </div>
-            {{/each}}
-            {{#if actor.evasionCheck}}
-              <div class="weapon-slot">
-                <h4><strong>Ausweichen</strong></h4>
-                <div class="line-view multi-item">
-                  <div class="flex-row multi-item flex-end">
-                    <img src="icons/svg/daze.svg" class="table-icon" alt="Ausweichen" title="Ausweichen" />
-                    {{> "systems/sw-tor/templates/check-preview.html"
-                        check=actor.evasionCheck
-                        action='rollEvasion'
-                    }}
-                  </div>
-                </div>
-              </div>
-            {{/if}}
+            {{> "systems/sw-tor/templates/partials/defensive-equipment.html"}}
             <div class="flex-row flex-end multi-item">
               <span>Effektivitätsbonus</span>
               <input type="text" name="data.defenseEffectivenessBonus" value="{{actor.defenseEffectivenessBonus}}" data-dtype="Number" />
             </div>
             <div class="weapon-slot">
-              <h4><strong>Eingehender Schaden</strong></h4>
-              <div class="line-view multi-item">
-                <div class="flex-row multi-item flex-end">
-                  <input type="text" name="input.damageIncoming.amount"
-                         value="{{ui.damageIncoming.amount}}" placeholder="Schaden"
-                         data-dtype="Number"
-                  />
-                  <select name="input.damageIncoming.type" class="small">
-                    {{#select ui.damageIncoming.type.key}}
-                      {{#each actor.dataSet.damageTypes.list as |type|}}
-                        <option value="{{type.key}}">
-                          {{type.label}}
-                        </option>
-                      {{/each}}
-                    {{/select}}
-                  </select>
-                  {{damageIcon type=ui.damageIncoming.type classes='table-icon'}}
-                </div>
-                {{#each ui.damageIncoming.resistances as |res|}}
-                  {{#if res.value.total}}
-                    <div class="flex-row multi-item flex-end">
-                      <img src="{{res.icon}}" alt="{{res.label}}" title="{{res.label}}" class="table-icon" />
-                      <span title="{{formatExplanation res.value.components}}">{{res.value.total}}</span>
-                      <span>|</span>
-                      <span>{{res.damageBefore}}</span>
-                      <i class="fas fa-arrow-right"></i>
-                      <span>{{res.damageAfter}}</span>
-                    </div>
-                  {{/if}}
-                {{/each}}
-                {{#if ui.damageIncoming.cost}}
-                  <div class="flex-row multi-item flex-end border-top">
-                    <img src="icons/svg/degen.svg" alt="Effektivschaden" title="Effektivschaden" class="table-icon" />
-                    {{#each ui.damageIncoming.cost as |cost key|}}
-                      <span>{{cost}} {{key}}</span>
-                    {{/each}}
-                    <a class="modify-metrics" data-add="{{json ui.damageIncoming.cost}}" title="Abziehen">
-                      <i class="fas fa-minus-square"></i>
-                    </a>
-                  </div>
-                {{/if}}
-              </div>
+              {{> "systems/sw-tor/templates/partials/incoming-damage.html"}}
             </div>
           </div>
         </div>
@@ -649,85 +450,15 @@
     {{#tabContent groupId='main' id='items'}}
       <div class="flex-row multi-item">
         <div class="flex-grow"></div>
-          <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
-            <i class="fas fa-weight-hanging"></i>
-            <span>{{actor.weight.value}}</span>
-            <span>/</span>
-            <span>{{actor.weight.max}}</span>
-          </div>
+        <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
+          <i class="fas fa-weight-hanging"></i>
+          <span>{{actor.weight.value}}</span>
+          <span>/</span>
+          <span>{{actor.weight.max}}</span>
         </div>
-        {{#each computed.inventory as |category|}}
-          <div class="padded">
-            <table>
-            <thead>
-              <tr>
-                <th>
-                  <div class="flex-row multi-item">
-                    <a class="toggle-inventory-view" data-category="{{category.key}}">
-                      {{#if (resolve ../ui.inventoryHidden category.key)}}
-                        <i class="fas fa-eye-slash"></i>
-                      {{else}}
-                        <i class="fas fa-eye"></i>
-                      {{/if}}
-                    </a>
-                    <span>{{category.label}}</span>
-                  </div>
-                </th>
-                {{#if category.isWeapon}}
-                  <th class="damage-col" title="Schaden">Schaden</th>
-                {{/if}}
-                {{#if category.isWearable}}
-                  <th class="damage-col" title="Rüstung">Rüstung</th>
-                  <th class="encumberance-col" title="Behinderung">Behinderung</th>
-                {{/if}}
-                {{#if category.isEquippable}}
-                  <th class="damage-col" title="Zustand">Zustand</th>
-                {{/if}}
-                <th class="price-col" title="Preis"><i class="fas fa-coins"></i></th>
-                <th class="weight-col" title="Gewicht"><i class="fas fa-weight-hanging"></i></th>
-                <th class="icon-col">
-                  <a class="item-create" data-type="{{category.key}}" title="{{category.label}} hinzufügen">
-                    <i class="fas fa-plus"></i>
-                  </a>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#unless (resolve ../ui.inventoryHidden category.key)}}
-                {{#each category.items as |item|}}
-                  <tr class="item" data-item-id="{{item.id}}">
-                    <td>
-                      <div class="flex-row multi-item">
-                        <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
-                        <a class="item-control item-edit" title="{{item.description}}">
-                          {{#if (isMultiple item.quantity)}}
-                            {{item.quantity}}x
-                          {{/if}}
-                          {{item.name}}
-                        </a>
-                      </div>
-                    </td>
-                    {{#if category.isWeapon}}
-                      <td title="Schaden">{{item.damage.formula}}</td>
-                    {{/if}}
-                    {{#if category.isWearable}}
-                      <td title="Rüstung">{{item.armor}}</td>
-                      <td title="Behinderung">{{item.encumberance}}</td>
-                    {{/if}}
-                    {{#if category.isEquippable}}
-                      <td class="damage-col" title="Zustand">{{formatPercentage item.condition}}</td>
-                    {{/if}}
-                    <td title="Preis">{{item.price}}</td>
-                    <td title="Gewicht">{{item.weight}}</td>
-                    <td>
-                      <a class="item-control item-delete" title="{{item.name}} löschen"><i class="fas fa-trash"></i></a>
-                    </td>
-                  </tr>
-                {{/each}}
-              {{/unless}}
-            </tbody>
-          </table>
-        </div>
+      </div>
+      {{#each computed.inventory as |category|}}
+        {{> "systems/sw-tor/templates/partials/inventory-category.html" category=category inventoryHidden=../ui.inventoryHidden}}
       {{/each}}
     {{/tabContent}}
 
