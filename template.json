@@ -1,6 +1,6 @@
 {
   "Actor": {
-    "types": ["pc", "npc"],
+    "types": ["pc", "npc", "beast"],
     "templates": {
       "humanoid": {
         "attributes": {},

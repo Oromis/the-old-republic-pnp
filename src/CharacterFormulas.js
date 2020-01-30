@@ -1,6 +1,7 @@
 import Config from './Config.js'
 import ObjectUtils from './util/ObjectUtils.js'
 import { STAGE_PERMANENT, STAGE_TEMPORARY } from './util/Modifier.js'
+import ExplanationUtils from './util/ExplanationUtils.js'
 
 export function detectPropertyType(property, { throwOnError = true } = {}) {
   const key = property.key
@@ -61,16 +62,8 @@ export function calcTotalXp(actor) {
 
 export function explainPropertyBaseValue(actor, property, options) {
   const result = actor.modifiers[property.key].explainBonus({ stage: STAGE_PERMANENT })
-  const gp = ObjectUtils.try(property, 'gp', { default: 0 })
-  if (gp !== 0) {
-    result.total += gp
-    result.components.unshift({ label: 'GP', value: gp })
-  }
-  let base = getBaseValue(property, options)
-  if (base !== 0) {
-    result.total += base
-    result.components.unshift({ label: 'Basis', value: base })
-  }
+  ExplanationUtils.add(result, { label: 'GP', value: ObjectUtils.try(property, 'gp', { default: 0 }) })
+  ExplanationUtils.add(result, { label: 'Basis', value: getBaseValue(property, options) })
   return result
 }
 
@@ -114,6 +107,8 @@ export function explainPermanentPropertyValue(actor, property, options) {
       result.components.push({ label: 'Verdient', value: granted })
     }
   }
+
+  ExplanationUtils.add(result, { label: 'Fix', value: ObjectUtils.try(property, 'fixed') })
 
   return result
 }

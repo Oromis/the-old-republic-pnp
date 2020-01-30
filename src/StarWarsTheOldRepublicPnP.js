@@ -20,6 +20,7 @@ import SpecialAbilitySheet from './sheets/SpecialAbilitySheet.js'
 import {installTokenInputHandler} from './overrides/TokenInputHandler.js'
 import CombatActionSheet from './sheets/CombatActionSheet.js'
 import ActiveEffectSheet from './sheets/ActiveEffectSheet.js'
+import BeastActorSheet from './sheets/BeastActorSheet.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -44,7 +45,9 @@ Hooks.once("init", async function() {
 
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet)
-  Actors.registerSheet("sw-tor", SwTorActorSheet, { makeDefault: true })
+  Actors.registerSheet("sw-tor", SwTorActorSheet, { types: ['pc', 'npc'], makeDefault: true })
+  Actors.registerSheet("sw-tor", BeastActorSheet, { types: ['beast'], makeDefault: true })
+
   Items.unregisterSheet("core", ItemSheet)
   Items.registerSheet("sw-tor", PhysicalItemSheet, { types: ["melee-weapon", "ranged-weapon", "wearable", "consumable", "other"], makeDefault: true })
   Items.registerSheet("sw-tor", SkillSheet, { types: ['skill', 'force-skill'], makeDefault: true })

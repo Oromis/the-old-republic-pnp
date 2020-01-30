@@ -1,13 +1,9 @@
-import ObjectUtils from '../util/ObjectUtils.js'
-import AutoSubmitSheet from './AutoSubmitSheet.js'
 import { calcPropertyBaseValue, calcUpgradeCost } from '../CharacterFormulas.js'
-import DamageTypes from '../DamageTypes.js'
 import ArrayUtils from '../util/ArrayUtils.js'
-import { itemNameComparator } from '../util/SheetUtils.js'
+import {itemNameComparator, processDeltaValue} from '../util/SheetUtils.js'
 import SheetWithTabs from './SheetWithTabs.js'
-import RollUtils from '../util/RollUtils.js'
-import SwTorActor from '../actor/SwTorActor.js'
-import Shortcuts, {CTRL} from '../shortcuts/Shortcuts.js'
+import BaseActorSheet from './BaseActorSheet.js'
+import SheetWithIncomingDamage from './SheetWithIncomingDamage.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -48,101 +44,26 @@ function calcGainChange(actor, property, { action, defaultXpCategory }) {
   return { xp: newXp, gainLog: newGainLog }
 }
 
-function processDeltaValue(text, oldValue) {
-  const matches = /\s*([+\-*/])\s*([+\-]?[\d.]+)/.exec(text)
-  if (matches) {
-    switch (matches[1]) {
-      case '+':
-        return (+oldValue) + (+matches[2])
-      case '-':
-        return (+oldValue) - (+matches[2])
-      case '*':
-        return (+oldValue) * (+matches[2])
-      case '/':
-        return (+oldValue) / (+matches[2])
-    }
-  }
-
-  if (!isNaN(text)) {
-    // Input is just a number => use it directly
-    return +text
-  }
-
-  // If we get here then the format is invalid
-  ui.notifications.error(`Ungültiger Wert: ${text}. Formate: <Number>, +<Number>, -<Number>, *<Number>, /<Number>`)
-  return oldValue
-}
-
 /**
  * Extend the basic ActorSheet with some very simple modifications
  */
-export default class SwTorActorSheet extends ActorSheet {
+export default class SwTorActorSheet extends BaseActorSheet {
   constructor(...args) {
     super(...args)
-
-    this._inventoryHidden = {}
-    this._damageIncoming = {
-      type: DamageTypes.default,
-      amount: 0,
-    }
 
     new SheetWithTabs(this)
 
     if (this.isEditable) {
-      const autoSubmit = new AutoSubmitSheet(this)
+      new SheetWithIncomingDamage(this, { autoSubmit: this.autoSubmit })
 
-      autoSubmit.addFilter('data.attributes.*.gp', this._processDeltaProperty)
-      autoSubmit.addFilter('data.attributes.*.buff', this._processDeltaProperty)
-      autoSubmit.addFilter('data.metrics.*.value', this._processDeltaProperty)
-      autoSubmit.addFilter('data.metrics.*.buff', this._processDeltaProperty)
-      autoSubmit.addFilter('data.combat.enemyDistance', this._processDeltaProperty)
+      this.autoSubmit.addFilter('data.attributes.*.gp', this._processDeltaProperty)
+      this.autoSubmit.addFilter('data.attributes.*.buff', this._processDeltaProperty)
 
-      autoSubmit.addFilter('skills.*', (obj, { name, path }) => {
-        const [_unused, key, ...rest] = path
-        const skill = this.actor.skills[key]
-        if (skill != null) {
-          let value = obj[name]
-          if (path.indexOf('buff') !== -1) {
-            value = processDeltaValue(value, skill.buff || 0)
-          } else if (path.indexOf('vars') !== -1) {
-            value = value === '' || isNaN(value) ? '' : +value
-          }
-          const payload = { [rest.join('.')]: value }
-          const oldValue = ObjectUtils.try(skill.data, ...rest)
-          if (value !== oldValue) {
-            skill.update(payload)
-          }
-        }
-        // No actor update
-        return {}
-      })
-
-      autoSubmit.addFilter('items.*', (obj, { name, path }) => {
-        const [_unused, id, ...rest] = path
-        const item = this.actor.getOwnedItem(id)
-        if (item != null) {
-          const value = obj[name]
-          const payload = { [rest.join('.')]: value }
-          const oldValue = ObjectUtils.try(item.data, ...rest)
-          if (value !== oldValue) {
-            item.update(payload)
-          }
-        }
-        // No actor update
-        return {}
-      })
-
-      autoSubmit.addFilter('input.totalXp', (obj, { name }) => {
+      this.autoSubmit.addFilter('input.totalXp', (obj, { name }) => {
         const newVal = Math.round(processDeltaValue(obj[name], this.actor.xp.total))
         return {
           'data.xp.gained': newVal - this.actor.xpFromGp
         }
-      })
-
-      autoSubmit.addFilter('input.damageIncoming.*', (obj, { name, path }) => {
-        this._damageIncoming[path[path.length - 1]] = obj[name]
-        this.render(false)
-        return {}
       })
     }
   }
@@ -172,12 +93,6 @@ export default class SwTorActorSheet extends ActorSheet {
   getData() {
     const data = super.getData()
 
-    if (!(this.actor instanceof SwTorActor)) {
-      const message = `Star Wars: The old Republic System has not been loaded correctly. Try reloading.`
-      ui.notifications.error(message)
-      throw new Error(message)
-    }
-
     const skills = [...this.actor.skills.list]
     const forceSkills = this.actor.forceSkills.list
     data.computed = {
@@ -194,17 +109,7 @@ export default class SwTorActorSheet extends ActorSheet {
         if (slot == null) {
           return null
         } else {
-          const equippedItem = this.actor.equippedItems.find(item => item.isEquippedInSlot(slot.key))
-          return {
-            key: slot.key,
-            ...slot.staticData,
-            item: equippedItem,
-            options: [
-              { id: null, name: '<Leer>', active: equippedItem == null },
-              ...(equippedItem != null ? [{ id: equippedItem.id, name: equippedItem.name, active: true }] : []),
-              ...this.actor.freeItems.filter(item => Array.isArray(item.slotTypes) && item.slotTypes.indexOf(slot.type) !== -1)
-            ]
-          }
+          return this._formatSlot(slot)
         }
       })),
       inventory: this.actor.dataSet.itemTypes.list.map(type => ({
@@ -212,19 +117,10 @@ export default class SwTorActorSheet extends ActorSheet {
         items: this.actor.inventory.filter(item => item.type === type.key)
       })),
     }
-
-    const incomingDamageType = DamageTypes.map[this._damageIncoming.type] || DamageTypes.map[DamageTypes.default]
-    const incomingDamageAmount = this._damageIncoming.amount
-    const incomingDamage = this.actor.calcIncomingDamage({ type: incomingDamageType, amount: incomingDamageAmount })
     data.ui = {
       inventoryHidden: this._inventoryHidden,
-      damageIncoming: {
-        type: incomingDamageType,
-        amount: incomingDamageAmount,
-        resistances: incomingDamage.resistances,
-        cost: incomingDamage.costs != null ? this.actor.calculateMetricsCosts(incomingDamage.costs) : null,
-      },
     }
+
     data.actor = this.actor
     return data
   }
@@ -238,13 +134,6 @@ export default class SwTorActorSheet extends ActorSheet {
 	activateListeners(html) {
     super.activateListeners(html);
 
-    const element = $(this.element)
-    if (element.length > 0 && !element.attr('tabindex')) {
-      element.attr('tabindex', '0')
-      Shortcuts.create(element[0])
-        .add(CTRL, '<', () => this._clearActorCache())
-    }
-
     // Everything below here is only needed if the sheet is editable
     if (!this.options.editable) return;
 
@@ -253,81 +142,12 @@ export default class SwTorActorSheet extends ActorSheet {
     html.find('button.change-attr-gained').click(this._onChangeAttrGained)
     html.find('button.change-skill-gained').click(this._onChangeSkillGained)
     html.find('button.change-metric-gained').click(this._onChangeMetricGained)
-    html.find('.do-roll').click(this._onDoRoll)
-    html.find('.roll-check').click(this._onRollCheck)
     html.find('.apply-force-skill').click(this._onApplyForceSkill)
-    html.find('.run-actor-action').click(this._onRunActorAction)
-    html.find('.item-create').click(this._onCreateItem)
-    html.find('.add-missing-skills').click(this._onAddMissingSkills)
-    html.find('.clear-cache').click(this._clearActorCache)
-    html.find('.sync-items').click(this._syncItems)
-
-    // Update Item (or skill)
-    html.find('.item-edit').click(ev => {
-      const li = $(ev.currentTarget).parents("[data-item-id]")
-      const item = this.actor.getOwnedItem(li.data("itemId"))
-      item.sheet.render(true)
-    });
-
-    // Delete Inventory Item
-    html.find('.item-delete').click(ev => {
-      const li = $(ev.currentTarget).parents("[data-item-id]")
-      const id = li.data("itemId")
-      const item = this.actor.getOwnedItem(id)
-      if (item != null) {
-        if (confirm(`Willst du das Item "${item.name}" wirklich löschen?`)) {
-          this.actor.deleteOwnedItem(id)
-          li.slideUp(200, () => this.render(false))
-        }
-      }
-    })
-
-    html.find('.toggle-inventory-view').click(event => {
-      const category = event.currentTarget.getAttribute('data-category')
-      this._inventoryHidden[category] = !this._inventoryHidden[category]
-      this.actor.render()
-    })
-
-    html.find('.modify-metrics').click(this._onModifyMetrics)
-    html.find('.equip-btn').click(this._onChangeEquipment)
   }
 
-  /* -------------------------------------------- */
-
-  _onCreateItem = event => {
-    event.preventDefault()
-    const type = event.currentTarget.getAttribute('data-type')
-    const itemData = {
-      name: `Neuer Gegenstand`,
-      type,
-      data: {}
-    }
-    return this.actor.createOwnedItem(itemData);
-  }
-
-  _onModifyMetrics = event => {
-    const target = event.currentTarget
-    let diff
-    const raw = target.getAttribute('data-deduct')
-    if (raw != null) {
-      diff = this.actor.calculateMetricsCosts(JSON.parse(raw))
-    } else {
-      diff = JSON.parse(target.getAttribute('data-add'))
-    }
-
-    return this.actor.modifyMetrics(diff)
-  }
-
-  _onChangeEquipment = async event => {
-    const slotKey = event.currentTarget.getAttribute('data-slot')
-    const rawItemId = event.currentTarget.getAttribute('data-item')
-    try {
-      return await this.actor.equipItem(slotKey, this.actor.getOwnedItem(rawItemId) || null)
-    } catch (e) {
-      ui.notifications.error(e.message)
-      return Promise.reject(e)
-    }
-  }
+  // ---------------------------------------------------------------------
+  // Callbacks
+  // ---------------------------------------------------------------------
 
   _onGpToXp = () => {
     if (this.actor.gp.value > 0) {
@@ -392,80 +212,10 @@ export default class SwTorActorSheet extends ActorSheet {
     })
   }
 
-  _onDoRoll = event => {
-    const formula = ObjectUtils.try(this.actor, ...event.currentTarget.getAttribute('data-formula').split('.'))
-    RollUtils.rollFormula(formula, {
-      actor: this.actor.id,
-      label: event.currentTarget.getAttribute('data-label') || undefined
-    })
-  }
-
-  _onRollCheck = async event => {
-    let check
-    const path = event.currentTarget.getAttribute('data-path')
-    if (path != null) {
-      check = ObjectUtils.try(this.actor, ...path.split('.'))
-    } else {
-      check = JSON.parse(event.currentTarget.getAttribute('data-check'))
-    }
-    if (check == null) {
-      throw new Error(`Check invalid. Path: ${path}`)
-    }
-    const label = event.currentTarget.getAttribute('data-label') || undefined
-
-    await RollUtils.rollCheck(check, { actor: this.actor.id, label })
-  }
-
   _onApplyForceSkill = async event => {
     const skill = this.actor.getOwnedItem(event.currentTarget.getAttribute('data-id'))
     if (skill != null) {
       await skill.apply()
     }
-  }
-
-  _onRunActorAction = event => {
-    const actionPath = event.currentTarget.getAttribute('data-action')
-    const parentPath = actionPath.split('.')
-    const funcPath = parentPath.pop()
-    const parent = ObjectUtils.try(this.actor, ...parentPath)
-    const func = ObjectUtils.try(parent, funcPath)
-    if (typeof func === 'function') {
-      return func.call(parent)
-    }
-  }
-
-  _onAddMissingSkills = async () => {
-    for (const skill of this.actor.missingSkills) {
-      await this.actor.createOwnedItem(skill.data)
-    }
-  }
-
-  _clearActorCache = () => {
-    this.actor.clearCache()
-    this.actor.render(false)
-  }
-
-  _syncItems = () => {
-    this.actor.syncItems()
-  }
-
-  _processDeltaProperty = (formData, { name }) => {
-    const input = formData[name]
-    if (input != null) {
-      const old = ObjectUtils.try(this.actor.data, ...name.split('.'))
-      formData[name] = Math.round(processDeltaValue(input, old))
-    }
-  }
-
-  /* -------------------------------------------- */
-
-  /**
-   * Implement the _updateObject method as required by the parent class spec
-   * This defines how to update the subject of the form when the form is submitted
-   * @private
-   */
-  _updateObject() {
-    // Disable regular form submissions (we use AutoSubmitForm)
-    return Promise.resolve()
   }
 }

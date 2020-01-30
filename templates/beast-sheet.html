@@ -1,0 +1,154 @@
+<form class="{{cssClass}} multi-item charsheet-form" autocomplete="off">
+  {{!-- Sheet Header --}}
+  <header class="sheet-header flex-row multi-item flex-cross-start">
+    <div class="multi-item flex-no-grow">
+      <img class="profile-img" src="{{actor.img}}" data-editable title="{{actor.name}}" height="100" width="100" />
+      {{#if actor.encumberance}}
+        <div title="Behinderung: {{formatExplanation actor.encumberanceExplanation.components}}">
+          <i class="fas fa-long-arrow-alt-down"></i> {{actor.encumberance}}
+        </div>
+      {{/if}}
+    </div>
+    <div class="header-fields flex-grow flex-self-start">
+      <div class="multi-item flex-grow">
+        <h1 class="char-name">
+          <input name="name" class="full-width" type="text" value="{{actor.name}}" placeholder="Name" />
+        </h1>
+        <div class="flex-row multi-item flex-wrap">
+          {{#each actor.attributes.list as |attr index|}}
+            <div class="attribute">
+              <strong class="attribute-label" title="{{attr.label}} - {{attr.desc}}">{{formatAttrKey attr.key}}</strong>
+              <span title="{{formatExplanation attr.value.components}}">{{attr.value.total}}</span>
+            </div>
+          {{/each}}
+          <div class="flex-grow"></div>
+          <div title="Basis-Initiative: {{formatExplanation actor.baseInitiativeExplanation.components}}" class="flex-row">
+            <i class="fas fa-bell"></i>&nbsp;
+            {{actor.baseInitiativeExplanation.total}}
+          </div>
+          <div class="flex-row">
+            <i class="fas fa-shoe-prints" title="Laufweg"></i>&nbsp;
+            <span title="Laufweg 1: {{formatExplanation actor.speed1Explanation.components}}">{{roundNumber actor.speed1Explanation.total 2}}</span>
+            &nbsp;|&nbsp;
+            <span title="Laufweg 2: {{formatExplanation actor.speed2Explanation.components}}">{{roundNumber actor.speed2Explanation.total 2}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex-row multi-item">
+        {{#each actor.metrics.list as |metric|}}
+          {{#if metric.max}}
+            {{metricView metric=metric}}
+          {{/if}}
+        {{/each}}
+      </div>
+    </div>
+  </header>
+
+  {{!-- Sheet Tab Navigation --}}
+  {{#tabGroup id='main' minWidth=600}}
+    {{tabHeader id='overview' label='Übersicht'}}
+    {{tabHeader id='items' label='Inventar'}}
+  {{/tabGroup}}
+
+  {{!-- Sheet Body --}}
+  {{#tabContents}}
+    {{!-- Attributes Tab --}}
+    {{#tabContent groupId='main' id='overview'}}
+      <div class="flex-row flex-wrap multi-item">
+        {{#each actor.attributes.list as |attr|}}
+          <label class="flex-row multi-item">
+            <span>{{formatAttrKey attr.key}}</span>
+            <input type="text" name="data.attributes.{{attr.key}}.fixed" value="{{attr.fixed}}" />
+          </label>
+        {{/each}}
+      </div>
+    {{/tabContent}}
+
+
+    {{!-- Inventory Tab --}}
+    {{#tabContent groupId='main' id='items'}}
+      <div class="flex-row multi-item">
+        <div class="flex-grow"></div>
+          <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
+            <i class="fas fa-weight-hanging"></i>
+            <span>{{actor.weight.value}}</span>
+            <span>/</span>
+            <span>{{actor.weight.max}}</span>
+          </div>
+        </div>
+        {{#each computed.inventory as |category|}}
+          <div class="padded">
+            <table>
+            <thead>
+              <tr>
+                <th>
+                  <div class="flex-row multi-item">
+                    <a class="toggle-inventory-view" data-category="{{category.key}}">
+                      {{#if (resolve ../ui.inventoryHidden category.key)}}
+                        <i class="fas fa-eye-slash"></i>
+                      {{else}}
+                        <i class="fas fa-eye"></i>
+                      {{/if}}
+                    </a>
+                    <span>{{category.label}}</span>
+                  </div>
+                </th>
+                {{#if category.isWeapon}}
+                  <th class="damage-col" title="Schaden">Schaden</th>
+                {{/if}}
+                {{#if category.isWearable}}
+                  <th class="damage-col" title="Rüstung">Rüstung</th>
+                  <th class="encumberance-col" title="Behinderung">Behinderung</th>
+                {{/if}}
+                {{#if category.isEquippable}}
+                  <th class="damage-col" title="Zustand">Zustand</th>
+                {{/if}}
+                <th class="price-col" title="Preis"><i class="fas fa-coins"></i></th>
+                <th class="weight-col" title="Gewicht"><i class="fas fa-weight-hanging"></i></th>
+                <th class="icon-col">
+                  <a class="item-create" data-type="{{category.key}}" title="{{category.label}} hinzufügen">
+                    <i class="fas fa-plus"></i>
+                  </a>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#unless (resolve ../ui.inventoryHidden category.key)}}
+                {{#each category.items as |item|}}
+                  <tr class="item" data-item-id="{{item.id}}">
+                    <td>
+                      <div class="flex-row multi-item">
+                        <img src="{{item.img}}" title="{{item.name}}" width="24" height="24" />
+                        <a class="item-control item-edit" title="{{item.description}}">
+                          {{#if (isMultiple item.quantity)}}
+                            {{item.quantity}}x
+                          {{/if}}
+                          {{item.name}}
+                        </a>
+                      </div>
+                    </td>
+                    {{#if category.isWeapon}}
+                      <td title="Schaden">{{item.damage.formula}}</td>
+                    {{/if}}
+                    {{#if category.isWearable}}
+                      <td title="Rüstung">{{item.armor}}</td>
+                      <td title="Behinderung">{{item.encumberance}}</td>
+                    {{/if}}
+                    {{#if category.isEquippable}}
+                      <td class="damage-col" title="Zustand">{{formatPercentage item.condition}}</td>
+                    {{/if}}
+                    <td title="Preis">{{item.price}}</td>
+                    <td title="Gewicht">{{item.weight}}</td>
+                    <td>
+                      <a class="item-control item-delete" title="{{item.name}} löschen"><i class="fas fa-trash"></i></a>
+                    </td>
+                  </tr>
+                {{/each}}
+              {{/unless}}
+            </tbody>
+          </table>
+        </div>
+      {{/each}}
+    {{/tabContent}}
+  {{/tabContents}}
+</form>

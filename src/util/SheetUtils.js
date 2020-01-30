@@ -66,3 +66,28 @@ export function onDropItem(callback) {
 export function itemNameComparator(a, b) {
   return a.name.localeCompare(b.name)
 }
+
+export function processDeltaValue(text, oldValue) {
+  const matches = /\s*([+\-*/])\s*([+\-]?[\d.]+)/.exec(text)
+  if (matches) {
+    switch (matches[1]) {
+      case '+':
+        return (+oldValue) + (+matches[2])
+      case '-':
+        return (+oldValue) - (+matches[2])
+      case '*':
+        return (+oldValue) * (+matches[2])
+      case '/':
+        return (+oldValue) / (+matches[2])
+    }
+  }
+
+  if (!isNaN(text)) {
+    // Input is just a number => use it directly
+    return +text
+  }
+
+  // If we get here then the format is invalid
+  ui.notifications.error(`Ungültiger Wert: ${text}. Formate: <Number>, +<Number>, -<Number>, *<Number>, /<Number>`)
+  return oldValue
+}

@@ -39,6 +39,7 @@ import ActiveEffect from '../item/ActiveEffect.js'
 import BeastActor from '../actor/BeastActor.js'
 import BeastAttributes from './BeastAttributes.js'
 import BeastMetrics from './BeastMetrics.js'
+import BeastSlots from './BeastSlots.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -49,6 +50,9 @@ export default Object.freeze({
           attributes: BeastAttributes,
           metrics: BeastMetrics,
           resistances: ResistanceTypes,
+          itemTypes: ItemTypes,
+          damageTypes: DamageTypes,
+          slots: BeastSlots,
         }
 
       default:
