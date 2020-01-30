@@ -14,7 +14,7 @@ function processCheck(check, { isConfirmation = false } = {}) {
   check.criticalScore = criticalScore
 
   check.needsConfirmation = false
-  if (check.confirmCriticals) {
+  if (check.confirmCriticals && !isConfirmation) {
     if (Math.abs(criticalScore) === 1) {
       if (check.confirmation == null) {
         // An unconfirmed critical result - either critical success or critical failure.

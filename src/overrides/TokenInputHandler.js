@@ -2,24 +2,7 @@ import ObjectUtils from '../util/ObjectUtils.js'
 import RadialMenu from '../vendor/radial-menu-js/RadialMenu.js'
 
 function getBaseMenuStructure() {
-  return [
-    {
-      id   : 'walk',
-      label: 'Walk',
-      icon: '\uf554'
-    },
-    null,
-    null,
-    null,
-    {
-      id: 'weapon',
-      label: 'Weapon...',
-      icon: '\uf0fc',
-    },
-    null,
-    null,
-    null,
-  ]
+  return [null, null, null, null, null, null, null, null]
 }
 
 function fillWithOverflow({ menu, availableSlots, objects, generateItem, generateSubMenuItem, generateAvailableSlots }) {
