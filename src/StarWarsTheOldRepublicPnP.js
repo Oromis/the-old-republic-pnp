@@ -37,6 +37,10 @@ Hooks.once("init", async function() {
   CONFIG.Actor.entityClass = SwTorActor
   CONFIG.Item.entityClass = SwTorItem
 
+  // Override the way the default Roll class renders. It sucks.
+  CONFIG.Roll.template = 'systems/sw-tor/templates/partials/standard-roll.html'
+  CONFIG.Roll.tooltip = 'systems/sw-tor/templates/partials/standard-roll-dice.html'
+
   // Chat Messages cannot currently (0.4.3) be extended like actors and items, so we need to mix
   // our functionality into the existing class
   new ChatMessageMixin(ChatMessage.prototype)

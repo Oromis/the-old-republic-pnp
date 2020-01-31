@@ -52,7 +52,7 @@ export default class ChatMessageMixin extends Mixin {
         html.find('.message-content').append(btn)
       }
 
-      if (originalThis.user != null && originalThis.user.id === game.user.id) {
+      if (originalThis.owner) {
         // Turn the "flavor" text into a link that opens the roll editor
         const originalFlavor = html.find('.flavor-text')
         const flavorLink = $(`<a class="flavor-text">${originalFlavor.text()}</a>`)

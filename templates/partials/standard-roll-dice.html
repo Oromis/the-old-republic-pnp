@@ -1,0 +1,11 @@
+<div class="dice dice-tooltip">
+  <div class="flex-row multi-item dice-rolls">
+    {{#each parts as |part|}}
+      {{#each part.rolls as |roll|}}
+        <div class="roll {{roll.classes}}">{{{roll.result}}}</div>
+      {{/each}}
+      <div class="flex-grow"></div>
+      <strong>{{part.total}}</strong>
+    {{/each}}
+  </div>
+</div>
