@@ -125,13 +125,14 @@ export default {
     }
 
     if (sendToChat) {
+      const rollMode = game.settings.get("core", "rollMode")
       const chatData = {
         user: game.user.id,
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-        rollMode: game.settings.get("core", "rollMode"),
+        rollMode,
         flavor: label,
         speaker: { actor },
-        sound: CONFIG.sounds.dice,
+        sound: rollMode === 'roll' ? CONFIG.sounds.dice : null,
         content: await renderTemplate('systems/sw-tor/templates/check-message.html', { check: result, confirmation }),
         flags: { 'sw-tor': { check: result } },
         permission: { default: 0, [game.user.id]: CONST.ENTITY_PERMISSIONS.OWNER },
