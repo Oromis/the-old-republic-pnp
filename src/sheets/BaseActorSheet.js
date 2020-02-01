@@ -13,6 +13,17 @@ export default class BaseActorSheet extends ActorSheet {
     if (this.isEditable) {
       this.autoSubmit = new AutoSubmitSheet(this)
 
+      this.autoSubmit.addFilter('name', updateData => {
+        // Also update the token name
+        for (const token of this.actor.getActiveTokens()) {
+          token.update({ name: updateData.name })
+        }
+        if (this.actor.data.token != null) {
+          updateData['token.name'] = updateData.name
+        }
+        return updateData
+      })
+
       this.autoSubmit.addFilter('data.metrics.*.value', this._processDeltaProperty)
       this.autoSubmit.addFilter('data.metrics.*.buff', this._processDeltaProperty)
       this.autoSubmit.addFilter('data.combat.enemyDistance', this._processDeltaProperty)
