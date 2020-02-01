@@ -244,6 +244,16 @@ export default {
       }
       return check
     }
+
+    this._getBar2Metric = function () {
+      if (this.metrics.MaP.max > 0) {
+        return 'MaP'
+      } else if (this.metrics.EnP.max > 0) {
+        return 'EnP'
+      } else {
+        return 'AuP'
+      }
+    }
   },
 
   afterPrepareData(actorData) {

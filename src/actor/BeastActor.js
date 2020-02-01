@@ -165,6 +165,10 @@ export default {
       }
       return check
     }
+
+    this._getBar2Metric = function () {
+      return 'AuP'
+    }
   },
 
   afterPrepareData(actorData) {

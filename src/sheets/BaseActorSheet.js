@@ -91,6 +91,7 @@ export default class BaseActorSheet extends ActorSheet {
     html.find('.item-delete').click(this._onDeleteItem)
     html.find('.add-missing-skills').click(this._onAddMissingSkills)
     html.find('.toggle-inventory-view').click(this._toggleInventoryView)
+    html.find('.update-token').click(this._onUpdateToken)
   }
 
   // ---------------------------------------------------------------------
@@ -200,6 +201,10 @@ export default class BaseActorSheet extends ActorSheet {
     const category = event.currentTarget.getAttribute('data-category')
     this._inventoryHidden[category] = !this._inventoryHidden[category]
     this.actor.render()
+  }
+
+  _onUpdateToken = () => {
+    return this.actor.updateToken()
   }
 
   // ---------------------------------------------------------------------

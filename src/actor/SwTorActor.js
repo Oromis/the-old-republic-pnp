@@ -534,6 +534,31 @@ export default class SwTorActor extends Actor {
     }
   }
 
+  async updateToken() {
+    const tokens = this.getActiveTokens().map(t => ({ prefix: '', data: t.data, entity: t }))
+    if (this.data.token != null) {
+      tokens.push({ prefix: 'token.', data: this.data.token, entity: this })
+    }
+
+    const bar1 = this._getBar1Metric()
+    const bar2 = this._getBar2Metric()
+
+    return Promise.all(tokens.map(token => {
+      const updateData = {
+        [`${token.prefix}name`]: this.name,
+        [`${token.prefix}vision`]: true,
+        [`${token.prefix}displayBars`]: this.data.type === 'pc' ? CONST.TOKEN_DISPLAY_MODES.HOVER : CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER
+      }
+      if (bar1) {
+        updateData[`${token.prefix}bar1.attribute`] = `metrics.${bar1}`
+      }
+      if (bar2) {
+        updateData[`${token.prefix}bar2.attribute`] = `metrics.${bar2}`
+      }
+      return token.entity.update(updateData)
+    }))
+  }
+
   // ---------------------------------------------------------------------
   // Private stuff
   // ---------------------------------------------------------------------
@@ -824,5 +849,13 @@ export default class SwTorActor extends Actor {
 
   get _linkedTokens() {
     return this.getActiveTokens()
+  }
+
+  _getBar1Metric() {
+    return 'LeP'
+  }
+
+  _getBar2Metric() {
+    return null
   }
 }
