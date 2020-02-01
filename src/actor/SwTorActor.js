@@ -676,6 +676,8 @@ export default class SwTorActor extends Actor {
       }
     }
 
+    this._callDelegate('afterCalcModifiers', result)
+
     return result
   }
 

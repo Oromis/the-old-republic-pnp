@@ -64,11 +64,14 @@
       "resistances": {},
       "regeneration": {},
       "targetDistance": {
-        "type": "",
+        "type": "auto",
         "value": null
       },
       "defenseEffectivenessBonus": 0,
-      "initiativeFormula": "1d12"
+      "initiativeFormula": "1d12",
+      "baseSpeed": 2,
+      "baseInitiative": 0,
+      "baseArmor": 0
     }
   },
   "Item": {

@@ -64,7 +64,7 @@
             </label>
           {{/each}}
         </div>
-        <div class="flex-row multi-item">
+        <div class="flex-row multi-item flex-cross-start">
           {{#each computed.slots as |slot|}}
             <div class="equipment-tile">
               {{#if slot}}
@@ -89,6 +89,22 @@
             </div>
           {{/each}}
           <div class="flex-grow"></div>
+          <div class="flex-col multi-item flex-cross-end">
+            <label class="flex-row multi-item" title="Basis-Rüstung">
+              <i class="fas fa-shield-alt"></i>
+              <input type="text" name="data.baseArmor" data-dtype="Number" value="{{formatMod data.baseArmor}}" />
+            </label>
+          </div>
+          <div class="flex-col multi-item flex-cross-end">
+            <label class="flex-row multi-item" title="Basis-Laufweg">
+              <i class="fas fa-shoe-prints"></i>
+              <input type="text" name="data.baseSpeed" data-dtype="Number" value="{{formatMod data.baseSpeed}}" />
+            </label>
+            <label class="flex-row multi-item" title="Basis-Initiative">
+              <i class="fas fa-bell"></i>
+              <input type="text" name="data.baseInitiative" data-dtype="Number" value="{{formatMod data.baseInitiative}}" />
+            </label>
+          </div>
           {{> "systems/sw-tor/templates/partials/target-distance.html"}}
         </div>
         <div class="beast-combat-grid">

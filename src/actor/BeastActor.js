@@ -9,6 +9,7 @@ import RollUtils from '../util/RollUtils.js'
 import CombatAction from '../item/CombatAction.js'
 import ExplanationUtils from '../util/ExplanationUtils.js'
 import ActorTypes from '../datasets/ActorTypes.js'
+import { STAGE_PERMANENT } from '../util/Modifier.js'
 
 /**
  * Functionality for beasts. Beasts are always NPCs and use a different (simplified) charsheet
@@ -25,11 +26,15 @@ export default {
       }
     })
 
-    defineCachedGetter(this, 'baseInitiativeExplanation', () => explainComputedValue({
-      value: roundDecimal((this.attrValue('in') + this.attrValue('sc')) / 5, 2),
-      label: `Attribute (IN+SC)/5`,
-      bonusExplanation: this.modifiers.InI.explainBonus(),
-    }))
+    defineCachedGetter(this, 'baseInitiativeExplanation', () => {
+      const result = explainComputedValue({
+        value: roundDecimal((this.attrValue('in') + this.attrValue('sc')) / 5, 2),
+        label: `Attribute (IN+SC)/5`,
+        bonusExplanation: this.modifiers.InI.explainBonus(),
+      })
+      ExplanationUtils.add(result, { label: 'Basis', value: this.data.data.baseInitiative })
+      return result
+    })
 
     defineCachedGetter(this, 'speed1Explanation', () => {
       const result = explainComputedValue({
@@ -37,8 +42,7 @@ export default {
         label: `Sprintstärke (SC/12)`,
         bonusExplanation: this.modifiers.LaW.explainBonus(),
       })
-      result.total += 2
-      result.components.unshift({ label: 'Basis', value: 2 })
+      ExplanationUtils.add(result, { label: 'Basis', value: this.data.data.baseSpeed })
       return result
     })
 
@@ -48,8 +52,7 @@ export default {
         label: `Ausdauer (SC/12)*(KO/100)`,
         bonusExplanation: this.modifiers.LaW.explainBonus(),
       })
-      result.total += 2
-      result.components.unshift({ label: 'Basis', value: 2 })
+      ExplanationUtils.add(result, { label: 'Basis', value: this.data.data.baseSpeed })
       return result
     })
 
@@ -97,7 +100,7 @@ export default {
     }
 
     defineGetter(this, 'evasionCheck', function () {
-      const evasion = this.skills.aus
+      const evasion = this.skills.bev
       if (evasion) {
         const check = evasion.check
         const advantageExplanation = this.explainEvasionAdvantage()
@@ -117,7 +120,7 @@ export default {
     this.rollEvasion = function rollEvasion() {
       return RollUtils.rollCheck(this.evasionCheck, {
         actor: this.id,
-        label: this.skills.aus.name,
+        label: this.skills.bev.name,
       })
     }
 
@@ -171,6 +174,13 @@ export default {
   enterTurn(payload) {
     if (this.defenseEffectivenessBonus !== 0) {
       payload['data.defenseEffectivenessBonus'] = 0
+    }
+  },
+
+  afterCalcModifiers(modifiers) {
+    const baseArmor = this.data.data.baseArmor
+    if (typeof baseArmor === 'number' && baseArmor !== 0) {
+      modifiers.getModifier('r_armor').inject(baseArmor, { label: 'Basis', stage: STAGE_PERMANENT })
     }
   },
 }
