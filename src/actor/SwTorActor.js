@@ -547,6 +547,8 @@ export default class SwTorActor extends Actor {
       const updateData = {
         [`${token.prefix}name`]: this.name,
         [`${token.prefix}vision`]: true,
+        [`${token.prefix}dimSight`]: 4,
+        [`${token.prefix}brightSight`]: 1.5,
         [`${token.prefix}displayBars`]: this.data.type === 'pc' ? CONST.TOKEN_DISPLAY_MODES.HOVER : CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER
       }
       if (bar1) {
