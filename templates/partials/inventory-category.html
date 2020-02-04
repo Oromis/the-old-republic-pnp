@@ -18,7 +18,6 @@
           <th class="damage-col" title="Schaden">Schaden</th>
         {{/if}}
         {{#if category.isWearable}}
-          <th class="damage-col" title="Rüstung">Rüstung</th>
           <th class="encumberance-col" title="Behinderung">Behinderung</th>
         {{/if}}
         {{#if category.isEquippable}}
@@ -52,7 +51,6 @@
               <td title="Schaden">{{item.damage.formula}}</td>
             {{/if}}
             {{#if category.isWearable}}
-              <td title="Rüstung">{{item.armor}}</td>
               <td title="Behinderung">{{item.encumberance}}</td>
             {{/if}}
             {{#if category.isEquippable}}
