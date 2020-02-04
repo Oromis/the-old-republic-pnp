@@ -546,6 +546,7 @@ export default class SwTorActor extends Actor {
     return Promise.all(tokens.map(token => {
       const updateData = {
         [`${token.prefix}name`]: this.name,
+        [`${token.prefix}img`]: this.data.img,
         [`${token.prefix}vision`]: true,
         [`${token.prefix}dimSight`]: 4,
         [`${token.prefix}brightSight`]: 1.5,

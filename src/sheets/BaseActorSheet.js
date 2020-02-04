@@ -23,6 +23,16 @@ export default class BaseActorSheet extends ActorSheet {
         }
         return updateData
       })
+      this.autoSubmit.addFilter('img', updateData => {
+        // Also update the token image
+        for (const token of this.actor.getActiveTokens()) {
+          token.update({ img: updateData.img })
+        }
+        if (this.actor.data.token != null) {
+          updateData['token.img'] = updateData.img
+        }
+        return updateData
+      })
 
       this.autoSubmit.addFilter('data.metrics.*.value', this._processDeltaProperty)
       this.autoSubmit.addFilter('data.metrics.*.buff', this._processDeltaProperty)
