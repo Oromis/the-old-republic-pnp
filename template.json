@@ -47,7 +47,10 @@
       "templates": ["humanoid"]
     },
     "npc": {
-      "templates": ["humanoid"]
+      "templates": ["humanoid"],
+      "generator": {
+        "seed": null
+      }
     },
     "beast": {
       "attributes": {},

@@ -5,6 +5,7 @@ import SheetWithTabs from './SheetWithTabs.js'
 import BaseActorSheet from './BaseActorSheet.js'
 import SheetWithIncomingDamage from './SheetWithIncomingDamage.js'
 import {fullLoadPromise} from '../util/GameUtils.js'
+import CharacterGenerator from '../actor/CharacterGenerator.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -145,6 +146,8 @@ export default class SwTorActorSheet extends BaseActorSheet {
     html.find('button.change-metric-gained').click(this._onChangeMetricGained)
     html.find('.apply-force-skill').click(this._onApplyForceSkill)
     html.find('.skill-sort-order').click(this._onMoveSkill)
+    html.find('.generate').click(this._onGenerate)
+    html.find('.generate-reset').click(this._onGenerateReset)
   }
 
   async _renderInner(...args) {
@@ -245,5 +248,14 @@ export default class SwTorActorSheet extends BaseActorSheet {
         ])
       }
     }
+  }
+
+  _onGenerate = () => {
+	  return CharacterGenerator.generate(this.actor)
+  }
+
+  _onGenerateReset = async () => {
+	  await this.actor.update({ 'data.generator.seed': null })
+    return this._onGenerate()
   }
 }

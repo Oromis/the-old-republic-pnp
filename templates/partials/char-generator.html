@@ -1,0 +1,29 @@
+<div class="multi-item">
+  <div class="flex-row multi-item flex-wrap">
+    <label class="flex-col multi-item">
+      <span>Spezies</span>
+      <select name="generator.species">
+        {{#select generator.species}}
+          <option value="">Random</option>
+          {{#each actor.dataSet.species.list as |species|}}
+            <option value="{{species.key}}">{{species.name}}</option>
+          {{/each}}
+        {{/select}}
+      </select>
+    </label>
+  </div>
+  <div class="flex-row multi-item">
+    <button type="button" class="small auto-width generate">Generieren</button>
+    <button type="button" class="small auto-width generate-reset">Seed Reset</button>
+    <label>
+      <input
+          type="text"
+          name="data.generator.seed"
+          value="{{actor.data.data.generator.seed}}"
+          title="Seed"
+          placeholder="Seed"
+          class="auto-width"
+      />
+    </label>
+  </div>
+</div>

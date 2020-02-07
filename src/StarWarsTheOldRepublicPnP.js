@@ -75,6 +75,7 @@ Hooks.once("init", async function() {
     'systems/sw-tor/templates/partials/inventory-category.html',
     'systems/sw-tor/templates/partials/target-distance.html',
     'systems/sw-tor/templates/partials/missing-skills.html',
+    'systems/sw-tor/templates/partials/char-generator.html',
   ]))
 
   await fullLoadPromise()

@@ -10,12 +10,14 @@ const list = [
     key: 'mens',
     name: 'Mensch',
     gp: 0,
+    weight: 25,
     mods: {},
   },
   {
     key: 'brgn',
     name: 'Baragwin',
     gp: 6,
+    weight: 2,
     mods: {
       kl: 10,
       kk: 5,
@@ -27,6 +29,7 @@ const list = [
     key: 'btnr',
     name: 'Bothaner',
     gp: 1,
+    weight: 8,
     mods: {
       ge: 10,
       ko: -10,
@@ -37,6 +40,7 @@ const list = [
     key: 'crnr',
     name: 'Cereaner',
     gp: 11,
+    weight: 6,
     mods: {
       ge: -10,
       in: 10,
@@ -48,6 +52,7 @@ const list = [
     key: 'dros',
     name: 'Duros',
     gp: 3,
+    weight: 5,
     mods: {
       ge: 10,
       kl: 10,
@@ -61,6 +66,7 @@ const list = [
     key: 'gmrr',
     name: 'Gamorreaner',
     gp: 0,
+    weight: 4,
     mods: {
       ch: -10,
       ge: -10,
@@ -76,6 +82,7 @@ const list = [
     key: 'htte',
     name: 'Hutte',
     gp: 0,
+    weight: 1,
     mods: {
       ch: -10,
       ge: -30,
@@ -91,6 +98,7 @@ const list = [
     key: 'itho',
     name: 'Ithorianer',
     gp: 3,
+    weight: 2,
     mods: {
       ch: 5,
       ge: -15,
@@ -104,6 +112,7 @@ const list = [
     key: 'keld',
     name: 'Kel\'Dor',
     gp: 17,
+    weight: 7,
     mods: {
       ge: 10,
       kl: 10,
@@ -116,6 +125,7 @@ const list = [
     key: 'monc',
     name: 'Mon Calamari',
     gp: 3,
+    weight: 3,
     mods: {
       kl: 10,
       kk: -10,
@@ -126,6 +136,7 @@ const list = [
     key: 'rodi',
     name: 'Rodianer',
     gp: 2,
+    weight: 8,
     mods: {
       ch: -10,
       ge: 10,
@@ -141,6 +152,7 @@ const list = [
     key: 'sull',
     name: 'Sullustaner',
     gp: 7,
+    weight: 3,
     mods: {
       ge: 10,
       ko: -10,
@@ -152,6 +164,7 @@ const list = [
     key: 'tran',
     name: 'Trandoshaner',
     gp: 3,
+    weight: 5,
     mods: {
       ge: -10,
       kk: 10,
@@ -162,6 +175,7 @@ const list = [
     key: 'togr',
     name: 'Togruta',
     gp: 2,
+    weight: 1,
     mods: {
       nav: skillXp({ category: 'C', to: 10 }),
       ens: skillXp({ category: 'B', to: 10 }),
@@ -171,6 +185,7 @@ const list = [
     key: 'toyd',
     name: 'Toydarianer',
     gp: 7,
+    weight: 2,
     mods: {
       ch: 5,
       kl: 10,
@@ -184,6 +199,7 @@ const list = [
     key: 'twil',
     name: 'Twi\'lek',
     gp: 3,
+    weight: 8,
     mods: {
       ch: 10,
       wk: -10,
@@ -194,6 +210,7 @@ const list = [
     key: 'verp',
     name: 'Verpine',
     gp: 18,
+    weight: 2,
     mods: {
       kl: 10,
       r_armor: 1,
@@ -205,6 +222,7 @@ const list = [
     key: 'wook',
     name: 'Wookie',
     gp: 0,
+    weight: 5,
     mods: {
       ch: -10,
       ge: -10,
@@ -217,6 +235,7 @@ const list = [
     key: 'zabr',
     name: 'Zabrak',
     gp: 22,
+    weight: 5,
     mods: {
       kk: 10,
       wk: 10,
