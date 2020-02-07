@@ -1,5 +1,6 @@
 import ObjectUtils from '../util/ObjectUtils.js'
 import RadialMenu from '../vendor/radial-menu-js/RadialMenu.js'
+import ArrayUtils from '../util/ArrayUtils.js'
 
 function getBaseMenuStructure() {
   return [null, null, null, null, null, null, null, null]
@@ -28,78 +29,82 @@ function fillWithOverflow({ menu, availableSlots, objects, generateItem, generat
   }
 }
 
+function pullFrom(array, count) {
+  const result = []
+  for (let i = 0; i < count; ++i) {
+    result.push(array.shift())
+  }
+  return result
+}
+
 function getMenuStructure(actor) {
   const result = getBaseMenuStructure()
+  const forceSkills = actor.forceSkills.list
 
-  // Fill attack rolls into the radial menu
-  fillWithOverflow({
-    menu: result,
-    availableSlots: [1, 0, 7, 6],
-    objects: actor.equippedWeapons,
-    generateItem: [
-      weapon => ({
-        label: 'Attacke',
-        title: `Attacke ${weapon.primaryEquippedSlot.label} (${weapon.name})`,
-        icon: { image: weapon.img, scale: 1.5 },
-        subIcon: '\uf6cf',
-        action: () => weapon.rollAttack(),
-      }),
-      weapon => ({
-        label: 'Schaden',
-        title: `Schaden ${weapon.primaryEquippedSlot.label} (${weapon.name})`,
-        icon: { image: weapon.img, scale: 1.5 },
-        subIcon: '\uf6d1',
-        action: () => weapon.rollDamage(),
-      })
-    ],
-    generateSubMenuItem: () => ({
-      label: 'Offensive ...',
-      icon: { image: 'icons/svg/sworg.svg' },
-      items: Array(8).fill(null)
-    }),
-    generateAvailableSlots: () => [1, 0, 7, 6, 5, 4, 3, 2],
-  })
+  if (forceSkills.length > 0) {
+    result.push(null)
+  }
 
-  // Fill evasion / defensive rolls into the radial menu
-  const availableDefensiveSlots = [3, 4, 5]
-  if (actor.evasionCheck) {
-    result[availableDefensiveSlots.shift()] = {
-      label: 'Ausweichen',
-      icon: { image: 'icons/svg/daze.svg' },
-      action: () => actor.rollEvasion(),
+  const rootSlots = result.map((a, i) => (2 + i) % result.length)
+
+  // Skills
+  {
+    const index = rootSlots.shift()
+    const skills = [...actor.skills.list]
+    result[index] = {
+      label: 'Skills ...',
+      icon: '\uf192',
+      items: [
+        ...actor.dataSet.skillCategories.list.map(cat => ({
+          label: `${cat.label} ...`,
+          icon: cat.glyph,
+          skills: ArrayUtils.removeBy(skills, skill => skill.category === cat.key),
+        })),
+        { label: 'Mächte ...', icon: '\uf669', skills: ArrayUtils.removeBy(skills, skill => skill.isForceSkill) },
+        { label: 'Sonst. ...', icon: '\uf1ce', skills: skills },
+      ]
+        .filter(item => item.skills.length > 0)
+        .map(item => {
+          item.items = Array(8).fill(null)
+          fillWithOverflow({
+            menu: item.items,
+            availableSlots: [0, 1, 2, 3, 4, 5, 6, 7],
+            objects: item.skills,
+            generateItem: [
+              skill => ({
+                label: skill.key.toUpperCase(),
+                icon: { image: skill.img },
+                subIcon: '\uf6cf',
+                title: `${skill.name} würfeln`,
+                action: ({ preventClose }) => {
+                  skill.rollCheck()
+                },
+              })
+            ],
+            generateSubMenuItem: () => ({
+              label: 'Mehr ...',
+              icon: '\uf669',
+              items: Array(8).fill(null),
+            }),
+            generateAvailableSlots: () => [0, 1, 2, 3, 4, 5, 6, 7],
+          })
+          return item
+        }),
     }
   }
-  fillWithOverflow({
-    menu: result,
-    availableSlots: availableDefensiveSlots,
-    objects: actor.equippedWeapons,
-    generateItem: weapon => ({
-      label: 'Parade',
-      title: `Parade ${weapon.primaryEquippedSlot.label} (${weapon.name})`,
-      icon: { image: weapon.img, scale: 1.5 },
-      subIcon: '\uf3ed',
-      action: () => weapon.rollParade(),
-    }),
-    generateSubMenuItem: () => ({
-      label: 'Defensive ...',
-      icon: { image: 'icons/svg/shield.svg' },
-      items: Array(8).fill(null)
-    }),
-    generateAvailableSlots: () => [3, 4, 5, 6, 7, 0, 1, 2],
-  })
 
   // Handle force powers
-  const forceSkills = actor.forceSkills.list
   if (forceSkills.length > 0) {
-    result[2] = {
+    const index = rootSlots.shift()
+    result[index] = {
       label: 'Mächte ...',
       icon: '\uf669',
       items: Array(8).fill(null),
     }
 
     fillWithOverflow({
-      menu: result[2].items,
-      availableSlots: [2, 3, 4, 5, 6, 7, 0, 1],
+      menu: result[index].items,
+      availableSlots: [3, 4, 5, 6, 7, 0, 1, 2],
       objects: forceSkills,
       generateItem: [
         forceSkill => forceSkill.needsCheck ? ({
@@ -128,6 +133,63 @@ function getMenuStructure(actor) {
       generateAvailableSlots: () => [2, 3, 4, 5, 6, 7, 0, 1],
     })
   }
+
+  // Fill evasion / defensive rolls into the radial menu
+  const availableDefensiveSlots = pullFrom(rootSlots, 3)
+  if (actor.evasionCheck) {
+    result[availableDefensiveSlots.shift()] = {
+      label: 'Ausweichen',
+      icon: { image: 'icons/svg/daze.svg' },
+      action: () => actor.rollEvasion(),
+    }
+  }
+  fillWithOverflow({
+    menu: result,
+    availableSlots: availableDefensiveSlots,
+    objects: actor.equippedWeapons,
+    generateItem: weapon => ({
+      label: 'Parade',
+      title: `Parade ${weapon.primaryEquippedSlot.label} (${weapon.name})`,
+      icon: { image: weapon.img, scale: 1.5 },
+      subIcon: '\uf3ed',
+      action: () => weapon.rollParade(),
+    }),
+    generateSubMenuItem: () => ({
+      label: 'Defensive ...',
+      icon: { image: 'icons/svg/shield.svg' },
+      items: Array(8).fill(null)
+    }),
+    generateAvailableSlots: () => [3, 4, 5, 6, 7, 0, 1, 2],
+  })
+
+  // Fill attack rolls into the radial menu
+  fillWithOverflow({
+    menu: result,
+    availableSlots: [...rootSlots],
+    objects: actor.equippedWeapons,
+    generateItem: [
+      weapon => ({
+        label: 'Attacke',
+        title: `Attacke ${weapon.primaryEquippedSlot.label} (${weapon.name})`,
+        icon: { image: weapon.img, scale: 1.5 },
+        subIcon: '\uf6cf',
+        action: () => weapon.rollAttack(),
+      }),
+      weapon => ({
+        label: 'Schaden',
+        title: `Schaden ${weapon.primaryEquippedSlot.label} (${weapon.name})`,
+        icon: { image: weapon.img, scale: 1.5 },
+        subIcon: '\uf6d1',
+        action: () => weapon.rollDamage(),
+      })
+    ],
+    generateSubMenuItem: () => ({
+      label: 'Offensive ...',
+      icon: { image: 'icons/svg/sworg.svg' },
+      items: Array(8).fill(null)
+    }),
+    generateAvailableSlots: () => [1, 0, 7, 6, 5, 4, 3, 2],
+  })
 
   return result
 }
