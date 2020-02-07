@@ -230,6 +230,7 @@
                 <th class="value-col">Wert</th>
                 {{#if ../data.creationMode.enabled}}
                   <th class="icon-col"></th>
+                  <th class="icon-col"></th>
                 {{/if}}
               </tr>
             </thead>
@@ -296,6 +297,30 @@
                   {{#if ../../data.creationMode.enabled}}
                     <td>
                       <a class="item-control item-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+                    </td>
+                    <td>
+                      <div class="flex-col">
+                        <a
+                            class="item-sort-order skill-sort-order"
+                            data-order="up"
+                            data-id="{{skill.id}}"
+                            data-type="{{skill.type}}"
+                            data-category="{{skill.category}}"
+                            title="Nach oben"
+                        >
+                          <i class="fas fa-caret-up"></i>
+                        </a>
+                        <a
+                            class="item-sort-order skill-sort-order"
+                            data-order="down"
+                            data-id="{{skill.id}}"
+                            data-type="{{skill.type}}"
+                            data-category="{{skill.category}}"
+                            title="Nach unten"
+                        >
+                          <i class="fas fa-caret-down"></i>
+                        </a>
+                      </div>
                     </td>
                   {{/if}}
                 </tr>

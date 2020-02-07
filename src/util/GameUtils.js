@@ -35,6 +35,10 @@ export function getActorByTokenId(tokenId, { scene = game.scenes.active } = {}) 
   }
 }
 
+export function compareItemSortOrder(a, b) {
+  return a.data.sort - b.data.sort
+}
+
 let fullLoad = null
 
 export function fullLoadPromise() {

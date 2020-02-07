@@ -20,10 +20,12 @@
             {{/if}}
           </div>
           <div>
-            {{#if (isNumeric attack.check.effectiveness)}}
-              {{formatCheckDiff attack.check.effectiveness}}
-            {{else}}
-              <i class="fas fa-hourglass fa-spin" title="Effektivität fehlt"></i>
+            {{#if attack.message.isRollVisible}}
+              {{#if (isNumeric attack.check.effectiveness)}}
+                {{formatCheckDiff attack.check.effectiveness}}
+              {{else}}
+                <i class="fas fa-hourglass fa-spin" title="Effektivität fehlt"></i>
+              {{/if}}
             {{/if}}
           </div>
         </div>

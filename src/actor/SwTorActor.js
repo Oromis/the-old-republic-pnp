@@ -10,6 +10,7 @@ import { keyMissing } from '../util/ProxyUtils.js'
 import Modifier, { STAGE_PERMANENT, STAGE_TEMPORARY } from '../util/Modifier.js'
 import ActorTypes from '../datasets/ActorTypes.js'
 import TokenUtils from '../util/TokenUtils.js'
+import {compareItemSortOrder} from '../util/GameUtils.js'
 
 export default class SwTorActor extends Actor {
   constructor(...args) {
@@ -610,6 +611,8 @@ export default class SwTorActor extends Actor {
           }
         }
       }
+      categories.skills.sort(compareItemSortOrder)
+      categories.forceSkills.sort(compareItemSortOrder)
       return categories
     })
   }

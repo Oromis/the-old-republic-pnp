@@ -100,10 +100,10 @@ export default class SwTorActorSheet extends BaseActorSheet {
       skillCategories: [
         ...this.actor.dataSet.skillCategories.list.map(cat => ({
           label: cat.label,
-          skills: ArrayUtils.removeBy(skills, skill => skill.category === cat.key).sort(itemNameComparator),
+          skills: ArrayUtils.removeBy(skills, skill => skill.category === cat.key),
         })),
-        { label: 'Mächte', skills: ArrayUtils.removeBy(skills, skill => skill.isForceSkill).sort(itemNameComparator) },
-        { label: 'Sonstige', skills: skills.sort(itemNameComparator) },
+        { label: 'Mächte', skills: ArrayUtils.removeBy(skills, skill => skill.isForceSkill) },
+        { label: 'Sonstige', skills: skills },
       ],
       forceSkills: forceSkills.length > 0 ? forceSkills : null,
       slots: this.actor.dataSet.slots.layout.map(row => row.map(slot => {
@@ -123,7 +123,6 @@ export default class SwTorActorSheet extends BaseActorSheet {
     }
 
     data.actor = this.actor
-    console.log(Handlebars.partials)
     return data
   }
 
@@ -145,6 +144,7 @@ export default class SwTorActorSheet extends BaseActorSheet {
     html.find('button.change-skill-gained').click(this._onChangeSkillGained)
     html.find('button.change-metric-gained').click(this._onChangeMetricGained)
     html.find('.apply-force-skill').click(this._onApplyForceSkill)
+    html.find('.skill-sort-order').click(this._onMoveSkill)
   }
 
   async _renderInner(...args) {
@@ -225,6 +225,25 @@ export default class SwTorActorSheet extends BaseActorSheet {
     const skill = this.actor.getOwnedItem(event.currentTarget.getAttribute('data-id'))
     if (skill != null) {
       await skill.apply()
+    }
+  }
+
+  _onMoveSkill = async event => {
+    const direction = event.currentTarget.getAttribute('data-order')
+    const type = event.currentTarget.getAttribute('data-type')
+    const category = event.currentTarget.getAttribute('data-category')
+    const id = event.currentTarget.getAttribute('data-id')
+    const skillsOfType = this.actor.skills.list.filter(skill => skill.type === type && (!category || skill.category === category))
+    const index = skillsOfType.findIndex(skill => skill.id === id)
+    if (index !== -1) {
+      const skill = skillsOfType[index]
+      const reference = skillsOfType[index + (direction === 'up' ? -1 : 1)]
+      if (reference != null) {
+        await this.actor.updateManyEmbeddedEntities('OwnedItem', [
+          { _id: skill.id, sort: reference.data.sort },
+          { _id: reference.id, sort: skill.data.sort },
+        ])
+      }
     }
   }
 }
