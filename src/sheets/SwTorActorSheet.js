@@ -4,6 +4,7 @@ import {itemNameComparator, processDeltaValue} from '../util/SheetUtils.js'
 import SheetWithTabs from './SheetWithTabs.js'
 import BaseActorSheet from './BaseActorSheet.js'
 import SheetWithIncomingDamage from './SheetWithIncomingDamage.js'
+import {fullLoadPromise} from '../util/GameUtils.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -122,6 +123,7 @@ export default class SwTorActorSheet extends BaseActorSheet {
     }
 
     data.actor = this.actor
+    console.log(Handlebars.partials)
     return data
   }
 
@@ -143,6 +145,13 @@ export default class SwTorActorSheet extends BaseActorSheet {
     html.find('button.change-skill-gained').click(this._onChangeSkillGained)
     html.find('button.change-metric-gained').click(this._onChangeMetricGained)
     html.find('.apply-force-skill').click(this._onApplyForceSkill)
+  }
+
+  async _renderInner(...args) {
+	  // Fix for a bug where the pop-out charsheet would be rendered before the templates have been loaded
+    // => make sure that they're loaded before attempting to render the window content
+	  await fullLoadPromise()
+	  return super._renderInner(...args)
   }
 
   // ---------------------------------------------------------------------

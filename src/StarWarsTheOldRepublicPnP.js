@@ -21,6 +21,7 @@ import {installTokenInputHandler} from './overrides/TokenInputHandler.js'
 import CombatActionSheet from './sheets/CombatActionSheet.js'
 import ActiveEffectSheet from './sheets/ActiveEffectSheet.js'
 import BeastActorSheet from './sheets/BeastActorSheet.js'
+import {fullLoadPromise, setFullLoadPromise} from './util/GameUtils.js'
 
 Hooks.once("init", async function() {
   console.log(`Initializing ${Config.system.title}`);
@@ -63,7 +64,7 @@ Hooks.once("init", async function() {
 
   // We need to register actors & sheets before doing any async work. Otherwise Actors might be
   // created before the class is overridden
-  await loadTemplates([
+  setFullLoadPromise(loadTemplates([
     'systems/sw-tor/templates/check-message.html',
     'systems/sw-tor/templates/check-roll.html',
     'systems/sw-tor/templates/check-preview.html',
@@ -74,7 +75,9 @@ Hooks.once("init", async function() {
     'systems/sw-tor/templates/partials/inventory-category.html',
     'systems/sw-tor/templates/partials/target-distance.html',
     'systems/sw-tor/templates/partials/missing-skills.html',
-  ])
+  ]))
+
+  await fullLoadPromise()
 })
 
 Hooks.once("ready", async function() {

@@ -34,3 +34,13 @@ export function getActorByTokenId(tokenId, { scene = game.scenes.active } = {}) 
     }
   }
 }
+
+let fullLoad = null
+
+export function fullLoadPromise() {
+  return fullLoad
+}
+
+export function setFullLoadPromise(promise) {
+  fullLoad = promise
+}
