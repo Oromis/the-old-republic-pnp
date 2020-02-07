@@ -165,7 +165,7 @@ function getMenuStructure(actor) {
   // Fill attack rolls into the radial menu
   fillWithOverflow({
     menu: result,
-    availableSlots: [...rootSlots],
+    availableSlots: [...rootSlots].reverse(),
     objects: actor.equippedWeapons,
     generateItem: [
       weapon => ({
