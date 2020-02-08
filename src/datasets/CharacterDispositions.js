@@ -11,8 +11,8 @@ const list = [
 export default Object.freeze({
   list,
   map: ObjectUtils.asObject(list, 'key'),
-  filteredList({ faction = null }) {
-    let result = list
+  filteredList({ faction = null, trainings = [] }) {
+    let result = [...list]
     if (faction) {
       if (typeof faction === 'string') {
         faction = Factions.map[faction]
@@ -20,6 +20,14 @@ export default Object.freeze({
       result = result.filter(disposition => {
         return Array.isArray(faction.excludeDispositions) ? !faction.excludeDispositions.includes(disposition.key) : true
       })
+    }
+    if (Array.isArray(trainings)) {
+      for (const training of trainings) {
+        if (training.dispositions != null && Object.values(training.dispositions).some(v => v)) {
+          // If the training restricts dispositions we need to be in this list to continue
+          result = result.filter(disposition => training.dispositions[disposition.key])
+        }
+      }
     }
     return result
   },

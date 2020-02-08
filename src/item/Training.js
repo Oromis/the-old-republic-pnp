@@ -7,6 +7,8 @@ export default {
     defineDataAccessor(this, 'gp')
     defineDataAccessor(this, 'dispositions')
     defineDataAccessor(this, 'factions')
+    defineDataAccessor(this, 'needsBaseTraining')
+    defineDataAccessor(this, 'isBaseTraining')
 
     defineGetter(this, 'baseTraining', function () {
       return this._cache.lookup('baseTraining', () => {

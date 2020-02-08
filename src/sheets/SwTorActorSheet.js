@@ -133,6 +133,12 @@ export default class SwTorActorSheet extends BaseActorSheet {
     }
     if (this.actor.hasGenerator) {
       data.generator = CharacterGenerator.getChoices(this.actor)
+      let trainingIndex = 0
+      data.generator.chosenTrainings = CharacterGenerator.trainingSlots.reduce((obj, cur) => {
+        obj[cur.key] = this.actor.trainings[trainingIndex++]
+        return obj
+      }, {})
+      data.generator.trainingSlots = CharacterGenerator.trainingSlots
     }
 
     data.actor = this.actor

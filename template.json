@@ -54,7 +54,12 @@
         "seed": null,
         "species": null,
         "disposition": null,
-        "faction": null
+        "faction": null,
+        "trainings": {
+          "primary": null,
+          "secondary": null,
+          "tertiary": null
+        }
       }
     },
     "beast": {
@@ -152,6 +157,8 @@
       "factions": {},
       "dispositions": {},
       "baseTraining": null,
+      "needsBaseTraining": false,
+      "isBaseTraining": false,
       "gp": 0,
       "effects": [],
       "additionalInformation": "",

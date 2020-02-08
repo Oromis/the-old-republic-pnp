@@ -1,5 +1,5 @@
 <div class="multi-item">
-  <div class="flex-row multi-item flex-wrap">
+  <div class="flex-row multi-item flex-wrap flex-cross-start">
     <label class="flex-col multi-item">
       <span>Spezies [{{actor.species.name}}]</span>
       <select name="data.generator.species">
@@ -33,6 +33,22 @@
         {{/select}}
       </select>
     </label>
+    <div class="flex-col multi-item">
+      <span>Ausbildungen</span>
+      {{#each generator.trainingSlots as |slot|}}
+        <label class="flex-row multi-item">
+          <select name="data.generator.trainings.{{slot.key}}" class="char-generator__training-select">
+            {{#select (resolve ../actor.data.data.generator.trainings slot.key)}}
+              <option value="">Random</option>
+              {{#each (resolve ../generator.trainings slot.key) as |training|}}
+                <option value="{{training.name}}">{{training.name}}</option>
+              {{/each}}
+            {{/select}}
+          </select>
+          <span>[{{fallback (resolve ../generator.chosenTrainings slot.key 'name') '-'}}]</span>
+        </label>
+      {{/each}}
+    </div>
   </div>
   <div class="flex-row multi-item">
     <button type="button" class="small auto-width generate">Generieren</button>

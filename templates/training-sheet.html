@@ -32,21 +32,6 @@
           </td>
         </tr>
         <tr>
-          <td>Fraktion</td>
-          <td>
-            <div class="flex-row multi-item">
-              {{#each factions.list as |faction|}}
-                <label class="flex-row multi-item">
-                  <span>
-                    <input type="checkbox" name="data.factions.{{faction.key}}" {{checked (resolve ../training.factions faction.key)}} />
-                  </span>
-                  <span>{{faction.label}}</span>
-                </label>
-              {{/each}}
-            </div>
-          </td>
-        </tr>
-        <tr>
           <td>Ausrichtung</td>
           <td class="flex-row">
             <div class="flex-row multi-item">
@@ -62,6 +47,21 @@
           </td>
         </tr>
         <tr>
+          <td>Fraktion</td>
+          <td>
+            <div class="flex-row multi-item">
+              {{#each factions.list as |faction|}}
+                <label class="flex-row multi-item">
+                  <span>
+                    <input type="checkbox" name="data.factions.{{faction.key}}" {{checked (resolve ../training.factions faction.key)}} />
+                  </span>
+                  <span>{{faction.label}}</span>
+                </label>
+              {{/each}}
+            </div>
+          </td>
+        </tr>
+        <tr>
           <td>Zusätzliche Informationen</td>
           <td>
             <textarea name="data.additionalInformation" class="flex-grow">{{data.additionalInformation}}</textarea>
@@ -70,14 +70,32 @@
         <tr>
           <td>Zugehörige Grundausbildung</td>
           <td>
-            {{#if training.baseTraining}}
-              <span title="{{training.baseTraining.summary}}">{{training.baseTraining.name}}</span>
-              <a class="baseTraining-control baseTraining-delete" title="Löschen"><i class="fas fa-trash"></i></a>
-            {{else}}
-              <div class="drop-zone">
-                <span>Drop base training here!</span>
+            <div class="multi-item">
+              <div class="flex-row multi-item">
+                <label class="flex-row multi-item">
+                  <span>
+                    <input type="checkbox" name="data.isBaseTraining" {{checked training.isBaseTraining}} />
+                  </span>
+                  <span>Ist Grundausbildung</span>
+                </label>
+                <label class="flex-row multi-item">
+                  <span>
+                    <input type="checkbox" name="data.needsBaseTraining" {{checked training.needsBaseTraining}} />
+                  </span>
+                  <span>Benötigt Grundausbildung</span>
+                </label>
               </div>
-            {{/if}}
+              <div>
+                {{#if training.baseTraining}}
+                  <span title="{{training.baseTraining.summary}}">{{training.baseTraining.name}}</span>
+                  <a class="baseTraining-control baseTraining-delete" title="Löschen"><i class="fas fa-trash"></i></a>
+                {{else}}
+                  <div class="drop-zone">
+                    <span>Drop base training here!</span>
+                  </div>
+                {{/if}}
+              </div>
+            </div>
           </td>
         </tr>
       </tbody>

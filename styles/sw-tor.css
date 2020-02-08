@@ -10,34 +10,34 @@
 @import "beast-sheet.css";
 
 .sw-tor table {
-    background-color: transparent;
-    border: 0;
-    width: 100%;
+  background-color: transparent;
+  border: 0;
+  width: 100%;
 }
 
 .sw-tor table th {
-    border-bottom: 1px solid black;
+  border-bottom: 1px solid black;
 }
 
 .sw-tor table > tfoot > tr:first-of-type > td {
-    border-top: 1px solid black;
+  border-top: 1px solid black;
 }
 
 .sw-tor table th, .sw-tor table td {
-    text-align: left;
-    padding: 4px;
+  text-align: left;
+  padding: 4px;
 }
 
 .sw-tor tbody tr:nth-child(2n), .sw-tor .line-view > *:nth-child(2n) {
-    background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .sw-tor .link-active {
-    text-shadow: 0 0 8px red;
+  text-shadow: 0 0 8px red;
 }
 
 .sw-tor .sheet-header h1 input {
-    margin: 0;
+  margin: 0;
 }
 
 /*************************************************************************************
@@ -45,380 +45,384 @@
  *************************************************************************************/
 
 .sw-tor.sheet form {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .sw-tor.sheet .window-content {
-    padding: 5px;
-    background: #ecebe7;
+  padding: 5px;
+  background: #ecebe7;
 }
 
 /* Sheet Header */
 .sw-tor.sheet .profile-img {
-    width: 100px;
-    height: 100px;
-    margin-right: 4px;
-    align-self: flex-start;
-    flex-basis: unset;
+  width: 100px;
+  height: 100px;
+  margin-right: 4px;
+  align-self: flex-start;
+  flex-basis: unset;
 }
 
 .sw-tor.sheet.item .profile-img {
-    width: 48px;
-    height: 48px;
+  width: 48px;
+  height: 48px;
 }
 
 .sw-tor.sheet .header-fields {
-    flex: 1;
+  flex: 1;
 }
 
 .sw-tor.sheet .char-name {
-    border-bottom: 0;
-    margin: 4px;
+  border-bottom: 0;
+  margin: 4px;
 }
 
 .sw-tor.sheet .char-name input {
-    height: 34px;
-    width: 100%;
+  height: 34px;
+  width: 100%;
 }
 
 .sw-tor.sheet .species-info {
-    height: 35px;
+  height: 35px;
 }
 
 .sw-tor.sheet .trainings {
-    flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
 .sw-tor.sheet .vertical-divider {
-    padding-left: 4px;
-    margin: 0 0 0 4px;
-    border-left: 1px solid gray;
-    height: 15px;
+  padding-left: 4px;
+  margin: 0 0 0 4px;
+  border-left: 1px solid gray;
+  height: 15px;
 }
 
 /* Navigation Tabs */
 .sw-tor.sheet .tab-group {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    flex: 0 0 40px;
-    border-top: 1px solid #AAA;
-    border-bottom: 1px solid #AAA;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  flex: 0 0 40px;
+  border-top: 1px solid #AAA;
+  border-bottom: 1px solid #AAA;
 }
 
 .sw-tor.sheet .tab-group .tab-header {
-    line-height: 40px;
-    font-weight: bold;
-    text-align: center;
-    flex: 1;
+  line-height: 40px;
+  font-weight: bold;
+  text-align: center;
+  flex: 1;
 }
 
 .sw-tor.sheet .tab-group .tab-header.active {
-    text-decoration: underline;
-    text-shadow: 0 0 4px #ff7a7a;
+  text-decoration: underline;
+  text-shadow: 0 0 4px #ff7a7a;
 }
 
 .sw-tor .tab-contents {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .sw-tor .tab-wrapper {
-    overflow: auto;
-    height: 100%;
-    flex-basis: 0;
-    flex-grow: 1;
+  overflow: auto;
+  height: 100%;
+  flex-basis: 0;
+  flex-grow: 1;
 }
 
 .sw-tor.sheet .training .label-col {
-    width: 120px;
+  width: 120px;
 }
 
 /* Content Tabs */
 .sw-tor.sheet .sheet-body {
-    flex-shrink: 1;
-    flex-grow: 1;
-    overflow: hidden;
+  flex-shrink: 1;
+  flex-grow: 1;
+  overflow: hidden;
 }
 .sw-tor.sheet .sheet-body .editor {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .sw-tor.sheet .basic-skill {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .sw-tor .attr-key-col {
-    width: 28px;
+  width: 28px;
 }
 
 .sw-tor .skill-key-col, .sw-tor .weight-col {
-    width: 34px;
+  width: 34px;
 }
 
 .sw-tor .price-col {
-    width: 38px;
+  width: 38px;
 }
 
 .sw-tor .damage-col {
-    width: 62px;
+  width: 62px;
 }
 
 .sw-tor .value-col {
-    width: 50px;
+  width: 50px;
 }
 
 .sw-tor .input-with-unit-col {
-    width: 90px;
+  width: 90px;
 }
 
 .sw-tor .gain-col, .sw-tor .encumberance-col {
-    width: 120px;
+  width: 120px;
 }
 
 .sw-tor .icon-col {
-    width: 24px;
+  width: 24px;
 }
 
 .sw-tor .xp-col {
-    width: 48px;
+  width: 48px;
 }
 
 .sw-tor .label-col {
-    width: 35%;
+  width: 35%;
 }
 
 .sw-tor .buff-col {
-    width: 64px;
+  width: 64px;
 }
 
 .sw-tor .xp-category-col {
-    width: 54px;
+  width: 54px;
 }
 
 /* Items */
 .sw-tor.sheet .items-list {
-    list-style: none;
-    margin: 7px 0;
-    padding: 0;
+  list-style: none;
+  margin: 7px 0;
+  padding: 0;
 }
 .sw-tor.sheet .items-list .item {
-    height: 30px;
-    line-height: 24px;
-    padding: 3px 0;
-    border-bottom: 1px solid #BBB;
+  height: 30px;
+  line-height: 24px;
+  padding: 3px 0;
+  border-bottom: 1px solid #BBB;
 }
 .sw-tor.sheet .items-list .item img {
-    flex: 0 0 24px;
-    margin-right: 5px;
+  flex: 0 0 24px;
+  margin-right: 5px;
 }
 .sw-tor.sheet .items-list .item-name {
-    margin: 0;
+  margin: 0;
 }
 .sw-tor.sheet .items-list .item-controls {
-    flex: 0 0 36px;
+  flex: 0 0 36px;
 }
 
 /* Trainings */
 .drop-zone {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    border: 2px dashed gray;
-    border-radius: 7px;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  border: 2px dashed gray;
+  border-radius: 7px;
 }
 
 .drop-zone:hover {
-    filter: brightness(125%);
+  filter: brightness(125%);
 }
 
 .drop-zone span {
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    font-style: italic;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  font-style: italic;
 }
 
 .baseTraining-control {
-    float: right;
-    padding-right: 4px;
+  float: right;
+  padding-right: 4px;
 }
 
 /* Attributes */
 .attributes-table-key {
-    width: 22px;
+  width: 22px;
 }
 
 .effect-table-key {
-    min-width: 56px;
+  min-width: 56px;
 }
 
 .attribute-gained {
-    width: 20px;
-    display: inline-block;
-    text-align: center;
+  width: 20px;
+  display: inline-block;
+  text-align: center;
 }
 
 /* Equipment */
 .sw-tor .equipment-row {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
 }
 
 .sw-tor .equipment-tile {
-    width: 64px;
-    height: 64px;
-    position: relative;
+  width: 64px;
+  height: 64px;
+  position: relative;
 }
 
 .sw-tor .equipment-slot {
-    background-size: 100%;
-    height: 100%;
+  background-size: 100%;
+  height: 100%;
 }
 
 .sw-tor .equipment-slot--bg {
-    background-color: #38281b;
-    border-radius: 12px;
+  background-color: #38281b;
+  border-radius: 12px;
 }
 
 .sw-tor .equipment-item {
-    border: 0;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 12px;
-    height: 100%;
+  border: 0;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  height: 100%;
 }
 
 .sw-tor .equipment-slot:hover .equipment-popup {
-    opacity: 1;
-    pointer-events: auto;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .sw-tor .equipment-popup {
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-    left: 50%;
-    top: 100%;
-    transform: translateX(-50%);
-    background-color: #f2f2f2;
-    border: 1px solid #aaa;
-    z-index: 100;
-    text-align: center;
-    box-shadow: 0 0 10px #aaa;
-    transition: all 0.2s;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  background-color: #f2f2f2;
+  border: 1px solid #aaa;
+  z-index: 100;
+  text-align: center;
+  box-shadow: 0 0 10px #aaa;
+  transition: all 0.2s;
 }
 
 .sw-tor .equipment-popup h4 {
-    border-bottom: 1px solid #aaa;
-    padding: 8px;
-    margin: 0;
+  border-bottom: 1px solid #aaa;
+  padding: 8px;
+  margin: 0;
 }
 
 .sw-tor .equipment-popup ul {
-    padding: 4px  0;
-    margin: 0;
+  padding: 4px  0;
+  margin: 0;
 }
 
 .sw-tor .equipment-popup ul li {
-    list-style: none;
-    margin: 0;
-    padding: 4px 8px;
+  list-style: none;
+  margin: 0;
+  padding: 4px 8px;
 }
 
 .sw-tor .weapon-slot {
-    margin-top: 16px;
+  margin-top: 16px;
 }
 
 .sw-tor .weapon-slot h4 {
-    margin-bottom: 8px;
+  margin-bottom: 8px;
 }
 
 .sw-tor img.table-icon {
-    width: 24px;
-    height: 24px;
-    filter: invert(0.8);
-    border: 0;
-    display: block;
+  width: 24px;
+  height: 24px;
+  filter: invert(0.8);
+  border: 0;
+  display: block;
 }
 
 .sw-tor img.table-icon.small {
-    width: 16px;
-    height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .sw-tor i.table-icon {
-    font-size: 24px;
-    color: #333;
-    border: 0;
-    display: block;
+  font-size: 24px;
+  color: #333;
+  border: 0;
+  display: block;
 }
 
 .sw-tor i.table-icon.small {
-    font-size: 16px;
+  font-size: 16px;
 }
 
 /* Metrics */
 .sw-tor .metric {
-    flex-grow: 1;
-    position: relative;
-    border: 1px solid #aaa;
+  flex-grow: 1;
+  position: relative;
+  border: 1px solid #aaa;
 }
 
 .sw-tor .metric-bar {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    height: 100%;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  height: 100%;
 }
 
 .sw-tor .metric-value {
-    position: relative;
-    z-index: 2;
+  position: relative;
+  z-index: 2;
 }
 
 .sw-tor .has-error {
-    background-color: #ff8b91;
+  background-color: #ff8b91;
 }
 
 /* Rolls */
 .sw-tor .check-roll {
-    flex: 1 0 0;
-    text-align: center;
+  flex: 1 0 0;
+  text-align: center;
 }
 
 .sw-tor .check-diff.good, .sw-tor.dark .d20.good, .sw-tor .d20.good, .sw-tor .good {
-    color: #006509;
+  color: #006509;
 }
 
 .sw-tor.dark .check-diff.good, .sw-tor.dark .good {
-    color: #00c712;
+  color: #00c712;
 }
 
 .sw-tor .check-diff.bad, .sw-tor.dark .d20.bad, .sw-tor .d20.bad, .sw-tor .bad {
-    color: #d6403e;
+  color: #d6403e;
 }
 
 .sw-tor.dark .check-diff.bad, .sw-tor.dark .bad {
-    color: #ff5a58;
+  color: #ff5a58;
 }
 
 .sw-tor span.small {
-    font-size: 10px;
+  font-size: 10px;
 }
 
 .sw-tor .check-AgP {
-    text-align: center;
-    width: 40px;
-    border-left: 1px solid #aaa;
+  text-align: center;
+  width: 40px;
+  border-left: 1px solid #aaa;
 }
 
 .sw-tor .item-sort-order {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
+}
+
+.sw-tor .char-generator__training-select {
+  max-width: 200px;
 }
 
 /*************************************************************************************
@@ -426,27 +430,27 @@
  *************************************************************************************/
 
 .sw-tor-confirm-button {
-    margin-top: 4px;
+  margin-top: 4px;
 }
 
 .sw-tor-effectiveness {
-    text-align: right;
-    font-size: 13px;
-    color: #555;
-    border-top: 1px solid #aaa;
-    padding-top: 4px;
-    margin-top: 4px;
+  text-align: right;
+  font-size: 13px;
+  color: #555;
+  border-top: 1px solid #aaa;
+  padding-top: 4px;
+  margin-top: 4px;
 }
 
 .sw-tor-confirmation-label {
-    font-size: 12px;
-    margin-top: 8px;
-    margin-bottom: 4px;
-    color: #555;
+  font-size: 12px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  color: #555;
 }
 
 .sw-tor-effectiveness + .sw-tor-confirmation-label {
-    margin-top: -10px;
+  margin-top: -10px;
 }
 
 /*************************************************************************************
@@ -454,21 +458,21 @@
  *************************************************************************************/
 
 .control-tool.active[data-tool=ruler]::after {
-    content: '';
-    position: absolute;
-    width: 38px;
-    height: 38px;
-    left: calc(100% + 10px);
-    background-size: cover;
-    opacity: 0.7;
+  content: '';
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  left: calc(100% + 10px);
+  background-size: cover;
+  opacity: 0.7;
 }
 
 .setting-rulerVisible-true .control-tool[data-tool=ruler]::after {
-    background-image: url('../../../icons/svg/eye.svg');
+  background-image: url('../../../icons/svg/eye.svg');
 }
 
 .setting-rulerVisible-false .control-tool[data-tool=ruler]::after {
-    background-image: url('../../../icons/svg/blind.svg');
+  background-image: url('../../../icons/svg/blind.svg');
 }
 
 /*************************************************************************************
@@ -476,7 +480,7 @@
  *************************************************************************************/
 
 .sw-tor.sheet input.advantage-field {
-    width: 30px;
+  width: 30px;
 }
 
 /*************************************************************************************
@@ -484,34 +488,34 @@
  *************************************************************************************/
 
 .sw-tor.combat-action {
-    height: auto !important;
-    top: auto !important;
-    bottom: 0;
+  height: auto !important;
+  top: auto !important;
+  bottom: 0;
 }
 
 .sw-tor.combat-action .configure-sheet {
-    display: none;
+  display: none;
 }
 
 .sw-tor.combat-action .window-content {
-    background: transparent;
-    color: inherit;
+  background: transparent;
+  color: inherit;
 }
 
 .sw-tor .combat-action-grid {
-    display: grid;
-    grid-template-columns: 1fr 32px 1fr;
-    grid-gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 32px 1fr;
+  grid-gap: 12px;
 }
 
 .sw-tor .combat-action-icon {
-    width: 32px;
-    border: none;
+  width: 32px;
+  border: none;
 }
 
 .sw-tor .combat-action-glyph {
-    color: white;
-    font-size: 10px;
+  color: white;
+  font-size: 10px;
 }
 
 /******************************************************************
@@ -519,5 +523,5 @@
  ******************************************************************/
 
 .sw-tor .active-effect__trigger .active-effect__trigger-body {
-    margin-left: 20px;
+  margin-left: 20px;
 }

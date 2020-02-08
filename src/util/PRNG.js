@@ -18,7 +18,15 @@ export default class PRNG {
     }
 
     const diff = max - min
-    return min + Math.floor(this.alea.quick() * diff)
+    return min + (this.alea.quick() * diff)
+  }
+
+  intFromRange(arg) {
+    return Math.floor(this.fromRange(arg))
+  }
+
+  decide(chance = 0.5) {
+    return this.alea.quick() < chance
   }
 
   fromArray(array) {
@@ -26,13 +34,21 @@ export default class PRNG {
     return array[index]
   }
 
-  fromWeightedArray(array) {
+  fromWeightedArray(array, { remove = false } = {}) {
     const total = array.reduce((acc, cur) => acc + cur.weight, 0)
     const target = this.fromRange(total)
     let sum = 0
-    return array.find(item => {
+    const index = array.findIndex(item => {
+      if (typeof item.weight !== 'number') {
+        throw new Error(`Weight of ${JSON.stringify(item)} is null`)
+      }
       sum += item.weight
       return sum >= target
     })
+    const result = array[index]
+    if (remove) {
+      array.splice(index, 1)
+    }
+    return result
   }
 }
