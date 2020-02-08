@@ -10,7 +10,7 @@ const list = [
     key: 'mens',
     name: 'Mensch',
     gp: 0,
-    weight: 25,
+    weight: 75, // There's a lot of humans in the galaxy... ~50% at the moment
     mods: {},
   },
   {
