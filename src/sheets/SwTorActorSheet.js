@@ -6,6 +6,8 @@ import BaseActorSheet from './BaseActorSheet.js'
 import SheetWithIncomingDamage from './SheetWithIncomingDamage.js'
 import {fullLoadPromise} from '../util/GameUtils.js'
 import CharacterGenerator from '../actor/CharacterGenerator.js'
+import CharacterDispositions from '../datasets/CharacterDispositions.js'
+import Factions from '../datasets/Factions.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0
@@ -67,6 +69,13 @@ export default class SwTorActorSheet extends BaseActorSheet {
           'data.xp.gained': newVal - this.actor.xpFromGp
         }
       })
+
+      if (this.actor.hasGenerator) {
+        this.autoSubmit.addFilter('data.generator.*', updateData => {
+          CharacterGenerator.generate(this.actor, updateData)
+          return {}
+        })
+      }
     }
   }
 
@@ -121,6 +130,9 @@ export default class SwTorActorSheet extends BaseActorSheet {
     }
     data.ui = {
       inventoryHidden: this._inventoryHidden,
+    }
+    if (this.actor.hasGenerator) {
+      data.generator = CharacterGenerator.getChoices(this.actor)
     }
 
     data.actor = this.actor

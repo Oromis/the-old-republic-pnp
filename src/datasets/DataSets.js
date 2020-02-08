@@ -41,6 +41,7 @@ import BeastAttributes from './BeastAttributes.js'
 import BeastMetrics from './BeastMetrics.js'
 import BeastSlots from './BeastSlots.js'
 import BeastResistanceTypes from './BeastResistanceTypes.js'
+import Factions from './Factions.js'
 
 export default Object.freeze({
   fromActorType(type) {
@@ -68,6 +69,8 @@ export default Object.freeze({
           itemTypes: ItemTypes,
           damageTypes: DamageTypes,
           slots: HumanoidSlots,
+          dispositions: CharacterDispositions,
+          factions: Factions,
         }
     }
   },

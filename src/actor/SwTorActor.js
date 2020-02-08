@@ -563,6 +563,10 @@ export default class SwTorActor extends Actor {
     }))
   }
 
+  get hasGenerator() {
+    return this.data.type === 'npc'
+  }
+
   // ---------------------------------------------------------------------
   // Private stuff
   // ---------------------------------------------------------------------

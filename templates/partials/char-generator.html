@@ -1,12 +1,34 @@
 <div class="multi-item">
   <div class="flex-row multi-item flex-wrap">
     <label class="flex-col multi-item">
-      <span>Spezies</span>
-      <select name="generator.species">
-        {{#select generator.species}}
+      <span>Spezies [{{actor.species.name}}]</span>
+      <select name="data.generator.species">
+        {{#select actor.data.data.generator.species}}
           <option value="">Random</option>
-          {{#each actor.dataSet.species.list as |species|}}
+          {{#each generator.species as |species|}}
             <option value="{{species.key}}">{{species.name}}</option>
+          {{/each}}
+        {{/select}}
+      </select>
+    </label>
+    <label class="flex-col multi-item">
+      <span>Ausrichtung [{{fallback actor.disposition.label '-'}}]</span>
+      <select name="data.generator.disposition">
+        {{#select actor.data.data.generator.disposition}}
+          <option value="">Random</option>
+          {{#each generator.dispositions as |disposition|}}
+            <option value="{{disposition.key}}">{{disposition.label}}</option>
+          {{/each}}
+        {{/select}}
+      </select>
+    </label>
+    <label class="flex-col multi-item">
+      <span>Fraktion [{{fallback actor.faction.label '-'}}]</span>
+      <select name="data.generator.faction">
+        {{#select actor.data.data.generator.faction}}
+          <option value="">Random</option>
+          {{#each generator.factions as |faction|}}
+            <option value="{{faction.key}}">{{faction.label}}</option>
           {{/each}}
         {{/select}}
       </select>

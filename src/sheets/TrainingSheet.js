@@ -1,6 +1,7 @@
 import AutoSubmitSheet from './AutoSubmitSheet.js'
 import { onDragOver, onDropItem } from '../util/SheetUtils.js'
 import SheetWithEffects from './SheetWithEffects.js'
+import Factions from '../datasets/Factions.js'
 
 export default class TrainingSheet extends ItemSheet {
   constructor(...args) {
@@ -8,6 +9,16 @@ export default class TrainingSheet extends ItemSheet {
 
     const autoSubmit = new AutoSubmitSheet(this)
     new SheetWithEffects(this, { autoSubmit, paysForActivation: true })
+
+    // autoSubmit.addFilter('data.factions.*', (obj, { name, path }) => {
+    //   if (this.item.data.data.factions == null) {
+    //     obj['data.factions'] = {
+    //       [path[path.length - 1]]: obj[name]
+    //     }
+    //     delete obj[name]
+    //   }
+    //   return obj
+    // })
   }
 
   /**
@@ -31,6 +42,7 @@ export default class TrainingSheet extends ItemSheet {
    */
   getData() {
     const data = super.getData()
+    data.factions = Factions
     data.training = data.item = this.item
     return data
   }

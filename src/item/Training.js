@@ -6,6 +6,7 @@ export default {
   beforeConstruct() {
     defineDataAccessor(this, 'gp')
     defineDataAccessor(this, 'dispositions')
+    defineDataAccessor(this, 'factions')
 
     defineGetter(this, 'baseTraining', function () {
       return this._cache.lookup('baseTraining', () => {

@@ -34,7 +34,16 @@
         <tr>
           <td>Fraktion</td>
           <td>
-            <input type="text" class="text" name="data.fraction" value="{{data.fraction}}" />
+            <div class="flex-row multi-item">
+              {{#each factions.list as |faction|}}
+                <label class="flex-row multi-item">
+                  <span>
+                    <input type="checkbox" name="data.factions.{{faction.key}}" {{checked (resolve ../training.factions faction.key)}} />
+                  </span>
+                  <span>{{faction.label}}</span>
+                </label>
+              {{/each}}
+            </div>
           </td>
         </tr>
         <tr>

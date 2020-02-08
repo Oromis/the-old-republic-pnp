@@ -132,7 +132,7 @@
     {{tabHeader id='equipment' label='Ausrüstung'}}
     {{tabHeader id='items' label='Inventar'}}
     {{tabHeader id='other' label='Sonstiges'}}
-    {{#if (isEqual ../actor.data.type 'npc')}}
+    {{#if ../actor.hasGenerator}}
       {{tabHeader id='generator' label='Generator'}}
     {{/if}}
   {{/tabGroup}}
@@ -712,7 +712,7 @@
 
     {{!-- Random generator --}}
     {{#tabContent groupId='main' id='generator'}}
-      {{#if (isEqual actor.data.type 'npc')}}
+      {{#if actor.hasGenerator}}
         {{> "systems/sw-tor/templates/partials/char-generator.html"}}
       {{/if}}
     {{/tabContent}}

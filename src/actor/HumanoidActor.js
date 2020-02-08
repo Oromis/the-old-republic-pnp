@@ -27,6 +27,8 @@ import ExplanationUtils from '../util/ExplanationUtils.js'
 export default {
   beforeConstruct() {
     defineEnumAccessor(this, 'species', { dataSetKey: 'species' })
+    defineEnumAccessor(this, 'disposition')
+    defineEnumAccessor(this, 'faction')
 
     const actor = this
     defineGetter(this, 'gp', function () {

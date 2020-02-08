@@ -48,8 +48,13 @@
     },
     "npc": {
       "templates": ["humanoid"],
+      "disposition": null,
+      "faction": null,
       "generator": {
-        "seed": null
+        "seed": null,
+        "species": null,
+        "disposition": null,
+        "faction": null
       }
     },
     "beast": {
@@ -144,7 +149,7 @@
     },
     "training": {
       "templates": ["described"],
-      "fraction": "",
+      "factions": {},
       "dispositions": {},
       "baseTraining": null,
       "gp": 0,

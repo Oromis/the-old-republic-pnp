@@ -175,7 +175,7 @@ const list = [
     key: 'togr',
     name: 'Togruta',
     gp: 2,
-    weight: 1,
+    weight: 8,
     mods: {
       nav: skillXp({ category: 'C', to: 10 }),
       ens: skillXp({ category: 'B', to: 10 }),
