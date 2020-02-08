@@ -33,22 +33,26 @@
         {{/select}}
       </select>
     </label>
-    <div class="flex-col multi-item">
-      <span>Ausbildungen</span>
-      {{#each generator.trainingSlots as |slot|}}
-        <label class="flex-row multi-item">
-          <select name="data.generator.trainings.{{slot.key}}" class="char-generator__training-select">
-            {{#select (resolve ../actor.data.data.generator.trainings slot.key)}}
-              <option value="">Random</option>
-              {{#each (resolve ../generator.trainings slot.key) as |training|}}
-                <option value="{{training.name}}">{{training.name}}</option>
-              {{/each}}
-            {{/select}}
-          </select>
-          <span>[{{fallback (resolve ../generator.chosenTrainings slot.key 'name') '-'}}]</span>
-        </label>
-      {{/each}}
-    </div>
+    <label class="flex-col multi-item">
+      <span>XP</span>
+      <input type="text" name="data.generator.xp" data-dtype="Number" value="{{actor.data.data.generator.xp}}" />
+    </label>
+  </div>
+  <div class="flex-col multi-item">
+    <span>Ausbildungen</span>
+    {{#each generator.trainingSlots as |slot|}}
+      <label class="flex-row multi-item">
+        <select name="data.generator.trainings.{{slot.key}}" class="char-generator__training-select">
+          {{#select (resolve ../actor.data.data.generator.trainings slot.key)}}
+            <option value="">Random</option>
+            {{#each (resolve ../generator.trainings slot.key) as |training|}}
+              <option value="{{training.name}}">{{training.name}}</option>
+            {{/each}}
+          {{/select}}
+        </select>
+        <span>[{{fallback (resolve ../generator.chosenTrainings slot.key 'name') '-'}}]</span>
+      </label>
+    {{/each}}
   </div>
   <div class="flex-row multi-item">
     <button type="button" class="small auto-width generate">Generieren</button>

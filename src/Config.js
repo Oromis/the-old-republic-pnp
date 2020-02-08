@@ -12,6 +12,7 @@ const character = {
       max: 65,
     }
   },
+  maxPropValue: 100,
   LeP: {
     xpCategory: 'H',
   },

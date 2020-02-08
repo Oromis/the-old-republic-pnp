@@ -2,6 +2,8 @@ import PRNG from '../util/PRNG.js'
 import SwTorActor from './SwTorActor.js'
 import SwTorItem from '../item/SwTorItem.js'
 import ObjectUtils from '../util/ObjectUtils.js'
+import Config from '../Config.js'
+import {clamp} from '../util/MathUtils.js'
 
 const trainingSlots = Object.freeze([
   { key: 'primary', chance: 1 },
@@ -16,6 +18,22 @@ function areTrainingsCompatible(a, b) {
     }
   }
   return false
+}
+
+function improveProp({ actor, propType, key, cost }) {
+  if (!Array.isArray(actor.data.data[propType][key].gained)) {
+    actor.data.data[propType][key].gained = []
+  }
+  actor.data.data[propType][key].gained.push({ xp: cost, xpCategory: actor[propType][key].effectiveXpCategory })
+  actor.data.data[propType][key].xp = (actor.data.data[propType][key].xp || 0) + cost
+}
+
+function calcPropWeight(prop) {
+  if (prop.value.total >= Config.character.maxPropValue) {
+    return 0
+  } else {
+    return prop.value.total
+  }
 }
 
 const generator = {
@@ -81,8 +99,23 @@ const generator = {
   },
 
   async generate(originalActor, updateData = {}) {
-    const tmpData = mergeObject(originalActor.data, expandObject(updateData), { inplace: false, enforceTypes: true })
+    const tmpData = mergeObject(originalActor.data, expandObject(updateData), { inplace: false, enforceTypes: false })
+    const itemTypesToRemove = ['training', 'innate-ability', 'skill', 'force-skill']
+    const deleteItemsList = tmpData.items.filter(i => itemTypesToRemove.includes(i.type))
+    tmpData.items = tmpData.items.filter(i => !itemTypesToRemove.includes(i.type))
+    for (const attr of Object.values(tmpData.data.attributes || {})) {
+      attr.gp = 0
+      attr.gained = []
+      attr.xp = 0
+    }
+    for (const metric of Object.values(tmpData.data.metrics || {})) {
+      metric.gp = 0
+      metric.gained = []
+      metric.xp = 0
+    }
     const actor = new SwTorActor(tmpData, originalActor.options)
+    let gp = actor.data.data.gp.initial || 500
+    console.log(`Generating NPC with ${gp} GP`)
 
     const generatorData = actor.data.data.generator || {}
     let seed = generatorData.seed
@@ -92,7 +125,6 @@ const generator = {
     }
 
     const newItemsList = []
-    const deleteItemsList = []
 
     const prng = new PRNG(seed)
 
@@ -102,6 +134,7 @@ const generator = {
       actor, generatorData, updateData, prng, key: 'species',
       choices: this.getSpeciesChoices(actor)
     })
+    gp -= species.gp
     const disposition = this.pickOne({
       actor, generatorData, updateData, prng, key: 'disposition',
       choices: this.getDispositionChoices(actor, { species, faction: generatorData.faction, trainings: fixedTrainings })
@@ -112,14 +145,139 @@ const generator = {
     })
 
     // Pick trainings
-    deleteItemsList.push(...actor.trainings)
     const trainingChoices = this.getTrainingChoices(actor, { disposition, faction, fixedTrainings })
     const trainings = this.pickTrainings({ generatorData, prng, disposition, faction, trainingChoices, fixedTrainings })
     newItemsList.push(...trainings)
+    gp -= trainings.reduce((sum, cur) => sum + (+cur.gp), 0)
+    console.log(`Picked trainings. GP remaining: ${gp}`)
+
+    // Pick innate abilities
+    if (disposition === actor.dataSet.dispositions.map.force) {
+      // This char needs to be force-sensitive
+      console.log(`Picking force innate ability`)
+      const forceInnates = game.items.entities.filter(item => item.type === 'innate-ability' &&
+        Array.isArray(item.effects) && item.effects.some(effect => effect.key === 'McL'))
+      const forceInnate = prng.fromArray(forceInnates)
+      if (forceInnate != null) {
+        newItemsList.push(forceInnate)
+        gp -= forceInnate.gp
+        console.log(`Picked force ability. GP remaining: ${gp}`)
+      } else {
+        console.warn(`Failed to pick force innate (${forceInnates.length} available)`)
+      }
+    }
+
+    // Collect skills
+    actor.data.items.push(...newItemsList.map(item => ObjectUtils.cloneDeep(item.data)))
+    actor.prepareEmbeddedEntities() // Needed so that missingSkills picks up the bonuses from trainings
+    actor.clearCache()
+    actor.data.items.push(...actor.missingSkills.map(skill => ObjectUtils.cloneDeep(skill.data)))
+    actor.prepareEmbeddedEntities()
+    actor.clearCache()
+
+    // Spend GP on attributes
+    const minAttributeGp = actor.dataSet.attributes.list.length * Config.character.attributes.gp.min
+    let attributeGp = prng.intFromRange({
+      min: clamp(300, { min: minAttributeGp, max: gp }),
+      max: clamp(450, { min: minAttributeGp, max: gp })
+    })
+    gp -= attributeGp
+    console.log(`Distributing ${attributeGp} GP to attributes. GP remaining: ${gp}`)
+    this.distributeGpToAttributes({ actor, prng, gp: attributeGp, })
+
+    // Turn remaining GP to XP and spend them
+    const gainedXp = generatorData.xp || 0
+    const xpFromGp = gp * Config.character.gpToXpRate
+    actor.data.data.xp.gained = gainedXp
+    actor.data.data.xp.gp = gp
+    updateData['data.xp.gained'] = gainedXp
+    updateData['data.xp.gp'] = gp
+    let xp = gainedXp + xpFromGp
+    console.log(`Spending ${xp} XP ...`)
+
+    const weightedProps = [{ prop: 'attribute', weight: 1 }, { prop: 'metric', weight: 1 }, { prop: 'skill', weight: 10 }]
+    const metricsChoices = actor.metrics.list
+      .filter(metric => metric.canBuyPoints && metric.max > 0)
+    while (xp > 0) {
+      actor.prepareData()
+      actor.clearCache()
+
+      // Pick the next property to improve
+      const { prop } = prng.fromWeightedArray(weightedProps)
+      let improvement
+      switch (prop) {
+        case 'attribute': {
+          const attr = prng.fromWeightedArray(actor.attributes.list, { calcWeight: calcPropWeight })
+          const cost = attr.upgradeCost
+          improvement = {
+            cost,
+            action: () => improveProp({ actor, propType: 'attributes', key: attr.key, cost })
+          }
+          break
+        }
+
+        case 'skill': {
+          const skill = prng.fromWeightedArray(actor.skills.list, { calcWeight: calcPropWeight })
+          const cost = skill.upgradeCost
+          improvement = {
+            cost,
+            action: () => {
+              const item = actor.data.items.find(item => item.type === skill.type && item.data.key === skill.key)
+              if (item == null) {
+                throw new Error(`Missing skill. This is a bug.`)
+              }
+              if (!Array.isArray(item.data.gained)) {
+                item.data.gained = []
+              }
+              item.data.gained.push({ xp: cost, xpCategory: skill.effectiveXpCategory })
+              item.data.xp = (item.data.xp || 0) + cost
+              actor.prepareEmbeddedEntities()
+            }
+          }
+          break
+        }
+
+        case 'metric': {
+          const metric = prng.fromWeightedArray(metricsChoices, { calcWeight: metric => metric.max })
+          const cost = actor.metrics[metric.key].upgradeCost
+          improvement = {
+            cost,
+            action: () => improveProp({ actor, cost, key: metric.key, propType: 'metrics' })
+          }
+          break
+        }
+
+        default:
+          throw new Error(`Unknown prop type ${prop}. This is a bug.`)
+      }
+
+      if (improvement.cost == null || improvement.cost > xp) {
+        // Cannot afford this upgrade => we're done generating this char
+        break
+      } else {
+        // We can afford it => do so
+        xp -= improvement.cost
+        improvement.action()
+      }
+    }
 
     // Perform actor updates
+    actor.clearCache()
+    newItemsList.push(...actor.skills.list)
+    for (const [key, attr] of Object.entries(actor.data.data.attributes)) {
+      updateData[`data.attributes.${key}.gp`] = attr.gp
+      updateData[`data.attributes.${key}.gained`] = attr.gained
+      updateData[`data.attributes.${key}.xp`] = attr.xp
+    }
+    for (const metric of actor.metrics.list) {
+      if (metric.max > 0) {
+        updateData[`data.metrics.${metric.key}.value`] = metric.max
+        updateData[`data.metrics.${metric.key}.gained`] = metric.gained
+        updateData[`data.metrics.${metric.key}.xp`] = metric.xp
+      }
+    }
     if (deleteItemsList.length > 0) {
-      await originalActor.deleteManyEmbeddedEntities('OwnedItem', deleteItemsList.map(item => item.id != null ? item.id : item))
+      await originalActor.deleteManyEmbeddedEntities('OwnedItem', deleteItemsList.map(item => item.id || item._id || item))
     }
     await originalActor.createManyEmbeddedEntities('OwnedItem', newItemsList.map(item => (
       ObjectUtils.cloneDeep((item instanceof SwTorItem) ? item.data : item)
@@ -233,6 +391,30 @@ const generator = {
 
     return trainings
   },
+
+  distributeGpToAttributes({ actor, prng, gp }) {
+    const weightedAttributes = actor.dataSet.attributes.list.map(attribute => {
+      return {
+        key: attribute.key,
+        ...attribute.staticData,
+        // Weigh attributes by the skills that contribute to them
+        weight: actor.skills.list
+          .filter(skill => skill.attribute1.key === attribute.key || skill.attribute2.key === attribute.key)
+          .reduce((sum, cur) => sum + cur.value.total, 0)
+      }
+    })
+    console.log(`Picking attributes from weighted array: \n${weightedAttributes.map(t => `${t.label} => ${t.weight}`).join('\n')}`)
+    for (const attr of weightedAttributes) {
+      // Add minimum points to all attributes
+      const usedGp = Math.min(Config.character.attributes.gp.min, gp)
+      actor.data.data.attributes[attr.key].gp = usedGp
+      gp -= usedGp
+    }
+    while (gp-- > 0) {
+      const attr = prng.fromWeightedArray(weightedAttributes)
+      ++actor.data.data.attributes[attr.key].gp
+    }
+  }
 }
 
 export default generator

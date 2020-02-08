@@ -30,19 +30,16 @@ export default class PRNG {
   }
 
   fromArray(array) {
-    const index = this.fromRange(array.length)
+    const index = this.intFromRange(array.length)
     return array[index]
   }
 
-  fromWeightedArray(array, { remove = false } = {}) {
-    const total = array.reduce((acc, cur) => acc + cur.weight, 0)
+  fromWeightedArray(array, { remove = false, calcWeight = cur => cur.weight } = {}) {
+    const total = array.reduce((acc, cur) => acc + calcWeight(cur), 0)
     const target = this.fromRange(total)
     let sum = 0
     const index = array.findIndex(item => {
-      if (typeof item.weight !== 'number') {
-        throw new Error(`Weight of ${JSON.stringify(item)} is null`)
-      }
-      sum += item.weight
+      sum += calcWeight(item)
       return sum >= target
     })
     const result = array[index]

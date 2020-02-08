@@ -55,6 +55,7 @@
         "species": null,
         "disposition": null,
         "faction": null,
+        "xp": null,
         "trainings": {
           "primary": null,
           "secondary": null,
