@@ -192,8 +192,8 @@ const generator = {
           advancedTrainings.every(adv => !areTrainingsCompatible(adv, base))
         ))
         if (unmatchedBaseTrainings.length > 0) {
-          // Double the chance for another training if a base training has been completed
-          chance = Math.max(1, chance * 2)
+          // Increase the chance for another training if a base training has been completed
+          chance = Math.min(1, chance * 2.5)
         }
 
         if (prng.decide(chance)) {
@@ -206,13 +206,14 @@ const generator = {
             if (training.factions && training.factions[faction.key]) {
               weight *= 2
             }
-            if (unmatchedBaseTrainings.some(base => areTrainingsCompatible(training, base))) {
+            if (training.needsBaseTraining && unmatchedBaseTrainings.some(base => areTrainingsCompatible(training, base))) {
               // We already have a corresponding base training, so we might want to learn a compatible advanced training
               weight *= 3
             }
             return { id: training.id, weight }
           })
 
+          console.log(`Picking training from weighted array: \n${weightedTrainings.map(t => `${trainingChoices.find(i => i.id === t.id).name} => ${t.weight}`).join('\n')}`)
           const chosen = prng.fromWeightedArray(weightedTrainings)
           if (chosen != null) {
             training = trainingChoices.find(t => t.id === chosen.id)
