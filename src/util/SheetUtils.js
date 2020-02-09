@@ -13,9 +13,27 @@ export function analyzeExpression({ expression, path = [], defaultExpr = '' }) {
   return result
 }
 
+const damageFormulaRegex = /^\s*(\d+)\s*(\+\s*(\d+)[wd](\d+)(\/\d+)?\s*)?$/g
 export function analyzeDamageFormula({ expression, path, defaultExpr = '' }) {
   const text = expression != null ? expression : (ObjectUtils.try(...path) || defaultExpr)
-  return { formulaError: !text.match(/^\s*\d+\s*(\+\s*\d+[wd]\d+(\/\d+)?\s*)?$/g) }
+  return { formulaError: !text.match(damageFormulaRegex) }
+}
+
+export function calcAverageDamage({ expression }) {
+  const match = expression.match(damageFormulaRegex)
+  if (match) {
+    let result = +(match[1] || 0)
+    if (match[2]) {
+      // Has dice
+      const dice = +match[3]
+      const sides = +match[4]
+      const divider = +(match[5] || 1)
+      result += (dice * ((1 + sides) / 2) / divider)
+    }
+    return result
+  } else {
+    return null
+  }
 }
 
 export function onDragOver() {

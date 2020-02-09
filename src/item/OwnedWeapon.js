@@ -1,5 +1,4 @@
-import { defineEnumAccessor, defineGetter } from '../util/EntityUtils.js'
-import ObjectUtils from '../util/ObjectUtils.js'
+import { defineGetter } from '../util/EntityUtils.js'
 import RollUtils from '../util/RollUtils.js'
 import Config from '../Config.js'
 import {roundDecimal} from '../util/MathUtils.js'
@@ -7,8 +6,6 @@ import ExplanationUtils from '../util/ExplanationUtils.js'
 
 export default {
   beforeConstruct() {
-    defineEnumAccessor(this, 'damageType')
-
     defineGetter(this, 'skill', function () {
       const key = this.data.data.skill
       if (key) {

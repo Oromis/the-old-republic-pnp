@@ -21,6 +21,10 @@ export default {
     defineGetter(this, 'isRegularSkill', function () { return this.type === 'skill' })
     defineGetter(this, 'isForceSkill', function () { return this.type === 'force-skill' })
     defineGetter(this, 'isSkill', function () { return true })
+    defineGetter(this, 'isWeaponSkill', function () {
+      const category = this.actorDataSet.skillCategories.map[this.category]
+      return category != null && category.isWeaponSkill
+    })
 
     defineEnumAccessor(this, 'attribute1', { getEnumData: () => this.actorDataSet.attributes, configurable: true })
     defineEnumAccessor(this, 'attribute2', { getEnumData: () => this.actorDataSet.attributes, configurable: true })

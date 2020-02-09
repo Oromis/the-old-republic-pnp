@@ -535,6 +535,10 @@ export default class SwTorActor extends Actor {
     }
   }
 
+  async clearInventory() {
+    return this.deleteManyEmbeddedEntities('OwnedItem', this.inventory.map(item => item._id))
+  }
+
   async updateToken() {
     const tokens = this.getActiveTokens().map(t => ({ prefix: '', data: t.data, entity: t }))
     if (this.data.token != null) {

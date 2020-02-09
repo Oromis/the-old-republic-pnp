@@ -1,13 +1,11 @@
 import { calcPropertyBaseValue, calcUpgradeCost } from '../CharacterFormulas.js'
 import ArrayUtils from '../util/ArrayUtils.js'
-import {itemNameComparator, processDeltaValue} from '../util/SheetUtils.js'
+import {processDeltaValue} from '../util/SheetUtils.js'
 import SheetWithTabs from './SheetWithTabs.js'
 import BaseActorSheet from './BaseActorSheet.js'
 import SheetWithIncomingDamage from './SheetWithIncomingDamage.js'
 import {fullLoadPromise} from '../util/GameUtils.js'
 import CharacterGenerator from '../actor/CharacterGenerator.js'
-import CharacterDispositions from '../datasets/CharacterDispositions.js'
-import Factions from '../datasets/Factions.js'
 
 function calcGainChange(actor, property, { action, defaultXpCategory }) {
   const prevXp = property.xp || 0

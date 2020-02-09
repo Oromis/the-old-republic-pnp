@@ -102,6 +102,7 @@ export default class BaseActorSheet extends ActorSheet {
     html.find('.add-missing-skills').click(this._onAddMissingSkills)
     html.find('.toggle-inventory-view').click(this._toggleInventoryView)
     html.find('.update-token').click(this._onUpdateToken)
+    html.find('.clear-inventory').click(this._onClearInventory)
   }
 
   // ---------------------------------------------------------------------
@@ -215,6 +216,12 @@ export default class BaseActorSheet extends ActorSheet {
 
   _onUpdateToken = () => {
     return this.actor.updateToken()
+  }
+
+  _onClearInventory = () => {
+    if (confirm(`Bist du sicher, dass du alle Inventargegenstände löschen möchtest?`)) {
+      return this.actor.clearInventory()
+    }
   }
 
   // ---------------------------------------------------------------------

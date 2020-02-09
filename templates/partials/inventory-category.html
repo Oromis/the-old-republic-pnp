@@ -47,13 +47,13 @@
                 </a>
               </div>
             </td>
-            {{#if category.isWeapon}}
+            {{#if ../category.isWeapon}}
               <td title="Schaden">{{item.damage.formula}}</td>
             {{/if}}
-            {{#if category.isWearable}}
+            {{#if ../category.isWearable}}
               <td title="Behinderung">{{item.encumberance}}</td>
             {{/if}}
-            {{#if category.isEquippable}}
+            {{#if ../category.isEquippable}}
               <td class="damage-col" title="Zustand">{{formatPercentage item.condition}}</td>
             {{/if}}
             <td title="Preis">{{item.price}}</td>

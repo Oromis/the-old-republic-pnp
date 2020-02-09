@@ -476,18 +476,23 @@
 
     {{!-- Inventory Tab --}}
     {{#tabContent groupId='main' id='items'}}
-      <div class="flex-row multi-item">
-        <div class="flex-grow"></div>
-        <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
-          <i class="fas fa-weight-hanging"></i>
-          <span>{{actor.weight.value}}</span>
-          <span>/</span>
-          <span>{{actor.weight.max}}</span>
+      <div class="multi-item">
+        <div class="flex-row multi-item">
+          <div class="flex-grow"></div>
+          <div class="flex-row multi-item {{errorClass when=actor.weight.isOverloaded}}" title="Traglast">
+            <i class="fas fa-weight-hanging"></i>
+            <span>{{actor.weight.value}}</span>
+            <span>/</span>
+            <span>{{actor.weight.max}}</span>
+          </div>
+        </div>
+        {{#each computed.inventory as |category|}}
+          {{> "systems/sw-tor/templates/partials/inventory-category.html" category=category inventoryHidden=../ui.inventoryHidden}}
+        {{/each}}
+        <div class="flex-row multi-item">
+          <button type="button" class="clear-inventory auto-width">Inventar leeren</button>
         </div>
       </div>
-      {{#each computed.inventory as |category|}}
-        {{> "systems/sw-tor/templates/partials/inventory-category.html" category=category inventoryHidden=../ui.inventoryHidden}}
-      {{/each}}
     {{/tabContent}}
 
     {{!-- Other Tab --}}

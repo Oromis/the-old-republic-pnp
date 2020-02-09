@@ -3,7 +3,7 @@ import SwTorActor from './SwTorActor.js'
 import SwTorItem from '../item/SwTorItem.js'
 import ObjectUtils from '../util/ObjectUtils.js'
 import Config from '../Config.js'
-import {clamp} from '../util/MathUtils.js'
+import {clamp, isInRange, lerp} from '../util/MathUtils.js'
 
 const trainingSlots = Object.freeze([
   { key: 'primary', chance: 1 },
@@ -194,72 +194,10 @@ const generator = {
     updateData['data.xp.gp'] = gp
     let xp = gainedXp + xpFromGp
     console.log(`Spending ${xp} XP ...`)
+    this.spendXp({ actor, prng, xp })
 
-    const weightedProps = [{ prop: 'attribute', weight: 1 }, { prop: 'metric', weight: 1 }, { prop: 'skill', weight: 10 }]
-    const metricsChoices = actor.metrics.list
-      .filter(metric => metric.canBuyPoints && metric.max > 0)
-    while (xp > 0) {
-      actor.prepareData()
-      actor.clearCache()
-
-      // Pick the next property to improve
-      const { prop } = prng.fromWeightedArray(weightedProps)
-      let improvement
-      switch (prop) {
-        case 'attribute': {
-          const attr = prng.fromWeightedArray(actor.attributes.list, { calcWeight: calcPropWeight })
-          const cost = attr.upgradeCost
-          improvement = {
-            cost,
-            action: () => improveProp({ actor, propType: 'attributes', key: attr.key, cost })
-          }
-          break
-        }
-
-        case 'skill': {
-          const skill = prng.fromWeightedArray(actor.skills.list, { calcWeight: calcPropWeight })
-          const cost = skill.upgradeCost
-          improvement = {
-            cost,
-            action: () => {
-              const item = actor.data.items.find(item => item.type === skill.type && item.data.key === skill.key)
-              if (item == null) {
-                throw new Error(`Missing skill. This is a bug.`)
-              }
-              if (!Array.isArray(item.data.gained)) {
-                item.data.gained = []
-              }
-              item.data.gained.push({ xp: cost, xpCategory: skill.effectiveXpCategory })
-              item.data.xp = (item.data.xp || 0) + cost
-              actor.prepareEmbeddedEntities()
-            }
-          }
-          break
-        }
-
-        case 'metric': {
-          const metric = prng.fromWeightedArray(metricsChoices, { calcWeight: metric => metric.max })
-          const cost = actor.metrics[metric.key].upgradeCost
-          improvement = {
-            cost,
-            action: () => improveProp({ actor, cost, key: metric.key, propType: 'metrics' })
-          }
-          break
-        }
-
-        default:
-          throw new Error(`Unknown prop type ${prop}. This is a bug.`)
-      }
-
-      if (improvement.cost == null || improvement.cost > xp) {
-        // Cannot afford this upgrade => we're done generating this char
-        break
-      } else {
-        // We can afford it => do so
-        xp -= improvement.cost
-        improvement.action()
-      }
-    }
+    // Pick weapons for the character
+    const itemsToEquip = this.pickWeapons({ actor, prng, xpLevel: gainedXp, newItemsList })
 
     // Perform actor updates
     actor.clearCache()
@@ -276,13 +214,38 @@ const generator = {
         updateData[`data.metrics.${metric.key}.xp`] = metric.xp
       }
     }
+    if (originalActor.data.data.targetDistance.value == null) {
+      updateData['data.targetDistance.value'] = 12  // Set default target distance to something reasonable
+    }
     if (deleteItemsList.length > 0) {
       await originalActor.deleteManyEmbeddedEntities('OwnedItem', deleteItemsList.map(item => item.id || item._id || item))
     }
     await originalActor.createManyEmbeddedEntities('OwnedItem', newItemsList.map(item => (
       ObjectUtils.cloneDeep((item instanceof SwTorItem) ? item.data : item)
     )))
-    return originalActor.update(updateData)
+    await originalActor.updateManyEmbeddedEntities('OwnedItem', originalActor.equippedItems.map(item => ({
+      _id: item.id,
+      'data.slots': [],
+    })))
+    await originalActor.update(updateData)
+    originalActor.prepareEmbeddedEntities()
+    originalActor.clearCache()
+
+    // Equip items
+    for (let item of itemsToEquip) {
+      const slots = []
+      for (const slotType of item.slotTypes) {
+        const slot = originalActor.dataSet.slots.list.find(slot => slot.type === slotType &&
+          originalActor.getItemInSlot(slot.key) == null &&
+          !slots.includes(slot))
+        slots.push(slot)
+      }
+      // Resolve the actual item instance on the original actor
+      item = originalActor.freeItems.find(i => i.type === item.type && i.name === item.name)
+      if (slots.length > 0 && slots.every(slot => slot != null) && item != null) {
+        await originalActor.equipItem(slots[0].key, item)
+      }
+    }
   },
 
   pickOne({ actor, generatorData, updateData, prng, key, choices }) {
@@ -414,7 +377,178 @@ const generator = {
       const attr = prng.fromWeightedArray(weightedAttributes)
       ++actor.data.data.attributes[attr.key].gp
     }
-  }
+  },
+
+  spendXp({ actor, prng, xp }) {
+    const weightedProps = [{ prop: 'attribute', weight: 1 }, { prop: 'metric', weight: 1 }, { prop: 'skill', weight: 10 }]
+    const metricsChoices = actor.metrics.list
+      .filter(metric => metric.canBuyPoints && metric.max > 0)
+    while (xp > 0) {
+      actor.prepareData()
+      actor.clearCache()
+
+      // Pick the next property to improve
+      const { prop } = prng.fromWeightedArray(weightedProps)
+      let improvement
+      switch (prop) {
+        case 'attribute': {
+          const attr = prng.fromWeightedArray(actor.attributes.list, { calcWeight: calcPropWeight })
+          const cost = attr.upgradeCost
+          improvement = {
+            cost,
+            action: () => improveProp({ actor, propType: 'attributes', key: attr.key, cost })
+          }
+          break
+        }
+
+        case 'skill': {
+          const skill = prng.fromWeightedArray(actor.skills.list, { calcWeight: calcPropWeight })
+          const cost = skill.upgradeCost
+          improvement = {
+            cost,
+            action: () => {
+              const item = actor.data.items.find(item => item.type === skill.type && item.data.key === skill.key)
+              if (item == null) {
+                throw new Error(`Missing skill. This is a bug.`)
+              }
+              if (!Array.isArray(item.data.gained)) {
+                item.data.gained = []
+              }
+              item.data.gained.push({ xp: cost, xpCategory: skill.effectiveXpCategory })
+              item.data.xp = (item.data.xp || 0) + cost
+              actor.prepareEmbeddedEntities()
+            }
+          }
+          break
+        }
+
+        case 'metric': {
+          const metric = prng.fromWeightedArray(metricsChoices, { calcWeight: metric => metric.max })
+          const cost = actor.metrics[metric.key].upgradeCost
+          improvement = {
+            cost,
+            action: () => improveProp({ actor, cost, key: metric.key, propType: 'metrics' })
+          }
+          break
+        }
+
+        default:
+          throw new Error(`Unknown prop type ${prop}. This is a bug.`)
+      }
+
+      if (improvement.cost == null || improvement.cost > xp) {
+        // Cannot afford this upgrade => we're done generating this char
+        break
+      } else {
+        // We can afford it => do so
+        xp -= improvement.cost
+        improvement.action()
+      }
+    }
+  },
+
+  pickWeapons({ actor, prng, xpLevel, newItemsList }) {
+    const minProficiencyForWeapon = 15
+    const safeProficiencyForWeapon = 50
+    const eligibleSkills = actor.skills.list
+      .filter(skill => skill.isWeaponSkill && skill.value.total >= minProficiencyForWeapon)
+      .sort((a, b) => b.value.total - a.value.total)  // Highest skill proficiency first
+    let chanceFactor = 1.5
+    const pickedSkills = eligibleSkills.filter(skill => {
+      const chance = clamp(chanceFactor * (skill.value.total - minProficiencyForWeapon) / (safeProficiencyForWeapon - minProficiencyForWeapon))
+      const result = prng.decide(chance)
+      if (result) {
+        // The more weapons the char already has the more difficult it is to get more
+        chanceFactor -= 0.5
+      }
+      return result
+    })
+
+    const weaponsToEquip = []
+
+    // See if the char already has appropriate weapons for the skills we picked
+    for (const skill of pickedSkills) {
+      const weapons = actor.inventory.filter(item => item.data.data.skill === skill.key)
+      if (weapons.length === 0) {
+        // No weapon for this skill yet => add at least one
+        let availableSlots = actor.dataSet.slots.list.filter(slot => slot.supportsWeapon).length
+        while (availableSlots > 0) {
+          const weapon = this.pickWeapon({ prng, skill, xpLevel, maxSlotCount: availableSlots })
+          if (weapon != null) {
+            console.log(`Picked weapon ${weapon.name}`)
+            weapons.push(weapon)
+            newItemsList.push(weapon)
+            availableSlots -= weapon.slotTypes.length
+            if (availableSlots > 0) {
+              // See if we want to add another weapon
+              const chance = 0.7 * (skill.value.total / 100)
+              console.log(`Adding another weapon with probability ${chance}`)
+              if (!prng.decide(chance)) {
+                break
+              }
+            }
+          } else {
+            break
+          }
+        }
+      }
+
+      if (weaponsToEquip.length === 0) {
+        weaponsToEquip.push(...weapons)
+      }
+    }
+
+    return weaponsToEquip.sort((a, b) => b.normalizedDamage - a.normalizedDamage)
+  },
+
+  /**
+   * Basic idea: Give the actors better weapons as they get more XP while also having an element of randomness in the
+   * weapon selection
+   */
+  pickWeapon({ skill, prng, xpLevel, maxSlotCount }) {
+    const worstWeaponXp = 0
+    const bestWeaponXp = 50000
+    const xpBracketSize = 0.2
+    const damageBracketSize = 0.1
+
+    const matchingItems = game.items.entities
+      .filter(item => (
+        item.isWeapon && item.data.data.skill === skill.key &&
+        typeof item.normalizedDamage === 'number' &&
+        Array.isArray(item.slotTypes) && item.slotTypes.length <= maxSlotCount
+      ))
+      .sort((a, b) => a.normalizedDamage - b.normalizedDamage)  // Sort by damage output
+    if (matchingItems.length > 0) {
+      const damageRange = [matchingItems[0].normalizedDamage, matchingItems[matchingItems.length - 1].normalizedDamage]
+      const damageValueRange = damageRange[1] - damageRange[0]
+      const xpPerc = clamp(
+        Math.pow(lerp(xpLevel, { minX: worstWeaponXp, maxX: bestWeaponXp, clamp: true }), 1.5)  // Exponential damage increase with XP gain
+          + prng.fromRange({ min: -xpBracketSize, max: xpBracketSize })   // Random variations (+- 20%) within the XP bracket
+      )
+      const targetDamage = lerp(xpPerc, { minY: damageRange[0], maxY: damageRange[1] }) // Scale expected weapon damage with XP
+      const damageBracket = [targetDamage - damageValueRange * damageBracketSize, targetDamage + damageValueRange * damageBracketSize]
+
+      // Find weapons fitting in the damage bracket
+      const matchingWeapons = matchingItems.filter(i => isInRange(damageBracket[0], i.normalizedDamage, damageBracket[1]))
+      if (matchingWeapons.length > 0) {
+        // Pick on at random
+        return prng.fromArray(matchingWeapons)
+      } else {
+        // No weapon matches out damage bracket... Pick the weapon that is closest to our target damage
+        return matchingItems.reduce((res, cur) => {
+          const curDist = Math.abs(targetDamage - cur.normalizedDamage)
+          if (curDist < res.distance) {
+            res.distance = curDist
+            res.weapon = cur
+          }
+          return res
+        }, { distance: Infinity, weapon: null })
+      }
+    } else {
+      console.warn(`No matching weapon for skill ${skill.name} available!`)
+      return null
+    }
+  },
 }
 
 export default generator
