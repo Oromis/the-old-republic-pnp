@@ -43,6 +43,9 @@ export default {
     defineGetter(this, 'xp', function () {
       return {
         ...this.data.data.xp,
+        get granted() {
+          return actor.skills.list.reduce((acc, skill) => acc + skill.gainedXp, 0)
+        },
         get total() {
           return actor._cache.lookup('totalXp', () => calcTotalXp(actor))
         },

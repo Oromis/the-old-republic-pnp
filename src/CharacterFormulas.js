@@ -57,7 +57,9 @@ export function calcFreeXp(actor) {
 }
 
 export function calcTotalXp(actor) {
-  return actor.xp.gp * Config.character.gpToXpRate + actor.xp.gained
+  return actor.xp.gp * Config.character.gpToXpRate +
+    actor.xp.gained +
+    actor.xp.granted
 }
 
 export function explainPropertyBaseValue(actor, property, options) {

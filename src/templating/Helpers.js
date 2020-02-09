@@ -94,7 +94,7 @@ export function registerHelpers() {
     formatCosts: (actor, costs) => formatMetricChanges(actor.calculateMetricsCosts(costs)),
     expressionVariables: variables => variables && variables.length > 0 ? new Handlebars.SafeString(`<div>Variablen: [${variables}]</div>`) : '',
     metricView: ({ hash: { metric, linked } }) => new Handlebars.SafeString(`
-      <div class="metric" title="${metric.key} | ${metric.label}m">
+      <div class="metric" title="${metric.key} | ${metric.label}">
         <div class="metric-bar" style="width: ${(metric.value / metric.max) * 100}%; background-color: ${metric.backgroundColor};"></div>
         <label class="metric-value flex-row multi-item flex-center">
           <input type="text" ${linked ? 'data-link' : 'name'}="data.metrics.${metric.key}.value" value="${metric.value}" class="align-right transparent flex-grow" />

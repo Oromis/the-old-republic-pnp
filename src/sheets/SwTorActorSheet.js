@@ -23,8 +23,10 @@ function calcGainChange(actor, property, { action, defaultXpCategory }) {
 
     case 'grant': {
       // The GM grants a point
-      newXp = prevXp
-      newGainLog = [...gainLog, { xpCategory: null, xp: 0 }]
+      const xpCategory = property.currentXpCategory || property.effectiveXpCategory || defaultXpCategory
+      const xpGain = calcUpgradeCost(actor, property)
+      newXp = prevXp + xpGain
+      newGainLog = [...gainLog, { xpCategory, xp: xpGain, xpGain }]
       break
     }
 

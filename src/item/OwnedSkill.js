@@ -48,6 +48,11 @@ export default {
       return result
     })
 
+    defineGetter(this, 'gainedXp', function () {
+      return (this.gained || [])
+        .reduce((acc, cur) => acc + (cur.xpGain == null || isNaN(cur.xpGain) ? 0 : cur.xpGain), 0)
+    })
+
     defineGetter(this, 'value', function () {
       return explainPropertyValue(this.actor, this)
     })

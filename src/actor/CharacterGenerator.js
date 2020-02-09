@@ -112,6 +112,7 @@ const generator = {
       metric.gp = 0
       metric.gained = []
       metric.xp = 0
+      metric.max = 0
     }
     const actor = new SwTorActor(tmpData, originalActor.options)
     let gp = actor.data.data.gp.initial || 500
@@ -208,11 +209,9 @@ const generator = {
       updateData[`data.attributes.${key}.xp`] = attr.xp
     }
     for (const metric of actor.metrics.list) {
-      if (metric.max > 0) {
-        updateData[`data.metrics.${metric.key}.value`] = metric.max
-        updateData[`data.metrics.${metric.key}.gained`] = metric.gained
-        updateData[`data.metrics.${metric.key}.xp`] = metric.xp
-      }
+      updateData[`data.metrics.${metric.key}.value`] = metric.max
+      updateData[`data.metrics.${metric.key}.gained`] = metric.gained
+      updateData[`data.metrics.${metric.key}.xp`] = metric.xp
     }
     if (originalActor.data.data.targetDistance.value == null) {
       updateData['data.targetDistance.value'] = 12  // Set default target distance to something reasonable
