@@ -375,6 +375,11 @@ const generator = {
     while (gp-- > 0) {
       const attr = prng.fromWeightedArray(weightedAttributes)
       ++actor.data.data.attributes[attr.key].gp
+
+      if (actor.data.data.attributes[attr.key].gp >= Config.character.attributes.gp.max) {
+        // Can't receive any more GP
+        attr.weight = 0
+      }
     }
   },
 
