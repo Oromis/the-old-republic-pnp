@@ -172,10 +172,27 @@ export default {
       const referenceAttack = this.getNextUnhandledAttack()
       if (referenceAttack != null) {
         return this.update({
-          'data.attacks': this.data.data.attacks.map((attack, index) => {
+          'data.attacks': this.data.data.attacks.map((attack) => {
             if (attack === referenceAttack) {
               const copy = ObjectUtils.cloneDeep(attack)
               copy.defenses.push({ messageId: message.id })
+              return copy
+            } else {
+              return attack
+            }
+          })
+        })
+      }
+    }
+
+    this.addDamageMessage = async function addDamageMessage(message, weapon) {
+      const matchingAttack = this.getMatchingAttack(weapon)
+      if (matchingAttack != null) {
+        return this.update({
+          'data.attacks': this.data.data.attacks.map((attack) => {
+            if (attack === matchingAttack) {
+              const copy = ObjectUtils.cloneDeep(attack)
+              copy.damage = message.id
               return copy
             } else {
               return attack
@@ -196,6 +213,13 @@ export default {
         }
       }
       return result
+    }
+
+    this.getMatchingAttack = function getMatchingAttack(weapon) {
+      if (this.data.data.attacks != null) {
+        return this.attacks.find(attack => attack.weapon.id === weapon.id)
+      }
+      return null
     }
 
     this.removeAttackByIndex = function removeAttackByIndex(index) {

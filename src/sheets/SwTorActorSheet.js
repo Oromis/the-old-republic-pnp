@@ -66,7 +66,7 @@ export default class SwTorActorSheet extends BaseActorSheet {
       this.autoSubmit.addFilter('input.totalXp', (obj, { name }) => {
         const newVal = Math.round(processDeltaValue(obj[name], this.actor.xp.total))
         return {
-          'data.xp.gained': newVal - this.actor.xpFromGp
+          'data.xp.gained': newVal - this.actor.xpFromGp - actor.xp.granted
         }
       })
 

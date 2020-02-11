@@ -92,12 +92,22 @@ function processCheck(check, { isConfirmation = false } = {}) {
   }
 }
 
+function rollFormula(formula, { actor = undefined, label = undefined } = {}) {
+  new Roll(formula).toMessage({
+    speaker: { actor },
+    flavor: label,
+  })
+}
+
 export default {
-  rollFormula(formula, { actor = undefined, label = undefined } = {}) {
-    new Roll(formula).toMessage({
-      speaker: { actor },
-      flavor: label,
-    })
+  rollFormula,
+
+  async rollDamage(formula) {
+    if (game.combats.active != null) {
+      const combatAction = await CombatAction.get(game.combats.active.id)
+      await combatAction.addDamageMessage(message)
+    }
+    return rollFormula(formula)
   },
 
   processCheck,

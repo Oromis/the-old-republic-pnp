@@ -64,7 +64,7 @@ const list = [
   }),
   new HumanoidAttributePrototype('ko', {
     label: 'Konstitution',
-    desc: 'Steht für die körperliche Verfassung, Ausdauer und Standfestigkeit. Auch beim Wiederstand gegen Drogen und Gifte hilfreich',
+    desc: 'Steht für die körperliche Verfassung, Ausdauer und Standfestigkeit. Auch beim Widerstand gegen Drogen und Gifte hilfreich',
     encumberanceFactor: 8,
   }),
   new HumanoidAttributePrototype('sc', {
@@ -74,7 +74,7 @@ const list = [
   }),
   new HumanoidAttributePrototype('wk', {
     label: 'Willenskraft',
-    desc: 'Maß für die geistige Stärke und Wiederstandsfähigkeit. Beeinflusst Konzentration und ist daher für Machtbenutzer wichtig',
+    desc: 'Maß für die geistige Stärke und Widerstandsfähigkeit. Beeinflusst Konzentration und ist daher für Machtbenutzer wichtig',
     encumberanceFactor: 5,
   })
 ]

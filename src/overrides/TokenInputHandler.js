@@ -49,12 +49,38 @@ function getMenuStructure(actor) {
 
   // Skills
   {
+    function generateSkillsPage(skills) {
+      const items = Array(8).fill(null)
+      fillWithOverflow({
+        menu: items,
+        availableSlots: [0, 1, 2, 3, 4, 5, 6, 7],
+        objects: skills,
+        generateItem: [
+          skill => ({
+            label: skill.key.toUpperCase(),
+            icon: { image: skill.img },
+            subIcon: '\uf6cf',
+            title: `${skill.name} würfeln`,
+            action: ({ preventClose }) => {
+              return skill.rollCheck()
+            },
+          })
+        ],
+        generateSubMenuItem: () => ({
+          label: 'Mehr ...',
+          icon: '\uf669',
+          items: Array(8).fill(null),
+        }),
+        generateAvailableSlots: () => [0, 1, 2, 3, 4, 5, 6, 7],
+      })
+      return items
+    }
+
     const index = rootSlots.shift()
     const skills = [...actor.skills.list]
-    result[index] = {
-      label: 'Skills ...',
-      icon: '\uf192',
-      items: [
+    let items
+    if (actor.dataSet.skillCategories != null) {
+      items = [
         ...actor.dataSet.skillCategories.list.map(cat => ({
           label: `${cat.label} ...`,
           icon: cat.glyph,
@@ -65,31 +91,16 @@ function getMenuStructure(actor) {
       ]
         .filter(item => item.skills.length > 0)
         .map(item => {
-          item.items = Array(8).fill(null)
-          fillWithOverflow({
-            menu: item.items,
-            availableSlots: [0, 1, 2, 3, 4, 5, 6, 7],
-            objects: item.skills,
-            generateItem: [
-              skill => ({
-                label: skill.key.toUpperCase(),
-                icon: { image: skill.img },
-                subIcon: '\uf6cf',
-                title: `${skill.name} würfeln`,
-                action: ({ preventClose }) => {
-                  skill.rollCheck()
-                },
-              })
-            ],
-            generateSubMenuItem: () => ({
-              label: 'Mehr ...',
-              icon: '\uf669',
-              items: Array(8).fill(null),
-            }),
-            generateAvailableSlots: () => [0, 1, 2, 3, 4, 5, 6, 7],
-          })
+          item.items = generateSkillsPage(item.skills)
           return item
-        }),
+        })
+    } else {
+      items = generateSkillsPage(skills)
+    }
+    result[index] = {
+      label: 'Skills ...',
+      icon: '\uf192',
+      items,
     }
   }
 
