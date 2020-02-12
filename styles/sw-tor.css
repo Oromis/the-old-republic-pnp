@@ -360,6 +360,11 @@
   font-size: 16px;
 }
 
+.sw-tor img.inline-icon {
+  border: 0;
+  height: 1em;
+}
+
 /* Metrics */
 .sw-tor .metric {
   flex-grow: 1;

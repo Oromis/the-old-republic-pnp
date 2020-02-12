@@ -2,6 +2,7 @@ import DataCache from '../util/DataCache.js'
 import ObjectUtils from '../util/ObjectUtils.js'
 import { getActor } from '../util/GameUtils.js'
 import Config from '../Config.js'
+import DamageTypes from '../DamageTypes.js'
 
 const cache = new DataCache()
 
@@ -72,11 +73,22 @@ export default {
           const attackWeapon = ObjectUtils.try(attackCheck, 'weapon', { default: { burstSize: 1, img: 'icons/svg/sword.svg' } })
           const isMelee = this.isMeleeAttack(raw)
           const effectivenessPenalty = Config.combat.defenseEffectivenessPenalty[isMelee ? 'melee' : 'ranged']
+          const damageMessage = game.messages.get(raw.damageMessageId)
+          let damage = null
+          if (damageMessage != null) {
+            damage = {
+              amount: Math.round(+damageMessage.data.content),
+              type: DamageTypes.map[ObjectUtils.try(damageMessage.data.flags, 'sw-tor', 'damageType')] ||
+                DamageTypes.map[DamageTypes.default],
+            }
+          }
           return {
             ...raw,
             message,
             weapon: attackWeapon,
             check: attackCheck,
+            damageMessage,
+            damage,
             defenses: raw.defenses.map(defense => {
               const message = game.messages.get(defense.messageId)
               const defenseCheck = ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check')
@@ -104,6 +116,7 @@ export default {
                 ...defense,
                 message,
                 instances,
+                defender,
                 check: defenseCheck,
                 totalHits: instances.reduce((acc, cur) => acc + (cur.hits ? 1 : 0), 0)
               }
@@ -164,7 +177,10 @@ export default {
           }
         }
       }
-      updateData['data.attacks'] = [...existingAttacks, { messageId: message.id, defenses: [] }]
+      updateData['data.attacks'] = [
+        ...existingAttacks,
+        { messageId: message.id, defenses: [], weaponId: ObjectUtils.try(message, 'data', 'flags', 'sw-tor', 'check', 'weapon', 'id') }
+      ]
       return this.update(updateData)
     }
 
@@ -192,7 +208,7 @@ export default {
           'data.attacks': this.data.data.attacks.map((attack) => {
             if (attack === matchingAttack) {
               const copy = ObjectUtils.cloneDeep(attack)
-              copy.damage = message.id
+              copy.damageMessageId = message.id
               return copy
             } else {
               return attack
@@ -217,7 +233,7 @@ export default {
 
     this.getMatchingAttack = function getMatchingAttack(weapon) {
       if (this.data.data.attacks != null) {
-        return this.attacks.find(attack => attack.weapon.id === weapon.id)
+        return this.data.data.attacks.find(attack => attack.weaponId === weapon.id)
       }
       return null
     }

@@ -49,16 +49,29 @@
           {{#if defense.check}}
             <div class="flex-row multi-item dice-tooltip flex-space-between flex-reverse-row flex-cross-stretch">
               <div class="flex-col multi-item flex-space-between">
-                <div class="flex-row multi-item dice-rolls">
+                <div class="flex-row multi-item dice-rolls flex-end">
                   {{#if defense.message.isRollVisible}}
                     {{#each defense.check.rolls as |roll|}}
                       {{formatD20Result roll.die}}
                     {{/each}}
                   {{/if}}
                 </div>
-                <div class="align-right">
-                  Treffer: {{defense.totalHits}}
-                </div>
+                {{#if attack.damage}}
+                  {{#if defense.defender.owner}}
+                    <div class="flex-row multi-item flex-end">
+                      <span>Schaden: {{attack.damage.amount}}</span>
+                      {{damageIcon type=attack.damage.type classes='inline-icon'}}
+                      <a
+                          class="apply-damage"
+                          title="Schaden anwenden"
+                          data-attack-index="{{attackIndex}}"
+                          data-defense-index="{{defenseIndex}}"
+                      >
+                        <i class="fas fa-play"></i>
+                      </a>
+                    </div>
+                  {{/if}}
+                {{/if}}
               </div>
               <div>
                 {{#if (isNumeric defense.check.effectiveness)}}
@@ -73,6 +86,9 @@
                       {{/if}}
                     </div>
                   {{/each}}
+                  <div>
+                    Treffer: {{defense.totalHits}}
+                  </div>
                 {{else}}
                   <i class="fas fa-hourglass fa-spin" title="Effektivität fehlt"></i>
                 {{/if}}

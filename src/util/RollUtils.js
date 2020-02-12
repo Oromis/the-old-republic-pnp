@@ -92,22 +92,27 @@ function processCheck(check, { isConfirmation = false } = {}) {
   }
 }
 
-function rollFormula(formula, { actor = undefined, label = undefined } = {}) {
-  new Roll(formula).toMessage({
+function rollFormula(formula, { actor = undefined, label = undefined, customChatData = {} } = {}) {
+  return new Roll(formula).toMessage({
     speaker: { actor },
     flavor: label,
+    ...customChatData,
   })
 }
 
 export default {
   rollFormula,
 
-  async rollDamage(formula) {
+  async rollDamage(formula, { actor = undefined, label = undefined, weapon } = {}) {
+    const message = await rollFormula(
+      formula,
+      { actor, label, customChatData: { damageType: ObjectUtils.try(weapon.damageType, 'key') } }
+    )
     if (game.combats.active != null) {
       const combatAction = await CombatAction.get(game.combats.active.id)
-      await combatAction.addDamageMessage(message)
+      await combatAction.addDamageMessage(message, weapon)
     }
-    return rollFormula(formula)
+    return message
   },
 
   processCheck,

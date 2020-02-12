@@ -24,9 +24,7 @@ export default class CombatActionSheet extends ItemSheet {
 
   getData() {
     const data = super.getData()
-    const rawAttacks = (this.item.data.data.attacks != null && this.item.data.data.attacks.length > 0 ?
-      this.item.data.data.attacks :
-      this.item.data.data.prevAttacks) || []
+    const rawAttacks = this._rawAttacks
     data.attacks = this.item.processAttacks(rawAttacks).attacks
     this._updateAppAssociations(this._extractObjects(data.attacks))
     data.combatAction = data.item = this.item
@@ -48,16 +46,42 @@ export default class CombatActionSheet extends ItemSheet {
         +e.currentTarget.getAttribute('data-defense-index')
       )
     })
+    html.find('.apply-damage').on('click', async e => {
+      const attackIndex = +e.currentTarget.getAttribute('data-attack-index')
+      const defenseIndex = +e.currentTarget.getAttribute('data-defense-index')
+      const { attacks } = this.item.processAttacks(this._rawAttacks)
+      const attack = attacks[attackIndex]
+      if (attack != null) {
+        const defense = attack.defenses[defenseIndex]
+        if (defense != null) {
+          for (let i = 0; i < defense.totalHits; ++i) {
+            const { costs } = defense.defender.calcIncomingDamage({ type: attack.damage.type, amount: attack.damage.amount })
+            if (costs != null) {
+              await defense.defender.modifyMetrics(defense.defender.calculateMetricsCosts(costs))
+            }
+          }
+        }
+      }
+    })
   }
 
   _updateObject() {
     return Promise.resolve()
   }
 
+  get _rawAttacks() {
+    return (this.item.data.data.attacks != null && this.item.data.data.attacks.length > 0 ?
+      this.item.data.data.attacks :
+      this.item.data.data.prevAttacks) || []
+  }
+
   _extractObjects(attacks) {
     const result = []
     for (const attack of attacks) {
       result.push(attack.message)
+      if (attack.damageMessage) {
+        result.push(attack.damageMessage)
+      }
       for (const defense of attack.defenses) {
         result.push(defense.message)
       }

@@ -48,6 +48,7 @@ export default {
       result.criticalBonus = Config.combat.criticalBonus
       result.advantageExplanation = advantageExplanation
       result.weapon = {
+        id: this.id,
         name: this.name,
         img: this.img,
         burstSize: this.burstSize
@@ -125,9 +126,10 @@ export default {
     }
 
     this.rollDamage = function rollDamage() {
-      return RollUtils.rollFormula(this.currentDamageFormula, {
+      return RollUtils.rollDamage(this.currentDamageFormula, {
         actor: this.actor.id,
-        label: `Schaden ${this.primaryEquippedSlot.label} (${this.name})`
+        label: `Schaden ${this.primaryEquippedSlot.label} (${this.name})`,
+        weapon: this,
       })
     }
   }
