@@ -25,7 +25,7 @@ export default class BeastActorSheet extends BaseActorSheet {
 	  return mergeObject(super.defaultOptions, {
   	  classes: ["sw-tor", "sheet", "actor", "beast"],
   	  template: "systems/sw-tor/templates/beast-sheet.html",
-      submitOnUnfocus: true,
+      submitOnChange: true,
       width: 784,
       height: 600
     });

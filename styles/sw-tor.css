@@ -2,6 +2,8 @@
  * General classes
  *************************************************************************************/
 
+@import "./vendor/quill/quill.core.css";
+@import "./vendor/quill/quill.snow.css";
 @import "./vendor/radial-menu-js/radial-menu.css";
 
 @import "general.css";
@@ -456,6 +458,10 @@
 
 .sw-tor-effectiveness + .sw-tor-confirmation-label {
   margin-top: -10px;
+}
+
+.sw-tor .rte.ql-container {
+  min-height: 250px;
 }
 
 /*************************************************************************************

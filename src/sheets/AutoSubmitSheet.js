@@ -1,3 +1,5 @@
+import Quill from 'quill'
+
 import { timeout } from '../util/Timing.js'
 import Mixin from './Mixin.js'
 
@@ -9,6 +11,7 @@ export default class AutoSubmitSheet extends Mixin {
 
     // Disable default submit logic (it doesn't update the entity immediately when jumping between inputs)
     this.interceptMethod('_onUnfocus', () => false)
+    this.interceptMethod('_onChangeInput', () => false)
     this.interceptMethod('_onSubmit', () => Promise.resolve({}))
 
     this._filters = []
@@ -19,7 +22,7 @@ export default class AutoSubmitSheet extends Mixin {
   }
 
   activateListeners(html) {
-    if (this.parent.options.submitOnUnfocus) {
+    if (this.parent.options.submitOnChange) {
       // Enable auto-submit
       html.find('input, select')
         .on('change', this._onChangeInput)
@@ -31,6 +34,25 @@ export default class AutoSubmitSheet extends Mixin {
       html.find('button')
         .on('click', this._recordFocus)
     }
+
+    html.find('.rte').each((index, container) => {
+      const quill = new Quill(container, {
+        placeholder: 'Deine Notizen ...',
+        theme: 'snow'
+      })
+      quill.on('selection-change', (range, oldRange) => {
+        if (range === null && oldRange !== null) {
+          this._onSubmit({
+            target: {
+              value: container.innerHTML,
+              getAttribute(key) {
+                return container.getAttribute(key)
+              }
+            }
+          })
+        }
+      })
+    })
 
     // Support Image updates
     html.find('img[data-editable]').click(this._onEditImage)

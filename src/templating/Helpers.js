@@ -68,6 +68,7 @@ export function registerHelpers() {
     roundNumber: (number, decimals) => roundDecimal(number, decimals),
     isLessThan: (number, threshold) => number < threshold,
     isRelevantFactor: num => typeof num === 'number' && num !== 1,
+    html: text => new Handlebars.SafeString(text),
     formatList: list => list.join(', '),
     formatAttrKey,
     formatPercentage: val => `${Math.round(val)}%`,
@@ -128,7 +129,7 @@ export function registerHelpers() {
 
     tabContents: function ({ fn }) {
       return new Handlebars.SafeString(
-        `<section class="tab-contents flex-row multi-item flex-cross-start">${fn(this)}</section>`
+        `<section class="tab-contents flex-row multi-item flex-cross-start flex-grow">${fn(this)}</section>`
       )
     },
 

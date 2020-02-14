@@ -1,7 +1,7 @@
 import { calcFreeXp, calcGp, calcTotalXp } from '../CharacterFormulas.js'
 import Config from '../Config.js'
 import {
-  defineCachedGetter,
+  defineCachedGetter, defineDataAccessor,
   defineEnumAccessor,
   defineGetter,
   explainComputedValue
@@ -29,6 +29,7 @@ export default {
     defineEnumAccessor(this, 'species', { dataSetKey: 'species' })
     defineEnumAccessor(this, 'disposition')
     defineEnumAccessor(this, 'faction')
+    defineDataAccessor(this, 'bio')
 
     const actor = this
     defineGetter(this, 'gp', function () {

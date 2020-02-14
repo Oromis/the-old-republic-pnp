@@ -32,7 +32,7 @@ export default class CheckMessageEditor extends BaseEntitySheet {
     options.height = 410
     options.closeOnSubmit = true
     options.submitOnClose = false
-    options.submitOnUnfocus = true
+    options.submitOnChange = true
     options.resizable = true
     return options
   }

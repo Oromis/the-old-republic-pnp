@@ -89,7 +89,7 @@ export default class SwTorActorSheet extends BaseActorSheet {
 	  return mergeObject(super.defaultOptions, {
   	  classes: ["sw-tor", "sheet", "actor"],
   	  template: "systems/sw-tor/templates/actor-sheet.html",
-      submitOnUnfocus: true,
+      submitOnChange: true,
       width: 784,
       height: 600
     });

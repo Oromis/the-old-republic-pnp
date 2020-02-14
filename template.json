@@ -40,6 +40,11 @@
         "creationMode": {
           "enabled": true
         },
+        "bio": {
+          "homePlanet": "",
+          "age": null,
+          "notes": ""
+        },
         "initiativeFormula": "1d12"
       }
     },

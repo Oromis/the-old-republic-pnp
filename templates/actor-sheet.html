@@ -132,6 +132,7 @@
     {{tabHeader id='equipment' label='Ausrüstung'}}
     {{tabHeader id='items' label='Inventar'}}
     {{tabHeader id='other' label='Sonstiges'}}
+    {{tabHeader id='notes' label='Notizen'}}
     {{#if ../actor.hasGenerator}}
       {{tabHeader id='generator' label='Generator'}}
     {{/if}}
@@ -711,6 +712,25 @@
             <button type="button" class="auto-width sync-items">Sync Items</button>
             <button type="button" class="auto-width update-token">Update Token</button>
           </div>
+        </div>
+      </div>
+    {{/tabContent}}
+
+    {{!-- Notes --}}
+    {{#tabContent groupId='main' id='notes'}}
+      <div class="multi-item">
+        <div class="flex-row multi-item">
+          <label class="flex-grow flex-row multi-item">
+            <span>Alter</span>
+            <input type="text" name="data.bio.age" data-dtype="Number" value="{{actor.bio.age}}" class="flex-grow" />
+          </label>
+          <label class="flex-grow flex-row multi-item">
+            <span>Heimatplanet</span>
+            <input type="text" name="data.bio.homePlanet" value="{{actor.bio.homePlanet}}" class="flex-grow" />
+          </label>
+        </div>
+        <div class="rte" name="data.bio.notes">
+          {{html actor.bio.notes}}
         </div>
       </div>
     {{/tabContent}}

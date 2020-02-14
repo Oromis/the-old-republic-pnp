@@ -17,7 +17,7 @@ export default class CombatActionSheet extends ItemSheet {
       width: 554,
       height: 200,
       resizable: false,
-      submitOnUnfocus: false,
+      submitOnChange: false,
       submitOnClose: false,
     })
   }
