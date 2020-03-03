@@ -2,6 +2,7 @@ import Quill from 'quill'
 
 import { timeout } from '../util/Timing.js'
 import Mixin from './Mixin.js'
+import ObjectUtils from '../util/ObjectUtils.js'
 
 export default class AutoSubmitSheet extends Mixin {
   constructor(parent, { customUpdate } = {}) {
@@ -40,9 +41,10 @@ export default class AutoSubmitSheet extends Mixin {
         placeholder: 'Deine Notizen ...',
         theme: 'snow'
       })
-      quill.on('selection-change', (range, oldRange) => {
-        if (range === null && oldRange !== null) {
-          this._onSubmit({
+      const submitContent = async () => {
+        const currentValue = ObjectUtils.try(this.parent.entity.data, ...container.getAttribute('name').split('.'))
+        if (container.innerHTML !== currentValue) {
+          await this._onSubmit({
             target: {
               value: container.innerHTML,
               getAttribute(key) {
@@ -50,7 +52,16 @@ export default class AutoSubmitSheet extends Mixin {
               }
             }
           })
+          ui.notifications.info(`Gespeichert.`)
         }
+      }
+      quill.on('selection-change', (range, oldRange) => {
+        if (range === null && oldRange !== null) {
+          submitContent()
+        }
+      })
+      container.parentElement.querySelector('.rte-save').addEventListener('click', function () {
+        submitContent()
       })
     })
 
